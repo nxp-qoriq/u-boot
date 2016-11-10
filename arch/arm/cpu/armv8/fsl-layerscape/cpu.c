@@ -529,6 +529,9 @@ int arch_early_init_r(void)
 #ifdef CONFIG_FMAN_ENET
 	fman_enet_init();
 #endif
+#ifdef CONFIG_SYS_DPAA_QBMAN
+	setup_qbman_portals();
+#endif
 	return 0;
 }
 
