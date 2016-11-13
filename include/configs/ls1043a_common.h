@@ -204,7 +204,6 @@
 
 /* Command line configuration */
 #define CONFIG_CMD_ENV
-#define CONFIG_CMD_PXE
 #endif
 
 #if !(defined(CONFIG_SPL_BUILD) && defined(CONFIG_NAND_BOOT))
