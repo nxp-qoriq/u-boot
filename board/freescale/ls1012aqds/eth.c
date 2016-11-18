@@ -26,6 +26,7 @@
 #define EMI1_SLOT2	3
 
 #define DEFAULT_PFE_MDIO_NAME "PFE_MDIO"
+#define DEFAULT_PFE_MDIO1_NAME "PFE_MDIO1"
 
 static const char * const mdio_names[] = {
 	"NULL",
@@ -160,6 +161,15 @@ int board_eth_init(bd_t *bis)
 	if(!bus)
 	{
 		printf("Failed to register mdio \n");
+		return -1;
+	}
+
+	mac1_mdio_info.reg_base = (void *)0x04220000; /*EMAC2_BASE_ADDR*/
+	mac1_mdio_info.name = DEFAULT_PFE_MDIO1_NAME;
+
+	bus = ls1012a_mdio_init(&mac1_mdio_info);
+	if (!bus) {
+		printf("Failed to register mdio\n");
 		return -1;
 	}
 
