@@ -170,7 +170,9 @@ typedef enum {SPEED_10M, SPEED_100M, SPEED_1000M, SPEED_1000M_PCS} MAC_SPEED;
 /* MII-related definitios */
 #define EMAC_MII_DATA_ST         0x40000000      /* Start of frame delimiter */
 #define EMAC_MII_DATA_OP_RD      0x20000000      /* Perform a read operation */
+#define EMAC_MII_DATA_OP_CL45_RD 0x30000000      /* Perform a read operation */
 #define EMAC_MII_DATA_OP_WR      0x10000000      /* Perform a write operation */
+#define EMAC_MII_DATA_OP_CL45_WR 0x10000000      /* Perform a write operation */
 #define EMAC_MII_DATA_PA_MSK     0x0f800000      /* PHY Address field mask */
 #define EMAC_MII_DATA_RA_MSK     0x007c0000      /* PHY Register field mask */
 #define EMAC_MII_DATA_TA         0x00020000      /* Turnaround */
@@ -233,6 +235,7 @@ typedef struct {
 #define PHY_SGMII_DEV_ABILITY_SGMII 0x4001
 #define PHY_SGMII_IF_MODE_AN        0x0002
 #define PHY_SGMII_IF_MODE_SGMII     0x0001
+#define PHY_SGMII_IF_MODE_SGMII_GBT 0x0008
 
 
 #endif /* _EMAC_H_ */

@@ -232,6 +232,43 @@ static int ls1012a_eth_recv(struct eth_device *dev)
 #if defined(CONFIG_PHYLIB)
 
 #define MDIO_TIMEOUT    5000
+static int ls1012a_write_addr(struct mii_dev *bus, int phy_addr, int dev_addr,
+			      int reg_addr)
+{
+	void *reg_base = bus->priv;
+	u32 devadr;
+	u32 phy;
+	u32 reg_data;
+	int timeout = MDIO_TIMEOUT;
+
+	devadr = ((dev_addr & EMAC_MII_DATA_RA_MASK) << EMAC_MII_DATA_RA_SHIFT);
+	phy = ((phy_addr & EMAC_MII_DATA_PA_MASK) << EMAC_MII_DATA_PA_SHIFT);
+
+	reg_data = (EMAC_MII_DATA_TA | phy | devadr | reg_addr);
+
+
+	writel(reg_data, reg_base + EMAC_MII_DATA_REG);
+
+	/*
+	 * wait for the MII interrupt
+	 */
+	while (!(readl(reg_base + EMAC_IEVENT_REG) & EMAC_IEVENT_MII)) {
+		if (timeout-- <= 0) {
+			printf("Phy MDIO read/write timeout\n");
+			return -1;
+		}
+	}
+
+	/*
+	 * clear MII interrupt
+	 */
+	writel(EMAC_IEVENT_MII, reg_base + EMAC_IEVENT_REG);
+
+
+	return 0;
+}
+
+
 static int ls1012a_phy_read(struct mii_dev *bus, int phy_addr, int dev_addr, int
 				reg_addr)
 {
@@ -242,11 +279,23 @@ static int ls1012a_phy_read(struct mii_dev *bus, int phy_addr, int dev_addr, int
 	u16 val;
 	int timeout = MDIO_TIMEOUT;
 
-	reg = ((reg_addr & EMAC_MII_DATA_RA_MASK) << EMAC_MII_DATA_RA_SHIFT);
+	if (dev_addr == MDIO_DEVAD_NONE) {
+			reg = ((reg_addr & EMAC_MII_DATA_RA_MASK) <<
+		       EMAC_MII_DATA_RA_SHIFT);
+	} else {
+		ls1012a_write_addr(bus, phy_addr, dev_addr, reg_addr);
+		reg = ((dev_addr & EMAC_MII_DATA_RA_MASK) <<
+		       EMAC_MII_DATA_RA_SHIFT);
+	}
+
 	phy = ((phy_addr & EMAC_MII_DATA_PA_MASK) << EMAC_MII_DATA_PA_SHIFT);
 
-	reg_data = (EMAC_MII_DATA_ST | EMAC_MII_DATA_OP_RD | EMAC_MII_DATA_TA |
-			phy | reg);
+	if (dev_addr == MDIO_DEVAD_NONE)
+		reg_data = (EMAC_MII_DATA_ST | EMAC_MII_DATA_OP_RD |
+			    EMAC_MII_DATA_TA | phy | reg);
+	else
+		reg_data = (EMAC_MII_DATA_OP_CL45_RD | EMAC_MII_DATA_TA |
+			    phy | reg);
 
 	writel(reg_data, reg_base + EMAC_MII_DATA_REG);
 
@@ -285,11 +334,23 @@ static int ls1012a_phy_write(struct mii_dev *bus, int phy_addr, int dev_addr,
 	int timeout = MDIO_TIMEOUT;
 	int val;
 
-	reg = ((reg_addr & EMAC_MII_DATA_RA_MASK) << EMAC_MII_DATA_RA_SHIFT);
+	if (dev_addr == MDIO_DEVAD_NONE) {
+		reg = ((reg_addr & EMAC_MII_DATA_RA_MASK) <<
+		       EMAC_MII_DATA_RA_SHIFT);
+	} else {
+		ls1012a_write_addr(bus, phy_addr, dev_addr, reg_addr);
+		reg = ((dev_addr & EMAC_MII_DATA_RA_MASK) <<
+		       EMAC_MII_DATA_RA_SHIFT);
+	}
+
 	phy = ((phy_addr & EMAC_MII_DATA_PA_MASK) << EMAC_MII_DATA_PA_SHIFT);
 
-	reg_data = (EMAC_MII_DATA_ST | EMAC_MII_DATA_OP_WR | EMAC_MII_DATA_TA |
-			phy | reg | data);
+	if (dev_addr == MDIO_DEVAD_NONE)
+		reg_data = (EMAC_MII_DATA_ST | EMAC_MII_DATA_OP_WR |
+			    EMAC_MII_DATA_TA | phy | reg | data);
+	else
+		reg_data = (EMAC_MII_DATA_OP_CL45_WR | EMAC_MII_DATA_TA |
+			    phy | reg | data);
 
 	writel(reg_data, reg_base + EMAC_MII_DATA_REG);
 
