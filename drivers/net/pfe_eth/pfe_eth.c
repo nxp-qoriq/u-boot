@@ -412,6 +412,10 @@ static void ls1012a_configure_serdes(struct ls1012a_eth_dev *priv)
 {
 	struct mii_dev bus;
 	int value, sgmii_2500 = 0;
+	struct gemac_s *gem = priv->gem;
+
+	if (gem->phy_mode == PHY_INTERFACE_MODE_SGMII_2500)
+		sgmii_2500 = 1;
 
 	printf("%s %d\n", __func__, priv->gemac_port);
 	/* PCS configuration done with corresponding GEMAC */
@@ -441,6 +445,8 @@ static void ls1012a_configure_serdes(struct ls1012a_eth_dev *priv)
 	value = PHY_SGMII_IF_MODE_SGMII;
 	if (!sgmii_2500)
 		value |= PHY_SGMII_IF_MODE_AN;
+	else
+		value |= PHY_SGMII_IF_MODE_SGMII_GBT;
 
 	ls1012a_phy_write(&bus, 0, MDIO_DEVAD_NONE, 0x14, value);
 
@@ -455,8 +461,13 @@ static void ls1012a_configure_serdes(struct ls1012a_eth_dev *priv)
 	/* ls1012a_phy_write(&bus, 0, MDIO_DEVAD_NONE, 0x12, 0xd40); */
 
 	/* These values taken from validation team */
-	ls1012a_phy_write(&bus, 0, MDIO_DEVAD_NONE, 0x13, 0x0);
-	ls1012a_phy_write(&bus, 0, MDIO_DEVAD_NONE, 0x12, 0x400);
+	if (!sgmii_2500) {
+		ls1012a_phy_write(&bus, 0, MDIO_DEVAD_NONE, 0x13, 0x0);
+		ls1012a_phy_write(&bus, 0, MDIO_DEVAD_NONE, 0x12, 0x400);
+	} else {
+		ls1012a_phy_write(&bus, 0, MDIO_DEVAD_NONE, 0x13, 0x7);
+		ls1012a_phy_write(&bus, 0, MDIO_DEVAD_NONE, 0x12, 0xa120);
+	}
 
 	/* Restart AN */
 	value = PHY_SGMII_CR_DEF_VAL;
