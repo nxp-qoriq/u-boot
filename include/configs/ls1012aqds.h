@@ -26,9 +26,12 @@
 /*#define CONFIG_CMD_PFE_START */
 #define EMAC1_PHY_ADDR          0x1e
 #define EMAC2_PHY_ADDR          0x1
+#define	SGMII_2500_PHY_ADDR	0x1
 #define CONFIG_PHYLIB
 #define CONFIG_PHY_VITESSE
 #define CONFIG_PHY_REALTEK
+#define	CONFIG_PHY_AQUANTIA
+#define	CONFIG_PHYLIB_10G
 #define RGMII_RESET_WA
 #endif
 

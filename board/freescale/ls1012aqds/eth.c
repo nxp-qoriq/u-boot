@@ -220,6 +220,52 @@ int board_eth_init(bd_t *bis)
 					     PHY_INTERFACE_MODE_SGMII);
 		break;
 
+	case 0x2205:
+		printf("ls1012aqds:supported SerDes PRCTL= %d\n", srds_s1);
+		/* Work around for FPGA registers initialization
+		 * This is needed for RGMII to work */
+		printf("Reset SLOT1 SLOT2....\n");
+		data8 = QIXIS_READ(rst_frc[2]);
+		data8 |= 0xc0;
+		QIXIS_WRITE(rst_frc[2], data8);
+		mdelay(100);
+		data8 = QIXIS_READ(rst_frc[2]);
+		data8 &= 0x3f;
+		QIXIS_WRITE(rst_frc[2], data8);
+
+		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_SLOT1);
+		if (ls1012aqds_mdio_init(DEFAULT_PFE_MDIO_NAME, EMI1_SLOT1) <
+		    0) {
+				printf("Failed to register mdio for %s\n",
+				       mdio_name);
+				return -1;
+		}
+
+		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_SLOT2);
+		if (ls1012aqds_mdio_init(DEFAULT_PFE_MDIO_NAME, EMI1_SLOT2) <
+		    0) {
+			printf("Failed to register mdio for %s\n", mdio_name);
+			return -1;
+		}
+		/* MAC2*/
+		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_SLOT2);
+		bus = miiphy_get_dev_by_name(mdio_name);
+		ls1012a_set_mdio(1, bus);
+		ls1012a_set_phy_address_mode(1,  SGMII_2500_PHY_ADDR,
+					     PHY_INTERFACE_MODE_SGMII_2500);
+
+		data8 = QIXIS_READ(brdcfg[12]);
+		data8 |= 0x20;
+		QIXIS_WRITE(brdcfg[12], data8);
+
+		/* MAC1*/
+		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_SLOT1);
+		bus = miiphy_get_dev_by_name(mdio_name);
+		ls1012a_set_mdio(0, bus);
+		ls1012a_set_phy_address_mode(0, SGMII_2500_PHY_ADDR,
+					     PHY_INTERFACE_MODE_SGMII_2500);
+		break;
+
 	default:
 		printf("ls1012aqds:unsupported SerDes PRCTL= %d\n", srds_s1);
 		break;
