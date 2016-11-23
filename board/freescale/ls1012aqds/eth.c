@@ -251,7 +251,7 @@ int board_eth_init(bd_t *bis)
 		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_SLOT2);
 		bus = miiphy_get_dev_by_name(mdio_name);
 		ls1012a_set_mdio(1, bus);
-		ls1012a_set_phy_address_mode(1,  SGMII_2500_PHY_ADDR,
+		ls1012a_set_phy_address_mode(1,  SGMII_2500_PHY2_ADDR,
 					     PHY_INTERFACE_MODE_SGMII_2500);
 
 		data8 = QIXIS_READ(brdcfg[12]);
@@ -262,7 +262,7 @@ int board_eth_init(bd_t *bis)
 		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_SLOT1);
 		bus = miiphy_get_dev_by_name(mdio_name);
 		ls1012a_set_mdio(0, bus);
-		ls1012a_set_phy_address_mode(0, SGMII_2500_PHY_ADDR,
+		ls1012a_set_phy_address_mode(0, SGMII_2500_PHY1_ADDR,
 					     PHY_INTERFACE_MODE_SGMII_2500);
 		break;
 
