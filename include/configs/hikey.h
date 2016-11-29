@@ -82,7 +82,6 @@
 #define CONFIG_FS_EXT4
 
 /* Command line configuration */
-#define CONFIG_MENU
 #define CONFIG_CMD_UNZIP
 #define CONFIG_CMD_ENV
 

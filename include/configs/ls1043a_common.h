@@ -204,7 +204,6 @@
 
 /* Command line configuration */
 #define CONFIG_CMD_ENV
-#define CONFIG_MENU
 #define CONFIG_CMD_PXE
 #endif
 

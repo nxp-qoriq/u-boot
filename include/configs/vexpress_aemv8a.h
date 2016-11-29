@@ -127,8 +127,6 @@
 #define CONFIG_PL011_CLOCK		24000000
 #endif
 
-/* Command line configuration */
-#define CONFIG_MENU
 /*#define CONFIG_MENU_SHOW*/
 #define CONFIG_CMD_UNZIP
 #define CONFIG_CMD_PXE
