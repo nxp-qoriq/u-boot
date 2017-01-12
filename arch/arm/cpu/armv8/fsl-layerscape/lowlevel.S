@@ -56,6 +56,9 @@ ENTRY(smp_kick_all_cpus)
 ENDPROC(smp_kick_all_cpus)
 
 #endif
+#ifdef CONFIG_FSL_LSCH3
+#include <asm/arch-fsl-layerscape/immap_lsch3.h>
+#endif
 
 ENTRY(lowlevel_init)
 	mov	x29, lr			/* Save LR */
@@ -287,6 +290,12 @@ ENDPROC(fsl_ocram_init)
 #endif
 
 #ifdef CONFIG_FSL_LSCH3
+	.globl get_svr
+get_svr:
+	ldr	x1, =FSL_LSCH3_SVR
+	ldr	w0, [x1]
+	ret
+
 hnf_pstate_poll:
 	/* x0 has the desired status, return 0 for success, 1 for timeout
 	 * clobber x1, x2, x3, x4, x6, x7
