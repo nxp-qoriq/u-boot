@@ -40,6 +40,7 @@ int child_dprc_id;
 struct fsl_dpbp_obj *dflt_dpbp = NULL;
 struct fsl_dpio_obj *dflt_dpio = NULL;
 struct fsl_dpni_obj *dflt_dpni = NULL;
+u64 mc_ram_addr = 0;
 
 #ifdef DEBUG
 void dump_ram_words(const char *title, void *addr)
@@ -151,48 +152,6 @@ int parse_mc_firmware_fit_image(u64 mc_fw_addr,
 	return 0;
 }
 #endif
-
-/*
- * Calculates the values to be used to specify the address range
- * for the MC private DRAM block, in the MCFBALR/MCFBAHR registers.
- * It returns the highest 512MB-aligned address within the given
- * address range, in '*aligned_base_addr', and the number of 256 MiB
- * blocks in it, in 'num_256mb_blocks'.
- */
-static int calculate_mc_private_ram_params(u64 mc_private_ram_start_addr,
-					   size_t mc_ram_size,
-					   u64 *aligned_base_addr,
-					   u8 *num_256mb_blocks)
-{
-	u64 addr;
-	u16 num_blocks;
-
-	if (mc_ram_size % MC_RAM_SIZE_ALIGNMENT != 0) {
-		printf("fsl-mc: ERROR: invalid MC private RAM size (%lu)\n",
-		       mc_ram_size);
-		return -EINVAL;
-	}
-
-	num_blocks = mc_ram_size / MC_RAM_SIZE_ALIGNMENT;
-	if (num_blocks < 1 || num_blocks > 0xff) {
-		printf("fsl-mc: ERROR: invalid MC private RAM size (%lu)\n",
-		       mc_ram_size);
-		return -EINVAL;
-	}
-
-	addr = (mc_private_ram_start_addr + mc_ram_size - 1) &
-		MC_RAM_BASE_ADDR_ALIGNMENT_MASK;
-
-	if (addr < mc_private_ram_start_addr) {
-		printf("fsl-mc: ERROR: bad start address %#llx\n",
-		       mc_private_ram_start_addr);
-		return -EFAULT;
-	}
-
-	*aligned_base_addr = addr;
-	*num_256mb_blocks = num_blocks;
-	return 0;
-}
 
 static int mc_fixup_dpc(u64 dpc_addr)
 {
@@ -442,7 +401,6 @@ int mc_init(u64 mc_fw_addr, u64 mc_dpc_addr)
 	int error = 0;
 	int portal_id = 0;
 	struct mc_ccsr_registers __iomem *mc_ccsr_regs = MC_CCSR_BASE_ADDR;
-	u64 mc_ram_addr = mc_get_dram_addr();
 	u32 reg_gsr;
 	u32 reg_mcfbalr;
 #ifndef CONFIG_SYS_LS_MC_FW_IN_DDR
@@ -450,17 +408,18 @@ int mc_init(u64 mc_fw_addr, u64 mc_dpc_addr)
 	size_t raw_image_size = 0;
 #endif
 	struct mc_version mc_ver_info;
-	u64 mc_ram_aligned_base_addr;
 	u8 mc_ram_num_256mb_blocks;
 	size_t mc_ram_size = mc_get_dram_block_size();
 
 
-	error = calculate_mc_private_ram_params(mc_ram_addr,
-						mc_ram_size,
-						&mc_ram_aligned_base_addr,
-						&mc_ram_num_256mb_blocks);
-	if (error != 0)
+	mc_ram_num_256mb_blocks = mc_ram_size / MC_RAM_SIZE_ALIGNMENT;
+	if (mc_ram_num_256mb_blocks < 1 || mc_ram_num_256mb_blocks > 0xff) {
+		printf("fsl-mc: ERROR: invalid MC private RAM size (%lu)\n",
+		       mc_ram_size);
 		goto out;
+	}
+
+	mc_ram_addr = mc_get_dram_addr();
 
 	/*
 	 * Management Complex cores should be held at reset out of POR.
@@ -502,11 +461,11 @@ int mc_init(u64 mc_fw_addr, u64 mc_dpc_addr)
 	/*
 	 * Tell MC what is the address range of the DRAM block assigned to it:
 	 */
-	reg_mcfbalr = (u32)mc_ram_aligned_base_addr |
+	reg_mcfbalr = (u32)mc_ram_addr |
 		      (mc_ram_num_256mb_blocks - 1);
 	out_le32(&mc_ccsr_regs->reg_mcfbalr, reg_mcfbalr);
 	out_le32(&mc_ccsr_regs->reg_mcfbahr,
-		 (u32)(mc_ram_aligned_base_addr >> 32));
+		 (u32)(mc_ram_addr >> 32));
 	out_le32(&mc_ccsr_regs->reg_mcfapr, FSL_BYPASS_AMQ);
 
 	/*
@@ -611,20 +570,40 @@ int get_dpl_apply_status(void)
  */
 u64 mc_get_dram_addr(void)
 {
-	u64 mc_ram_addr;
+	u64 mc_private_ram_start_addr;
+	size_t mc_ram_size = mc_get_dram_block_size();
 
 	/*
 	 * The MC private DRAM block was already carved at the end of DRAM
 	 * by board_init_f() using CONFIG_SYS_MEM_TOP_HIDE:
 	 */
 	if (gd->bd->bi_dram[1].start) {
-		mc_ram_addr =
+		mc_private_ram_start_addr =
 			gd->bd->bi_dram[1].start + gd->bd->bi_dram[1].size;
 	} else {
-		mc_ram_addr =
+		mc_private_ram_start_addr =
 			gd->bd->bi_dram[0].start + gd->bd->bi_dram[0].size;
 	}
 
+	if (mc_ram_size == 0) {
+		printf("fsl-mc: ERROR: invalid MC private RAM size (%lu)\n",
+		       mc_ram_size);
+		return -EINVAL;
+	}
+
+	/*
+	 * Calculate the highest 512MB aligned address within the
+	 * given address range
+	 */
+	mc_ram_addr = (mc_private_ram_start_addr - 1 +
+		       MC_RAM_BASE_ADDR_ALIGNMENT) &
+		      MC_RAM_BASE_ADDR_ALIGNMENT_MASK;
+
+	if (mc_ram_addr < mc_private_ram_start_addr) {
+		printf("fsl-mc: ERROR: bad start address %#llx\n",
+		       mc_private_ram_start_addr);
+		return -EFAULT;
+	}
 	return mc_ram_addr;
 }
 
