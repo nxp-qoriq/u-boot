@@ -151,6 +151,8 @@
 #define CONFIG_SYS_LS_PPA_ESBC_ADDR     0x40740000
 #elif defined(CONFIG_LS1012A)
 #define CONFIG_SYS_LS_PPA_ESBC_ADDR     0x40480000
+#elif defined(CONFIG_FSL_LSCH3)
+#define CONFIG_SYS_LS_PPA_ESBC_ADDR     0x580c40000
 #endif
 #else
 #error "No CONFIG_SYS_LS_PPA_FW_IN_xxx defined"
