@@ -184,6 +184,9 @@ int board_init(void)
 	/* invert AQR405 IRQ pins polarity */
 	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR405_IRQ_MASK);
 #endif
+#ifdef CONFIG_FSL_CAAM
+        sec_init();
+#endif
 
 	return 0;
 }
@@ -231,9 +234,6 @@ int arch_misc_init(void)
 {
 #ifdef CONFIG_FSL_DEBUG_SERVER
 	debug_server_init();
-#endif
-#ifdef CONFIG_FSL_CAAM
-	sec_init();
 #endif
 	return 0;
 }
