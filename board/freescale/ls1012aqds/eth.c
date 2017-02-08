@@ -128,39 +128,39 @@ int board_eth_init(bd_t *bis)
 {
 #ifdef CONFIG_FSL_PPFE
         struct mii_dev *bus;
+	static const char *mdio_name;
 	struct mdio_info mac1_mdio_info;
 	struct ccsr_scfg *scfg = (struct ccsr_scfg *)CONFIG_SYS_FSL_SCFG_ADDR;
 	u8 data8;
+
+	struct ccsr_gur __iomem *gur = (void *)CONFIG_SYS_FSL_GUTS_ADDR;
+	int srds_s1 = in_be32(&gur->rcwsr[4]) &
+			FSL_CHASSIS2_RCWSR4_SRDS1_PRTCL_MASK;
+	srds_s1 >>= FSL_CHASSIS2_RCWSR4_SRDS1_PRTCL_SHIFT;
+
+	/*TODO Following config should be done for all boards, where is the right place to put this */
+	out_be32(&scfg->pfeasbcr,
+		 in_be32(&scfg->pfeasbcr) | SCFG_PPFEASBCR_AWCACHE0);
+	out_be32(&scfg->pfebsbcr,
+		 in_be32(&scfg->pfebsbcr) | SCFG_PPFEASBCR_AWCACHE0);
 
 	/*CCI-400 QoS settings for PFE */
 	out_be32(&scfg->wr_qos1, 0x0ff00000);
 	out_be32(&scfg->rd_qos1, 0x0ff00000);
 
 	/* Set RGMII into 1G + Full duplex mode */
-	out_be32(&scfg->rgmiipcr, in_be32(&scfg->rgmiipcr) | (SCFG_RGMIIPCR_SETSP_1000M | SCFG_RGMIIPCR_SETFD));
+	out_be32(&scfg->rgmiipcr, in_be32(&scfg->rgmiipcr) |
+		 (SCFG_RGMIIPCR_SETSP_1000M | SCFG_RGMIIPCR_SETFD));
 
 	out_be32((CONFIG_SYS_DCSR_DCFG_ADDR + 0x520), 0xFFFFFFFF);
 	out_be32((CONFIG_SYS_DCSR_DCFG_ADDR + 0x524), 0xFFFFFFFF);
-
-	ls1012aqds_mux_mdio(2);
-
-#ifdef RGMII_RESET_WA
-	/* Work around for FPGA registers initialization
-	 * This is needed for RGMII to work */
-	printf("Reset RGMII WA....\n");
-	data8 = QIXIS_READ(rst_frc[0]);
-	data8 |= 0x2;
-	QIXIS_WRITE(rst_frc[0], data8);
-	data8 = QIXIS_READ(rst_frc[0]);
-#endif
 
 	mac1_mdio_info.reg_base = (void *)0x04200000; /*EMAC1_BASE_ADDR*/
 	mac1_mdio_info.name = DEFAULT_PFE_MDIO_NAME;
 
 	bus = ls1012a_mdio_init(&mac1_mdio_info);
-	if(!bus)
-	{
-		printf("Failed to register mdio \n");
+	if (!bus) {
+		printf("Failed to register mdio\n");
 		return -1;
 	}
 
@@ -173,25 +173,57 @@ int board_eth_init(bd_t *bis)
 		return -1;
 	}
 
-	/*Based on RCW config initialize correctly */
-	/*MAC2 */
-	if(ls1012aqds_mdio_init(DEFAULT_PFE_MDIO_NAME, EMI1_RGMII) < 0)
-	{
-		printf("Failed to register mdio for %s\n", ls1012aqds_mdio_name_for_muxval(EMI1_RGMII));
-		return -1;
-	}
-	ls1012a_set_mdio(1, miiphy_get_dev_by_name(ls1012aqds_mdio_name_for_muxval(EMI1_RGMII)));
-	ls1012a_set_phy_address_mode(1,  EMAC2_PHY_ADDR, PHY_INTERFACE_MODE_RGMII);
+	switch (srds_s1) {
+	case 0x3508:
+		printf("ls1012aqds:supported SerDes PRCTL= %d\n", srds_s1);
+#ifdef RGMII_RESET_WA
+		/* Work around for FPGA registers initialization
+		 * This is needed for RGMII to work */
+		printf("Reset RGMII WA....\n");
+		data8 = QIXIS_READ(rst_frc[0]);
+		data8 |= 0x2;
+		QIXIS_WRITE(rst_frc[0], data8);
+		data8 = QIXIS_READ(rst_frc[0]);
 
-	/*MAC1 */
-	if(ls1012aqds_mdio_init(DEFAULT_PFE_MDIO_NAME, EMI1_SLOT1) < 0)
-	{
-		printf("Failed to register mdio for %s\n", ls1012aqds_mdio_name_for_muxval(EMI1_SLOT1));
-		return -1;
-	}
-	ls1012a_set_mdio(0, miiphy_get_dev_by_name(ls1012aqds_mdio_name_for_muxval(EMI1_SLOT1)));
-	ls1012a_set_phy_address_mode(0,  EMAC1_PHY_ADDR, PHY_INTERFACE_MODE_SGMII);
+		data8 = QIXIS_READ(res8[6]);
+		data8 |= 0xff;
+		QIXIS_WRITE(res8[6], data8);
+		data8 = QIXIS_READ(res8[6]);
+#endif
+		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_RGMII);
+		if (ls1012aqds_mdio_init(DEFAULT_PFE_MDIO_NAME, EMI1_RGMII) <
+		    0) {
+			printf("Failed to register mdio for %s\n", mdio_name);
+			return -1;
+		}
 
+		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_SLOT1);
+		if (ls1012aqds_mdio_init(DEFAULT_PFE_MDIO_NAME, EMI1_SLOT1) <
+		    0) {
+				printf("Failed to register mdio for %s\n",
+				       mdio_name);
+				return -1;
+		}
+
+		/* MAC2*/
+		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_RGMII);
+		bus = miiphy_get_dev_by_name(mdio_name);
+		ls1012a_set_mdio(1, bus);
+		ls1012a_set_phy_address_mode(1,  EMAC2_PHY_ADDR,
+					     PHY_INTERFACE_MODE_RGMII);
+
+		/* MAC1*/
+		mdio_name = ls1012aqds_mdio_name_for_muxval(EMI1_SLOT1);
+		bus = miiphy_get_dev_by_name(mdio_name);
+		ls1012a_set_mdio(0, bus);
+		ls1012a_set_phy_address_mode(0, EMAC1_PHY_ADDR,
+					     PHY_INTERFACE_MODE_SGMII);
+		break;
+
+	default:
+		printf("ls1012aqds:unsupported SerDes PRCTL= %d\n", srds_s1);
+		break;
+	}
 	cpu_eth_init(bis);
 #endif
 	return pci_eth_init(bis);
