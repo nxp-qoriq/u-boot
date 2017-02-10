@@ -16,6 +16,16 @@ unsigned long get_board_sys_clk(void);
 unsigned long get_board_ddr_clk(void);
 #endif
 
+#define CONFIG_FSL_LS_PPA
+#if defined(CONFIG_FSL_LS_PPA)
+#define CONFIG_ARMV8_SEC_FIRMWARE_SUPPORT
+
+#define CONFIG_SYS_LS_PPA_FW_IN_XIP
+#ifdef CONFIG_SYS_LS_PPA_FW_IN_XIP
+#define	CONFIG_SYS_LS_PPA_FW_ADDR	0x580a00000
+#endif
+#endif
+
 #define CONFIG_SYS_FSL_CLK
 
 #ifdef CONFIG_FSL_QSPI
