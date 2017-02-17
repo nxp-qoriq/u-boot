@@ -613,14 +613,28 @@ void fdt_fixup_smmu_pcie(void *blob, int nodeoffset, int idx)
 static void ft_pcie_ls_setup(void *blob, struct ls_pcie *pcie)
 {
 	int off;
+#ifdef CONFIG_LS2080A
+	uint svr;
+#endif
+#ifdef FSL_PCIE_COMPAT
+	char *compat = NULL;
+#endif
 
 	off = fdt_node_offset_by_compat_reg(blob, "fsl,ls-pcie",
 					    pcie->dbi_res.start);
 	if (off < 0) {
 	#ifdef FSL_PCIE_COMPAT /* Compatible with older version of dts node */
-		off = fdt_node_offset_by_compat_reg(blob,
-						    FSL_PCIE_COMPAT,
-						    pcie->dbi_res.start);
+#ifdef CONFIG_LS2080A
+		svr = SVR_SOC_VER(get_svr());
+		if (svr == SVR_LS2088A || svr == SVR_LS2084A ||
+		    svr == SVR_LS2048A || svr == SVR_LS2044A)
+			compat = "fsl,ls2088a-pcie";
+		else
+#endif
+			compat = FSL_PCIE_COMPAT;
+		if (compat)
+			off = fdt_node_offset_by_compat_reg(blob,
+					compat, pcie->dbi_res.start);
 		if (off < 0)
 			return;
 	#else
