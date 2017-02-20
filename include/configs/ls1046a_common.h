@@ -16,10 +16,11 @@
 #define CONFIG_GICV2
 
 #include <asm/arch/config.h>
+#ifndef CONFIG_SPL_BUILD
 #ifdef CONFIG_SYS_FSL_SRDS_1
 #define	CONFIG_SYS_HAS_SERDES
 #endif
-
+#endif
 /* Link Definitions */
 #define CONFIG_SYS_INIT_SP_ADDR		(CONFIG_SYS_FSL_OCRAM_BASE + 0xfff0)
 
@@ -118,6 +119,7 @@
 #define CONFIG_SYS_I2C_MXC_I2C3
 #define CONFIG_SYS_I2C_MXC_I2C4
 
+#ifndef CONFIG_SPL_BUILD
 #define FSL_PCIE_COMPAT "fsl,ls1046a-pcie"
 #ifdef CONFIG_PCI
 #define CONFIG_PCI_PNP
@@ -127,7 +129,9 @@
 
 /* Command line configuration */
 #define CONFIG_CMD_ENV
+#endif
 
+#if !(defined(CONFIG_SPL_BUILD) && defined(CONFIG_NAND_BOOT))
 /* MMC */
 #define CONFIG_MMC
 #ifdef CONFIG_MMC
@@ -136,16 +140,17 @@
 #define CONFIG_GENERIC_MMC
 #define CONFIG_DOS_PARTITION
 #endif
+#endif
 
 #define CONFIG_FSL_CAAM			/* Enable SEC/CAAM */
 
+#ifndef CONFIG_SPL_BUILD
 #define CONFIG_SYS_DPAA_QBMAN		/* Support Q/Bman */
-
 /* FMan ucode */
 #define CONFIG_SYS_DPAA_FMAN
 #ifdef CONFIG_SYS_DPAA_FMAN
 #define CONFIG_SYS_FM_MURAM_SIZE	0x60000
-
+#endif
 #ifdef CONFIG_SD_BOOT
 /*
  * PBL SD boot image should stored at 0x1000(8 blocks), the size of the image is
@@ -180,6 +185,7 @@
 #define CONFIG_HWCONFIG
 #define HWCONFIG_BUFFER_SIZE		128
 
+#ifndef CONFIG_SPL_BUILD
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	"hwconfig=fsl_ddr:bank_intlv=auto\0"	\
@@ -197,13 +203,16 @@
 #define CONFIG_BOOTARGS			"console=ttyS0,115200 root=/dev/ram0 " \
 					"earlycon=uart8250,mmio,0x21c0500 " \
 					MTDPARTS_DEFAULT
+#endif
 /* Monitor Command Prompt */
 #define CONFIG_SYS_CBSIZE		512	/* Console I/O Buffer Size */
 #define CONFIG_SYS_PBSIZE		(CONFIG_SYS_CBSIZE + \
 					sizeof(CONFIG_SYS_PROMPT) + 16)
 #define CONFIG_SYS_BARGSIZE		CONFIG_SYS_CBSIZE /* Boot args buffer */
 #define CONFIG_SYS_LONGHELP
+#ifndef CONFIG_SPL_BUILD
 #define CONFIG_CMDLINE_EDITING		1
+#endif
 #define CONFIG_AUTO_COMPLETE
 #define CONFIG_SYS_MAXARGS		64	/* max command args */
 

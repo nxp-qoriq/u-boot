@@ -9,6 +9,7 @@
 
 #include "ls1046a_common.h"
 
+#ifndef CONFIG_SPL_BUILD
 #if defined(CONFIG_FSL_LS_PPA)
 #define CONFIG_ARMV8_PSCI
 #define CONFIG_ARMV8_SEC_FIRMWARE_SUPPORT
@@ -22,6 +23,7 @@
 
 #define CONFIG_DISPLAY_CPUINFO
 #define CONFIG_DISPLAY_BOARDINFO
+#endif
 
 #ifdef CONFIG_SD_BOOT
 #define CONFIG_SYS_TEXT_BASE		0x82000000
@@ -68,13 +70,14 @@
 /* No NOR flash */
 #define CONFIG_SYS_NO_FLASH
 
+#if !(defined(CONFIG_SPL_BUILD) && defined(CONFIG_SD_BOOT))
 /* IFC */
 #define CONFIG_FSL_IFC
-
 /*
  * NAND Flash Definitions
  */
 #define CONFIG_NAND_FSL_IFC
+#endif
 
 #define CONFIG_SYS_NAND_BASE		0x7e800000
 #define CONFIG_SYS_NAND_BASE_PHYS	CONFIG_SYS_NAND_BASE
@@ -175,10 +178,12 @@
 #define CONFIG_POWER_I2C
 #endif
 
+#ifndef CONFIG_SPL_BUILD
 /*
  * Environment
  */
 #define CONFIG_ENV_OVERWRITE
+#endif
 
 #if defined(CONFIG_SD_BOOT)
 #define CONFIG_ENV_IS_IN_MMC
@@ -192,6 +197,7 @@
 #define CONFIG_ENV_SECT_SIZE		0x40000		/* 256KB */
 #endif
 
+#ifndef CONFIG_SPL_BUILD
 /* FMan */
 #ifdef CONFIG_SYS_DPAA_FMAN
 #define CONFIG_FMAN_ENET
@@ -261,6 +267,7 @@
 			"15m(u-boot),48m(kernel.itb);" \
 			"7e800000.flash:16m(nand_uboot)," \
 			"48m(nand_kernel),448m(nand_free)"
+#endif /* CONFIG_SPL_BUILD */
 
 #include <asm/fsl_secure_boot.h>
 
