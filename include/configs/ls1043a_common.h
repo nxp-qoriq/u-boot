@@ -74,7 +74,18 @@
 #define CONFIG_SPL_DRIVERS_MISC_SUPPORT
 #define CONFIG_SPL_MMC_SUPPORT
 #define CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR		0x110
+
+#ifdef CONFIG_SECURE_BOOT
+#define CONFIG_U_BOOT_HDR_SIZE				(16 << 10)
+/*
+ * HDR would be appended at end of image and copied to DDR along
+ * with U-Boot image.
+ */
+#define CONFIG_SYS_U_BOOT_MAX_SIZE_SECTORS		(0x500 + \
+		(CONFIG_U_BOOT_HDR_SIZE / 512)
+#else
 #define CONFIG_SYS_U_BOOT_MAX_SIZE_SECTORS		0x500
+#endif /* ifdef CONFIG_SECURE_BOOT */
 
 #define CONFIG_SPL_TEXT_BASE		0x10000000
 /*
@@ -83,7 +94,7 @@
  * So notice that even if DEBUG is ON, the SPL image(spl/u-boot-spl.bin)
  * should not be > 124 KiB.
  */
-#define CONFIG_SPL_MAX_SIZE		0x1f000		/* 124 KiB */
+#define CONFIG_SPL_MAX_SIZE		0x20000		/* 124 KiB */
 #define CONFIG_SPL_STACK		0x10020000
 #define CONFIG_SPL_PAD_TO		0x21000		/* 132 KiB */
 
@@ -92,7 +103,18 @@
 #define CONFIG_SYS_SPL_MALLOC_SIZE	0x100000
 #define CONFIG_SPL_BSS_START_ADDR	0x80100000
 #define CONFIG_SPL_BSS_MAX_SIZE		0x80000
-#define CONFIG_SYS_MONITOR_LEN		0xa0000
+
+#ifdef CONFIG_U_BOOT_HDR_SIZE
+/*
+ * HDR would be appended at end of image and copied to DDR along
+ * with U-Boot image. Here u-boot max. size is 512K. So if binary
+ * size increases then increase this size in case of secure boot as
+ * it uses raw u-boot image instead of fit image.
+ */
+#define CONFIG_SYS_MONITOR_LEN		(0x100000 + CONFIG_U_BOOT_HDR_SIZE)
+#else
+#define CONFIG_SYS_MONITOR_LEN		0x100000
+#endif /* ifdef CONFIG_U_BOOT_HDR_SIZE */
 #endif
 
 /* NAND SPL */
