@@ -16,8 +16,10 @@
 #define CONFIG_GICV2
 
 #include <asm/arch/config.h>
+#ifndef CONFIG_SPL_BUILD
 #ifdef CONFIG_SYS_FSL_SRDS_1
 #define	CONFIG_SYS_HAS_SERDES
+#endif
 #endif
 
 #define CONFIG_HAS_FEATURE_GIC4K_ALIGN
@@ -68,7 +70,6 @@
 #define CONFIG_SPL_ENV_SUPPORT
 #define CONFIG_SPL_MPC8XXX_INIT_DDR_SUPPORT
 #define CONFIG_SPL_WATCHDOG_SUPPORT
-#define CONFIG_SPL_I2C_SUPPORT
 #define CONFIG_SPL_SERIAL_SUPPORT
 #define CONFIG_SPL_DRIVERS_MISC_SUPPORT
 #define CONFIG_SPL_MMC_SUPPORT
@@ -122,6 +123,7 @@
 #define CONFIG_SYS_MONITOR_LEN		0xa0000
 #endif
 
+#if !(defined(CONFIG_SPL_BUILD) && defined(CONFIG_SD_BOOT))
 /* IFC */
 #if !defined(CONFIG_QSPI_BOOT) && !defined(CONFIG_SD_BOOT_QSPI)
 #define CONFIG_FSL_IFC
@@ -143,6 +145,7 @@
 #define CONFIG_FLASH_SHOW_PROGRESS	45	/* count down from 45/5: 9..1 */
 #endif
 #endif
+#endif
 
 /* I2C */
 #define CONFIG_SYS_I2C
@@ -152,6 +155,7 @@
 #define CONFIG_SYS_I2C_MXC_I2C3
 #define CONFIG_SYS_I2C_MXC_I2C4
 
+#ifndef CONFIG_SPL_BUILD
 /* PCIe */
 #define FSL_PCIE_COMPAT "fsl,ls1043a-pcie"
 #ifdef CONFIG_PCI
@@ -164,7 +168,9 @@
 #define CONFIG_CMD_ENV
 #define CONFIG_MENU
 #define CONFIG_CMD_PXE
+#endif
 
+#if !(defined(CONFIG_SPL_BUILD) && defined(CONFIG_NAND_BOOT))
 /*  MMC  */
 #define CONFIG_MMC
 #ifdef CONFIG_MMC
@@ -173,7 +179,11 @@
 #define CONFIG_GENERIC_MMC
 #define CONFIG_DOS_PARTITION
 #endif
+#endif
 
+#define CONFIG_FSL_CAAM			/* Enable SEC/CAAM */
+
+#ifndef CONFIG_SPL_BUILD
 /*  DSPI  */
 #define CONFIG_FSL_DSPI
 #ifdef CONFIG_FSL_DSPI
@@ -186,8 +196,6 @@
 #define CONFIG_SF_DEFAULT_CS		0
 #endif
 #endif
-
-#define CONFIG_FSL_CAAM			/* Enable SEC/CAAM */
 
 #define CONFIG_SYS_DPAA_QBMAN		/* Support Q/Bman */
 
@@ -223,6 +231,7 @@
 #define CONFIG_SYS_QE_FMAN_FW_LENGTH	0x10000
 #define CONFIG_SYS_FDT_PAD		(0x3000 + CONFIG_SYS_QE_FMAN_FW_LENGTH)
 #endif
+#endif
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LOAD_ADDR	(CONFIG_SYS_DDR_SDRAM_BASE + 0x10000000)
@@ -232,6 +241,7 @@
 #define CONFIG_HWCONFIG
 #define HWCONFIG_BUFFER_SIZE		128
 
+#ifndef CONFIG_SPL_BUILD
 #if defined(CONFIG_QSPI_BOOT) || defined(CONFIG_SD_BOOT_QSPI)
 #define MTDPARTS_DEFAULT "mtdparts=spi0.0:1m(uboot)," \
 			"5m(kernel),1m(dtb),9m(file_system)"
@@ -269,6 +279,7 @@
 #else
 #define CONFIG_BOOTCOMMAND		"cp.b $kernel_start $kernel_load "     \
 					"$kernel_size && bootm $kernel_load"
+#endif
 #endif
 
 /* Monitor Command Prompt */

@@ -89,6 +89,7 @@ unsigned long get_board_ddr_clk(void);
 #endif
 
 #ifdef CONFIG_SD_BOOT
+#define CONFIG_SPL_I2C_SUPPORT
 #ifdef CONFIG_SD_BOOT_QSPI
 #define CONFIG_SYS_FSL_PBL_RCW \
 	board/freescale/ls1043aqds/ls1043aqds_rcw_sd_qspi.cfg

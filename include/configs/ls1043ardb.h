@@ -104,7 +104,9 @@
 /*
  * NAND Flash Definitions
  */
+#if !(defined(CONFIG_SPL_BUILD) && defined(CONFIG_SD_BOOT))
 #define CONFIG_NAND_FSL_IFC
+#endif
 
 #define CONFIG_SYS_NAND_BASE		0x7e800000
 #define CONFIG_SYS_NAND_BASE_PHYS	CONFIG_SYS_NAND_BASE
@@ -226,6 +228,7 @@
 #define CONFIG_SYS_CS2_FTIM2		CONFIG_SYS_CPLD_FTIM2
 #define CONFIG_SYS_CS2_FTIM3		CONFIG_SYS_CPLD_FTIM3
 
+#ifndef CONFIG_SPL_BUILD
 /* EEPROM */
 #define CONFIG_ID_EEPROM
 #define CONFIG_SYS_I2C_EEPROM_NXID
@@ -239,6 +242,7 @@
  * Environment
  */
 #define CONFIG_ENV_OVERWRITE
+#endif
 
 #if defined(CONFIG_NAND_BOOT)
 #define CONFIG_ENV_IS_IN_NAND
@@ -256,6 +260,7 @@
 #define CONFIG_ENV_SIZE			0x20000
 #endif
 
+#ifndef CONFIG_SPL_BUILD
 /* FMan */
 #ifdef CONFIG_SYS_DPAA_FMAN
 #define CONFIG_FMAN_ENET
@@ -319,6 +324,7 @@
 #define CONFIG_PARTITION_UUIDS
 #define CONFIG_EFI_PARTITION
 #define CONFIG_CMD_GPT
+#endif
 
 #include <asm/fsl_secure_boot.h>
 
