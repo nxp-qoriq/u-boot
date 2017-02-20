@@ -18,6 +18,7 @@ unsigned long get_board_ddr_clk(void);
 
 #define CONFIG_FSL_LS_PPA
 #if defined(CONFIG_FSL_LS_PPA)
+#define CONFIG_ARMV8_PSCI
 #define CONFIG_ARMV8_SEC_FIRMWARE_SUPPORT
 
 #define CONFIG_SYS_LS_PPA_FW_IN_XIP
