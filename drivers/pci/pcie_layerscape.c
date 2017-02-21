@@ -35,6 +35,10 @@ DECLARE_GLOBAL_DATA_PTR;
 #define CONFIG_SYS_PCI_EP_MEMORY_BASE CONFIG_SYS_LOAD_ADDR
 #endif
 
+#define PCIE_PHYS_SIZE			0x200000000ULL
+#define LS2088A_PCIE_PHYS_SIZE		0x800000000ULL
+#define LS2088A_PCIE1_PHYS_ADDR		0x2000000000ULL
+
 /* iATU registers */
 #define PCIE_ATU_VIEWPORT		0x900
 #define PCIE_ATU_REGION_INBOUND		(0x1 << 31)
@@ -270,6 +274,9 @@ static void ls_pcie_setup_atu(struct ls_pcie *pcie)
 	struct pci_region *io, *mem, *pref;
 	unsigned long long offset = 0;
 	int idx = 0;
+#ifdef CONFIG_LS2080A
+	uint svr;
+#endif
 
 #ifdef CONFIG_LS102XA
 	offset = LS1021_PCIE_SPACE_OFFSET + LS1021_PCIE_SPACE_SIZE * pcie->idx;
@@ -291,6 +298,29 @@ static void ls_pcie_setup_atu(struct ls_pcie *pcie)
 
 	pci_get_regions(pcie->bus, &io, &mem, &pref);
 	idx = PCIE_ATU_REGION_INDEX1 + 1;
+
+#ifdef CONFIG_LS2080A
+	/* Fix the pcie memory map for LS2088A series SoCs */
+	svr = SVR_SOC_VER(get_svr());
+	if (svr == SVR_LS2088A || svr == SVR_LS2084A ||
+	    svr == SVR_LS2048A || svr == SVR_LS2044A) {
+		if (io)
+			io->phys_start = (io->phys_start &
+					 (PCIE_PHYS_SIZE - 1)) +
+					 LS2088A_PCIE1_PHYS_ADDR +
+					 LS2088A_PCIE_PHYS_SIZE * pcie->idx;
+		if (mem)
+			mem->phys_start = (mem->phys_start &
+					 (PCIE_PHYS_SIZE - 1)) +
+					 LS2088A_PCIE1_PHYS_ADDR +
+					 LS2088A_PCIE_PHYS_SIZE * pcie->idx;
+		if (pref)
+			pref->phys_start = (pref->phys_start &
+					 (PCIE_PHYS_SIZE - 1)) +
+					 LS2088A_PCIE1_PHYS_ADDR +
+					 LS2088A_PCIE_PHYS_SIZE * pcie->idx;
+	}
+#endif
 
 	if (io)
 		/* ATU : OUTBOUND : IO */
@@ -583,14 +613,28 @@ void fdt_fixup_smmu_pcie(void *blob, int nodeoffset, int idx)
 static void ft_pcie_ls_setup(void *blob, struct ls_pcie *pcie)
 {
 	int off;
+#ifdef CONFIG_LS2080A
+	uint svr;
+#endif
+#ifdef FSL_PCIE_COMPAT
+	char *compat = NULL;
+#endif
 
 	off = fdt_node_offset_by_compat_reg(blob, "fsl,ls-pcie",
 					    pcie->dbi_res.start);
 	if (off < 0) {
 	#ifdef FSL_PCIE_COMPAT /* Compatible with older version of dts node */
-		off = fdt_node_offset_by_compat_reg(blob,
-						    FSL_PCIE_COMPAT,
-						    pcie->dbi_res.start);
+#ifdef CONFIG_LS2080A
+		svr = SVR_SOC_VER(get_svr());
+		if (svr == SVR_LS2088A || svr == SVR_LS2084A ||
+		    svr == SVR_LS2048A || svr == SVR_LS2044A)
+			compat = "fsl,ls2088a-pcie";
+		else
+#endif
+			compat = FSL_PCIE_COMPAT;
+		if (compat)
+			off = fdt_node_offset_by_compat_reg(blob,
+					compat, pcie->dbi_res.start);
 		if (off < 0)
 			return;
 	#else
@@ -630,6 +674,9 @@ static int ls_pcie_probe(struct udevice *dev)
 	u8 header_type;
 	u16 link_sta;
 	bool ep_mode;
+#ifdef CONFIG_LS2080A
+	uint svr;
+#endif
 	int ret;
 
 	pcie->bus = dev;
@@ -682,6 +729,17 @@ static int ls_pcie_probe(struct udevice *dev)
 		printf("%s: resource \"config\" not found\n", dev->name);
 		return 0;
 	}
+
+#ifdef CONFIG_LS2080A
+	/* Fix the pcie memory map for LS2088A series SoCs */
+	svr = SVR_SOC_VER(get_svr());
+	if (svr == SVR_LS2088A || svr == SVR_LS2084A ||
+	    svr == SVR_LS2048A || svr == SVR_LS2044A) {
+		pcie->cfg_res.start = LS2088A_PCIE1_PHYS_ADDR +
+					LS2088A_PCIE_PHYS_SIZE * pcie->idx;
+		pcie->ctrl += 0x40000;
+	}
+#endif
 
 	pcie->cfg0 = map_physmem(pcie->cfg_res.start,
 				 fdt_resource_size(&pcie->cfg_res),
