@@ -22,6 +22,7 @@
 #include <fsl_ifc.h>
 #include <fsl_sec.h>
 #include <spl.h>
+#include <asm/arch/ppa.h>
 
 #include "../common/vid.h"
 #include "../common/qixis.h"
@@ -279,6 +280,10 @@ int board_init(void)
 
 #ifdef CONFIG_FSL_CAAM
 	sec_init();
+#endif
+
+#ifdef CONFIG_FSL_LS_PPA
+	ppa_init();
 #endif
 
 	return 0;
