@@ -30,13 +30,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-int dram_init(void)
-{
-	gd->ram_size = initdram(0);
-
-	return 0;
-}
-
 int board_early_init_f(void)
 {
 	fsl_lsch2_early_init_f();

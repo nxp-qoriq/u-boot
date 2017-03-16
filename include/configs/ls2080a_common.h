@@ -159,7 +159,6 @@ unsigned long long get_qixis_addr(void);
 #define CONFIG_SYS_DEBUG_SERVER_TIMEOUT			(2 * 1000 * 1000)
 
 /* MC firmware */
-#define CONFIG_FSL_MC_ENET
 /* TODO Actual DPL max length needs to be confirmed with the MC FW team */
 #define CONFIG_SYS_LS_MC_DPC_MAX_LENGTH	    0x20000
 #define CONFIG_SYS_LS_MC_DRAM_DPC_OFFSET    0x00F00000
@@ -178,7 +177,6 @@ unsigned long long get_qixis_addr(void);
 #if defined(CONFIG_FSL_MC_ENET) || defined(CONFIG_FSL_DEBUG_SERVER)
 #define CONFIG_SYS_DEBUG_SERVER_DRAM_BLOCK_MIN_SIZE	(254UL * 1024 * 1024)
 #define CONFIG_SYS_LS_MC_DRAM_BLOCK_MIN_SIZE		(512UL * 1024 * 1024)
-#define CONFIG_SYS_MC_RSV_MEM_ALIGN			(512UL * 1024 * 1024)
 #endif
 
 /* PCIe */

@@ -46,9 +46,6 @@ void board_init_f(ulong dummy)
 {
 	/* Clear global data */
 	memset((void *)gd, 0, sizeof(gd_t));
-#ifdef CONFIG_LS2080A
-	arch_cpu_init();
-#endif
 	board_early_init_f();
 	timer_init();
 #ifdef CONFIG_LS2080A

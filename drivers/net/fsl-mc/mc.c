@@ -513,6 +513,7 @@ int mc_init(u64 mc_fw_addr, u64 mc_dpc_addr)
 
 	mc_ram_num_256mb_blocks = mc_ram_size / MC_RAM_SIZE_ALIGNMENT;
 	if (mc_ram_num_256mb_blocks < 1 || mc_ram_num_256mb_blocks > 0xff) {
+		error = -EINVAL;
 		printf("fsl-mc: ERROR: invalid MC private RAM size (%lu)\n",
 		       mc_ram_size);
 		goto out;
@@ -669,41 +670,7 @@ int get_dpl_apply_status(void)
  */
 u64 mc_get_dram_addr(void)
 {
-	u64 mc_private_ram_start_addr;
-	size_t mc_ram_size = mc_get_dram_block_size();
-
-	/*
-	 * The MC private DRAM block was already carved at the end of DRAM
-	 * by board_init_f() using CONFIG_SYS_MEM_TOP_HIDE:
-	 */
-	if (gd->bd->bi_dram[1].start) {
-		mc_private_ram_start_addr =
-			gd->bd->bi_dram[1].start + gd->bd->bi_dram[1].size;
-	} else {
-		mc_private_ram_start_addr =
-			gd->bd->bi_dram[0].start + gd->bd->bi_dram[0].size;
-	}
-
-	if (mc_ram_size == 0) {
-		printf("fsl-mc: ERROR: invalid MC private RAM size (%lu)\n",
-		       mc_ram_size);
-		return -EINVAL;
-	}
-
-	/*
-	 * Calculate the highest 512MB aligned address within the
-	 * given address range
-	 */
-	mc_ram_addr = (mc_private_ram_start_addr - 1 +
-		       MC_RAM_BASE_ADDR_ALIGNMENT) &
-		      MC_RAM_BASE_ADDR_ALIGNMENT_MASK;
-
-	if (mc_ram_addr < mc_private_ram_start_addr) {
-		printf("fsl-mc: ERROR: bad start address %#llx\n",
-		       mc_private_ram_start_addr);
-		return -EFAULT;
-	}
-	return mc_ram_addr;
+	return gd->arch.resv_ram;
 }
 
 /**
