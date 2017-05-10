@@ -43,6 +43,14 @@ config PCIE_DW_MVEBU
 	  Armada-8K SoCs. The PCIe controller on Armada-8K is based on
 	  DesignWare hardware.
 
+config PCIE_LX
+	bool "LX PCIe support"
+	depends on DM_PCI
+	help
+	  Support PCIe on NXP LX series SoCs, which may have one or several
+	  PCIe controllers. The PCIe may works in RC or EP mode according to
+	  RCW[HOST_AGT_PEX] setting.
+
 config PCI_SANDBOX
 	bool "Sandbox PCI support"
 	depends on SANDBOX && DM_PCI
