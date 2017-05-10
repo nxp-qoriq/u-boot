@@ -69,6 +69,14 @@ config PCI_RCAR_GEN2
 	  Renesas RCar Gen2 SoCs. The PCIe controller on RCar Gen2 is
 	  also used to access EHCI USB controller on the SoC.
 
+config PCIE_LX
+	bool "LX PCIe support"
+	depends on DM_PCI
+	help
+	  Support PCIe on NXP LX series SoCs, which may have one or several
+	  PCIe controllers. The PCIe may works in RC or EP mode according to
+	  RCW[HOST_AGT_PEX] setting.
+
 config PCI_SANDBOX
 	bool "Sandbox PCI support"
 	depends on SANDBOX && DM_PCI
