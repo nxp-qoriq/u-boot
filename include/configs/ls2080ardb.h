@@ -18,7 +18,6 @@
 #define CONFIG_QIXIS_I2C_ACCESS
 #endif
 #define CONFIG_SYS_I2C_EARLY_INIT
-#define CONFIG_DISPLAY_BOARDINFO_LATE
 #endif
 
 #define I2C_MUX_CH_VOL_MONITOR		0xa
@@ -264,7 +263,7 @@ unsigned long get_board_sys_clk(void);
 
 #ifdef CONFIG_TARGET_LS2081ARDB
 #define CONFIG_FSL_QIXIS	/* use common QIXIS code */
-#define QIXIS_QMAP_MASK			0x07
+#define QIXIS_QMAP_MASK			0x70
 #define QIXIS_QMAP_SHIFT		5
 #define QIXIS_LBMAP_DFLTBANK		0x00
 #define QIXIS_LBMAP_QSPI		0x00
@@ -293,18 +292,14 @@ unsigned long get_board_sys_clk(void);
 /* SPI */
 #if defined(CONFIG_FSL_QSPI) || defined(CONFIG_FSL_DSPI)
 #define CONFIG_SPI_FLASH
-#ifdef CONFIG_FSL_QSPI
+#ifdef CONFIG_FSL_DSPI
 #define CONFIG_SPI_FLASH_STMICRO
 #endif
 #ifdef CONFIG_FSL_QSPI
-#ifdef CONFIG_TARGET_LS2081ARDB
-#define CONFIG_SPI_FLASH_STMICRO
-#else
 #define CONFIG_SPI_FLASH_SPANSION
 #endif
 #define FSL_QSPI_FLASH_SIZE		SZ_64M	/* 64MB */
 #define FSL_QSPI_FLASH_NUM		2
-#endif
 #endif
 
 /*
