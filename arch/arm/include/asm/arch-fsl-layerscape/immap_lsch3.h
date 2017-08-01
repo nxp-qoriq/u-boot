@@ -126,7 +126,7 @@
 #define DCSR_BASE              0x700000000ULL
 #define DCSR_USB_PHY1                  0x4600000
 #define DCSR_USB_PHY2                  0x4610000
-#define DCSR_USB_PHY_RX_OVRD_IN_HI     0x1006
+#define DCSR_USB_PHY_RX_OVRD_IN_HI     0x200C
 #define USB_PHY_RX_EQ_VAL_1            0x0000
 #define USB_PHY_RX_EQ_VAL_2            0x0080
 #define USB_PHY_RX_EQ_VAL_3            0x0380
