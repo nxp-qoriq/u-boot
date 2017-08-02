@@ -69,13 +69,30 @@ static int ls_pcie_ltssm(struct ls_pcie *pcie)
 
 static int ls_pcie_link_up(struct ls_pcie *pcie)
 {
-	int ltssm;
+	int ltssm, i;
 
 	ltssm = ls_pcie_ltssm(pcie);
-	if (ltssm < LTSSM_PCIE_L0)
-		return 0;
 
-	return 1;
+	/*
+	 * For some special reset times for longer pcie devices,
+	 * the pcie device may on polling compliance state,
+	 * on this state, if the device can restored to the L0 state
+	 * within 100ms considers the pcie device is link up
+	 */
+	if (ltssm == LTSSM_PCIE_DETECT_QUIET ||
+	    ltssm == LTSSM_PCIE_DETECT_ACTIVE) {
+		return 0;
+	} else if (ltssm == LTSSM_PCIE_L0) {
+		return 1;
+	} else {
+		for (i = 0; i < 100; i++) {
+			udelay(1000);
+			ltssm = ls_pcie_ltssm(pcie);
+			if (ltssm == LTSSM_PCIE_L0)
+				return 1;
+		}
+		return 0;
+	}
 }
 
 static void ls_pcie_cfg0_set_busdev(struct ls_pcie *pcie, u32 busdev)

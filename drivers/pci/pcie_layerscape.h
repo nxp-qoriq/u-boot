@@ -70,6 +70,9 @@
 
 #define LTSSM_STATE_MASK	0x3f
 #define LTSSM_PCIE_L0		0x11 /* L0 state */
+#define LTSSM_PCIE_DETECT_QUIET		0x00 /* L0 state */
+#define LTSSM_PCIE_DETECT_ACTIVE	0x01 /* L0 state */
+#define LTSSM_PCIE_L0		0x11 /* L0 state */
 
 #define PCIE_DBI_SIZE		0x100000 /* 1M */
 
