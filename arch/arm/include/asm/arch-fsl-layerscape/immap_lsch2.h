@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Freescale Semiconductor, Inc.
+ * Copyright 2013-2017 Freescale Semiconductor, Inc.
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -199,6 +199,11 @@ struct ccsr_gur {
 #define FSL_CHASSIS2_DEVDISR2_10GEC1_2	0x00400000
 #define FSL_CHASSIS2_DEVDISR2_10GEC1_3	0x80000000
 #define FSL_CHASSIS2_DEVDISR2_10GEC1_4	0x40000000
+#define SCFG_USB3PRM1CR_USB2           0x07C
+#define SCFG_USB3PRM1CR_USB3           0x088
+#define USB_TXVREFTUNE                 0x9
+#define USB_SQRXTUNE                   0xFC7FFFFF
+
 	u32     devdisr2;       /* Device disable control 2 */
 	u32     devdisr3;       /* Device disable control 3 */
 	u32     devdisr4;       /* Device disable control 4 */
