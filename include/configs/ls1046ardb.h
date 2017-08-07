@@ -243,8 +243,14 @@
 
 #ifndef SPL_NO_MISC
 #undef CONFIG_BOOTCOMMAND
-#define CONFIG_BOOTCOMMAND "run distro_bootcmd; run qspi_bootcmd; "	\
+#if defined(CONFIG_QSPI_BOOT)
+#define CONFIG_BOOTCOMMAND "run distro_bootcmd; run qspi_bootcmd; "     \
 			   "env exists secureboot && esbc_halt;"
+#elif defined(CONFIG_SD_BOOT)
+#define CONFIG_BOOTCOMMAND "run distro_bootcmd; run sd_bootcmd; "       \
+			   "env exists secureboot && esbc_halt;"
+#endif
+
 #define MTDPARTS_DEFAULT "mtdparts=1550000.quadspi:1m(rcw)," \
 			"15m(u-boot),48m(kernel.itb);" \
 			"7e800000.flash:16m(nand_uboot)," \
