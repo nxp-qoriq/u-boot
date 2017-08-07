@@ -284,6 +284,8 @@
 	"load_addr=0xa0000000\0"		\
 	"kernelheader_size=0x40000\0"		\
 	"kernel_size=0x2800000\0"		\
+	"kernel_addr_sd=0x8000\0"		\
+	"kernel_size_sd=0x14000\0"		\
 	"console=ttyS0,115200\0"		\
 	"mtdparts=" MTDPARTS_DEFAULT "\0"	\
 	BOOTENV					\
@@ -328,11 +330,19 @@
 		"$kernel_size; env exists secureboot "	\
 		"&& cp.b $kernelheader_addr $kernelheader_addr_r "	\
 		"$kernelheader_size && esbc_validate ${kernelheader_addr_r}; " \
-		"bootm $load_addr#$board\0"
+		"bootm $load_addr#$board\0"	    \
+	"sd_bootcmd=echo Trying load from SD ..;"   \
+		"mmcinfo; mmc read $load_addr "	    \
+		"$kernel_addr_sd $kernel_size_sd ;" \
+		" bootm $load_addr#$board\0"
+
 
 #undef CONFIG_BOOTCOMMAND
 #if defined(CONFIG_QSPI_BOOT) || defined(CONFIG_SD_BOOT_QSPI)
 #define CONFIG_BOOTCOMMAND "run distro_bootcmd; run qspi_bootcmd; "	\
+			   "env exists secureboot && esbc_halt;"
+#elif defined(CONFIG_SD_BOOT)
+#define CONFIG_BOOTCOMMAND "run distro_bootcmd; run sd_bootcmd; "	\
 			   "env exists secureboot && esbc_halt;"
 #else
 #define CONFIG_BOOTCOMMAND "run distro_bootcmd; run nor_bootcmd; "	\
