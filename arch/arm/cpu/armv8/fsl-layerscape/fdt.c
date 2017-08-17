@@ -345,6 +345,7 @@ static void fdt_fixup_msi(void *blob)
 }
 #endif
 
+#ifdef CONFIG_ARMV8_SEC_FIRMWARE_SUPPORT
 /* Remove JR node used by SEC firmware */
 void fdt_fixup_remove_jr(void *blob)
 {
@@ -370,6 +371,7 @@ void fdt_fixup_remove_jr(void *blob)
 							"fsl,sec-v4.0-job-ring");
 	}
 }
+#endif
 
 void ft_cpu_setup(void *blob, bd_t *bd)
 {
@@ -382,9 +384,10 @@ void ft_cpu_setup(void *blob, bd_t *bd)
 #if CONFIG_SYS_FSL_SEC_COMPAT >= 4
 	else {
 		ccsr_sec_t __iomem *sec;
-
+#ifdef CONFIG_ARMV8_SEC_FIRMWARE_SUPPORT
 		if (fdt_fixup_kaslr(blob))
 			fdt_fixup_remove_jr(blob);
+#endif
 
 		sec = (void __iomem *)CONFIG_SYS_FSL_SEC_ADDR;
 		fdt_fixup_crypto_node(blob, sec_in32(&sec->secvid_ms));
