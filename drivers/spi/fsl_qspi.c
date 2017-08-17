@@ -166,6 +166,26 @@ static inline u32 qspi_endian_xchg(u32 data)
 	return data;
 #endif
 }
+static inline u32 qspi_controller_busy(struct fsl_qspi_priv *priv)
+{
+	u32 sr;
+	u32 retry = 5;
+
+	do {
+		sr = qspi_read32(priv->flags, &priv->regs->sr);
+		if ((sr & QSPI_SR_BUSY_MASK) ||
+		    (sr & QSPI_SR_AHB_ACC_MASK) ||
+		    (sr & QSPI_SR_IP_ACC_MASK)) {
+			debug("The controller is busy, sr = 0x%x\n", sr);
+			udelay(1);
+		} else {
+			break;
+		}
+	} while (--retry);
+
+	return (sr & QSPI_SR_BUSY_MASK) ||
+		(sr & QSPI_SR_AHB_ACC_MASK) || (sr & QSPI_SR_IP_ACC_MASK);
+}
 
 static void qspi_set_lut(struct fsl_qspi_priv *priv)
 {
@@ -758,6 +778,11 @@ int qspi_xfer(struct fsl_qspi_priv *priv, unsigned int bitlen,
 	u32 bytes = DIV_ROUND_UP(bitlen, 8);
 	static u32 wr_sfaddr;
 	u32 txbuf;
+
+	if (qspi_controller_busy(priv)) {
+		printf("ERROR : The controller is busy\n");
+		return -EBUSY;
+	}
 
 	if (dout) {
 		if (flags & SPI_XFER_BEGIN) {
