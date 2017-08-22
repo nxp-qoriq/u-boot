@@ -96,8 +96,11 @@ int fsl_initdram(void)
 {
 	puts("Initializing DDR....using SPD\n");
 
+#if defined(CONFIG_SPL) && !defined(CONFIG_SPL_BUILD)
+	gd->ram_size = fsl_ddr_sdram_size();
+#else
 	gd->ram_size = fsl_ddr_sdram();
-
+#endif
 
 	return 0;
 }
