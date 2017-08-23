@@ -323,6 +323,11 @@
 #define CONFIG_PHY_GIGE
 #endif
 
+/*  USB  */
+#define CONFIG_HAS_FSL_XHCI_USB
+#define CONFIG_USB_XHCI_FSL
+#define CONFIG_USB_MAX_CONTROLLER_COUNT		2
+
 /*  MMC  */
 #ifdef CONFIG_MMC
 #define CONFIG_FSL_ESDHC
