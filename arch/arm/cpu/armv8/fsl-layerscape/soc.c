@@ -150,7 +150,7 @@ little endian style */
 	writew(USB_PHY_RX_EQ_VAL_4, (u8 *)(usb_phy) + USB_PHY_RX_OVRD_IN_HI);
 #endif
 
-#if defined(CONFIG_ARCH_LS2080A)
+#if defined(CONFIG_ARCH_LS2080A) || defined(CONFIG_ARCH_LS1088A)
 	u32 __iomem *dcsr = (u32 __iomem *)DCSR_BASE;
 	writew(USB_PHY_RX_EQ_VAL_1,
 	       (u8 *)(dcsr) + DCSR_USB_PHY1 + DCSR_USB_PHY_RX_OVRD_IN_HI);
