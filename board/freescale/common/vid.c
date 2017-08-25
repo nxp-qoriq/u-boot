@@ -184,6 +184,7 @@ static int read_voltage(int i2caddress)
 	return voltage_read;
 }
 
+#ifdef CONFIG_VOL_MONITOR_IR36021_SET
 /*
  * We need to calculate how long before the voltage stops to drop
  * or increase. It returns with the loop count. Each loop takes
@@ -243,7 +244,6 @@ static int wait_for_voltage_stable(int i2caddress)
 	return vdd_current;
 }
 
-#ifdef CONFIG_VOL_MONITOR_IR36021_SET
 /* Set the voltage to the IR chip */
 static int set_voltage_to_IR(int i2caddress, int vdd)
 {
@@ -298,7 +298,12 @@ int adjust_vdd(ulong vdd_override)
 	int re_enable = disable_interrupts();
 	struct ccsr_gur *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
 	u32 fusesr;
+#if defined(CONFIG_VOL_MONITOR_IR36021_SET) || \
+	defined(CONFIG_VOL_MONITOR_IR36021_READ)
 	u8 vid, buf;
+#else
+	u8 vid;
+#endif
 	int vdd_target, vdd_current, vdd_last;
 	int ret, i2caddress;
 	unsigned long vdd_string_override;
@@ -369,6 +374,8 @@ int adjust_vdd(ulong vdd_override)
 		ret = -1;
 		goto exit;
 	}
+#if defined(CONFIG_VOL_MONITOR_IR36021_SET) || \
+	defined(CONFIG_VOL_MONITOR_IR36021_READ)
 	ret = find_ir_chip_on_i2c();
 	if (ret < 0) {
 		printf("VID: Could not find voltage regulator on I2C.\n");
@@ -393,6 +400,7 @@ int adjust_vdd(ulong vdd_override)
 		ret = -1;
 		goto exit;
 	}
+#endif
 
 	/* get the voltage ID from fuse status register */
 	fusesr = in_le32(&gur->dcfg_fusesr);
