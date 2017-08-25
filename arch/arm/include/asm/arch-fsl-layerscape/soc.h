@@ -121,6 +121,7 @@ int setup_chip_volt(void);
 /* Setup core vdd in unit mV */
 int board_setup_core_volt(u32 vdd);
 #endif
+void ddr_enable_0v9_volt(bool en);
 
 void cpu_name(char *name);
 #ifdef CONFIG_SYS_FSL_ERRATUM_A009635

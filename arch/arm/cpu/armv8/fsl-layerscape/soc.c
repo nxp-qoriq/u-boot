@@ -545,23 +545,6 @@ static int setup_core_volt(u32 vdd)
 	return board_setup_core_volt(vdd);
 }
 
-#ifdef CONFIG_SYS_FSL_DDR
-static void ddr_enable_0v9_volt(bool en)
-{
-	struct ccsr_ddr __iomem *ddr = (void *)CONFIG_SYS_FSL_DDR_ADDR;
-	u32 tmp;
-
-	tmp = ddr_in32(&ddr->ddr_cdr1);
-
-	if (en)
-		tmp |= DDR_CDR1_V0PT9_EN;
-	else
-		tmp &= ~DDR_CDR1_V0PT9_EN;
-
-	ddr_out32(&ddr->ddr_cdr1, tmp);
-}
-#endif
-
 int setup_chip_volt(void)
 {
 	int vdd;
@@ -627,6 +610,23 @@ void fsl_lsch2_early_init_f(void)
 	erratum_a009798();
 	erratum_a008997();
 	erratum_a009007();
+}
+#endif
+
+#ifdef CONFIG_SYS_FSL_DDR
+void ddr_enable_0v9_volt(bool en)
+{
+	struct ccsr_ddr __iomem *ddr = (void *)CONFIG_SYS_FSL_DDR_ADDR;
+	u32 tmp;
+
+	tmp = ddr_in32(&ddr->ddr_cdr1);
+
+	if (en)
+		tmp |= DDR_CDR1_V0PT9_EN;
+	else
+		tmp &= ~DDR_CDR1_V0PT9_EN;
+
+	ddr_out32(&ddr->ddr_cdr1, tmp);
 }
 #endif
 
