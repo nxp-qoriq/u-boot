@@ -296,15 +296,28 @@ int adjust_vdd(ulong vdd_override)
 	unsigned long vdd_string_override;
 	char *vdd_string;
 	static const uint16_t vdd[32] = {
+#ifdef CONFIG_ARCH_LS1088A
+		10250,
+		9875,
+#else
 		10500,
 		0,      /* reserved */
+#endif
 		9750,
 		0,      /* reserved */
+#ifdef CONFIG_ARCH_LS1088A
+		0,      /* reserved */
+#else
 		9500,
+#endif
 		0,      /* reserved */
 		0,      /* reserved */
 		0,      /* reserved */
+#ifdef CONFIG_ARCH_LS1088A
+		9000,
+#else
 		0,      /* reserved */
+#endif
 		0,      /* reserved */
 		0,      /* reserved */
 		0,      /* reserved */
@@ -313,10 +326,18 @@ int adjust_vdd(ulong vdd_override)
 		0,      /* reserved */
 		0,      /* reserved */
 		10000,  /* 1.0000V */
+#ifdef CONFIG_ARCH_LS1088A
+		10125,
+#else
 		0,      /* reserved */
+#endif
 		10250,
 		0,      /* reserved */
+#ifdef CONFIG_ARCH_LS1088A
+		0,      /* reserved */
+#else
 		10500,
+#endif
 		0,      /* reserved */
 		0,      /* reserved */
 		0,      /* reserved */
