@@ -32,7 +32,9 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#ifndef CONFIG_SYS_DCACHE_OFF
 struct mm_region *mem_map = early_map;
+#endif
 
 void cpu_name(char *name)
 {
@@ -824,6 +826,7 @@ void efi_add_known_memory(void)
 }
 #endif
 
+#ifndef CONFIG_SYS_DCACHE_OFF
 /*
  * Before DDR size is known, early MMU table have DDR mapped as device memory
  * to avoid speculative access. To relocate U-Boot to DDR, "normal memory"
@@ -888,13 +891,16 @@ void update_early_mmu_table(void)
 		}
 	}
 }
+#endif
 
 __weak int dram_init(void)
 {
 	fsl_initdram();
+#ifndef CONFIG_SYS_DCACHE_OFF
 #if !defined(CONFIG_SPL) || defined(CONFIG_SPL_BUILD)
 	/* This will break-before-make MMU for DDR */
 	update_early_mmu_table();
+#endif
 #endif
 
 	return 0;
