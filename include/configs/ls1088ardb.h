@@ -278,6 +278,26 @@
 
 #ifndef SPL_NO_ENV
 /* Initial environment variables */
+#ifdef CONFIG_SECURE_BOOT
+#undef CONFIG_EXTRA_ENV_SETTINGS
+#define CONFIG_EXTRA_ENV_SETTINGS		\
+	"hwconfig=fsl_ddr:bank_intlv=auto\0"	\
+	"loadaddr=0x90100000\0"			\
+	"kernel_addr=0x100000\0"		\
+	"ramdisk_addr=0x800000\0"		\
+	"ramdisk_size=0x2000000\0"		\
+	"fdt_high=0xa0000000\0"			\
+	"initrd_high=0xffffffffffffffff\0"	\
+	"kernel_start=0x1000000\0"		\
+	"kernel_load=0xa0000000\0"		\
+	"kernel_size=0x2800000\0"		\
+	"mcinitcmd=sf probe 0:0;sf read 0xa0a00000 0xa00000 0x100000;"	\
+	"sf read 0xa0700000 0x700000 0x4000; esbc_validate 0xa0700000;"	\
+	"sf read 0xa0e00000 0xe00000 0x100000;"	\
+	"sf read 0xa0740000 0x740000 0x4000; esbc_validate 0xa0740000;"	\
+	"fsl_mc start mc 0xa0a00000 0xa0e00000\0"	\
+	"mcmemsize=0x70000000 \0"
+#else /* if !(CONFIG_SECURE_BOOT) */
 #if defined(CONFIG_QSPI_BOOT)
 #define MC_INIT_CMD				\
 	"mcinitcmd=sf probe 0:0;sf read 0x80000000 0xA00000 0x100000;"	\
@@ -378,7 +398,7 @@
 			"run distro_bootcmd;run sd_bootcmd"
 #endif
 #endif
-
+#endif /* CONFIG_SECURE_BOOT */
 /* MAC/PHY configuration */
 #ifdef CONFIG_FSL_MC_ENET
 #define CONFIG_PHYLIB_10G
