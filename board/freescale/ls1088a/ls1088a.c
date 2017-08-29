@@ -24,6 +24,13 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+int board_early_init_f(void)
+{
+	fsl_lsch3_early_init_f();
+	return 0;
+}
+
+#if !defined(CONFIG_SPL_BUILD)
 unsigned long long get_qixis_addr(void)
 {
 	unsigned long long addr;
@@ -321,12 +328,6 @@ int board_init(void)
 	return 0;
 }
 
-int board_early_init_f(void)
-{
-	fsl_lsch3_early_init_f();
-	return 0;
-}
-
 void detail_board_ddr_info(void)
 {
 	puts("\nDDR    ");
@@ -404,3 +405,4 @@ int ft_board_setup(void *blob, bd_t *bd)
 	return 0;
 }
 #endif
+#endif /* defined(CONFIG_SPL_BUILD) */
