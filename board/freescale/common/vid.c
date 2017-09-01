@@ -176,10 +176,11 @@ static int read_voltage_from_IR(int i2caddress)
 static int read_voltage_from_LTC(int i2caddress)
 {
 	int  ret, vcode = 0;
+	u8 chan = PWM_CHANNEL0;
 
 	/* select the PAGE 0 using PMBus commands PAGE for VDD*/
 	ret = i2c_write(I2C_VOL_MONITOR_ADDR,
-			PMBUS_CMD_PAGE, 1, PWM_CHANNEL0, 1);
+			PMBUS_CMD_PAGE, 1, &chan, 1);
 	if (ret) {
 		printf("VID: failed to select VDD Page 0\n");
 		return ret;

@@ -316,10 +316,11 @@ int i2c_multiplexer_select_vid_channel(u8 channel)
 int get_serdes_volt(void)
 {
 	int  ret, vcode = 0;
+	u8 chan = PWM_CHANNEL0;
 
 	/* Select the PAGE 0 using PMBus commands PAGE for VDD */
 	ret = i2c_write(I2C_SVDD_MONITOR_ADDR,
-			PMBUS_CMD_PAGE, 1, PWM_CHANNEL0, 1);
+			PMBUS_CMD_PAGE, 1, &chan, 1);
 	if (ret) {
 		printf("VID: failed to select VDD Page 0\n");
 		return ret;
