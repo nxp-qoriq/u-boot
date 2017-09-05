@@ -91,6 +91,14 @@
 #define CONFIG_HWCONFIG
 #define HWCONFIG_BUFFER_SIZE		128
 
+#include <config_distro_defaults.h>
+#ifndef CONFIG_SPL_BUILD
+#define BOOT_TARGET_DEVICES(func) \
+	func(MMC, mmc, 0) \
+	func(USB, usb, 0)
+#include <config_distro_bootcmd.h>
+#endif
+
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	"verify=no\0"				\
@@ -104,6 +112,7 @@
 
 #define CONFIG_BOOTARGS		"console=ttyS0,115200 root=/dev/ram0 " \
 				"earlycon=uart8250,mmio,0x21c0500 quiet lpj=250000"
+#undef CONFIG_BOOTCOMMAND
 #define CONFIG_BOOTCOMMAND		"sf probe 0:0; sf read $kernel_load "\
 					"$kernel_start $kernel_size && "\
 					"bootm $kernel_load"
@@ -114,7 +123,6 @@
 					sizeof(CONFIG_SYS_PROMPT) + 16)
 #define CONFIG_SYS_BARGSIZE		CONFIG_SYS_CBSIZE /* Boot args buffer */
 #define CONFIG_SYS_LONGHELP
-#define CONFIG_CMDLINE_EDITING		1
 #define CONFIG_AUTO_COMPLETE
 #define CONFIG_SYS_MAXARGS		64	/* max command args */
 
