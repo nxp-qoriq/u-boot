@@ -134,6 +134,9 @@ config SYS_FSL_DDR1
 
 endchoice
 
+config SYS_FSL_DDR_PHY
+	bool "Freescale DDR PHY"
+	default y
 endmenu
 
 config SYS_FSL_ERRATUM_A008378

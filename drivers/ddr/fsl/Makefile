@@ -12,6 +12,7 @@ obj-$(CONFIG_SYS_FSL_DDR3) += main.o util.o ctrl_regs.o options.o \
 				lc_common_dimm_params.o
 obj-$(CONFIG_SYS_FSL_DDR4) += main.o util.o ctrl_regs.o options.o \
 				lc_common_dimm_params.o
+obj-$(CONFIG_SYS_FSL_DDR_PHY) += fsl_phy.o
 
 ifdef CONFIG_DDR_SPD
 SPD := y

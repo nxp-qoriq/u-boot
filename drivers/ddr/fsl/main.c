@@ -579,6 +579,14 @@ fsl_ddr_compute(fsl_ddr_info_t *pinfo, unsigned int start_step,
 				 pinfo->dimm_params[i],
 				 dbw_capacity_adjust[i],
 				 size_only);
+
+			/* Find the first non empty DIMM slot */
+			for (j = 0; j < CONFIG_DIMM_SLOTS_PER_CTLR; j++)
+				if((pinfo->dimm_params[i][j]).capacity)
+					break;
+
+			compute_phy_config_regs(i, &pinfo->memctl_opts[i],
+					&ddr_reg[i]);
 		}
 
 	default:
