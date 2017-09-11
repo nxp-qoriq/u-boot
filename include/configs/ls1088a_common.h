@@ -88,7 +88,7 @@
 #define CONFIG_BAUDRATE			115200
 #define CONFIG_SYS_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200 }
 
-#ifndef SPL_NO_IFC
+#if !defined(SPL_NO_IFC) || defined(CONFIG_TARGET_LS1088AQDS)
 /* IFC */
 #define CONFIG_FSL_IFC
 #endif

@@ -34,7 +34,7 @@ int board_early_init_f(void)
 	return 0;
 }
 
-#if !defined(CONFIG_SPL_BUILD)
+#ifdef CONFIG_FSL_QIXIS
 unsigned long long get_qixis_addr(void)
 {
 	unsigned long long addr;
@@ -52,7 +52,9 @@ unsigned long long get_qixis_addr(void)
 
 	return addr;
 }
+#endif
 
+#if !defined(CONFIG_SPL_BUILD)
 int checkboard(void)
 {
 	char buf[64];
