@@ -370,6 +370,7 @@ unsigned long get_board_sys_clk(void);
 	"scriptaddr=0x80000000\0"		\
 	"scripthdraddr=0x80080000\0"		\
 	"fdtheader_addr_r=0x80100000\0"		\
+	"kernelheader_addr_r=0x80200000\0"	\
 	"kernelheader_addr=0x580800000\0"	\
 	"kernel_addr_r=0x81000000\0"		\
 	"kernelheader_size=0x40000\0"		\
@@ -378,6 +379,8 @@ unsigned long get_board_sys_clk(void);
 	"kernel_size=0x2800000\0"		\
 	"kernel_addr_sd=0x8000\0"		\
 	"kernel_size_sd=0x14000\0"		\
+	"kernelhdr_addr_sd=0x4000\0"		\
+	"kernelhdr_size_sd=0x10\0"		\
 	"console=ttyAMA0,38400n8\0"		\
 	"mcmemsize=0x70000000\0"		\
 	BOOTENV					\
@@ -419,13 +422,16 @@ unsigned long get_board_sys_clk(void);
 		" bootm $load_addr#$board\0"			\
 	"nor_bootcmd=echo Trying load from nor..;"		\
 		"cp.b $kernel_addr $load_addr "			\
-		"$kernel_size && bootm $load_addr#$board\0"	\
+		"$kernel_size ; env exists secureboot && "	\
+		"cp.b $kernelheader_addr $kernelheader_addr_r "	\
+		"$kernelheader_size && esbc_validate ${kernelheader_addr_r}; "	\
+		"bootm $load_addr#$board\0"			\
 	"sd_bootcmd=echo Trying load from SD ..;"		\
 		"mmcinfo; mmc read $load_addr "			\
 		"$kernel_addr_sd $kernel_size_sd ;"		\
-		"$kernel_size ; env exists secureboot && "		\
-		"cp.b $kernelheader_addr $kernelheader_addr_r "	\
-		"$kernelheader_size && esbc_validate ${kernelheader_addr_r}; "	\
+		"env exists secureboot && mmc read $kernelheader_addr_r "		\
+		"$kernelhdr_addr_sd $kernelhdr_size_sd "		\
+		" && esbc_validate ${kernelheader_addr_r};"	\
 		"bootm $load_addr#$board\0"
 
 #undef CONFIG_BOOTCOMMAND
@@ -443,7 +449,7 @@ unsigned long get_board_sys_clk(void);
 			"env exists mcinitcmd && run mcinitcmd "	\
 			"&& mmcinfo && mmc read 0x88000000 0x6800 0x800 " \
 			"&& fsl_mc apply dpl 0x88000000;"		\
-			"run distro_bootcmd;run qspi_bootcmd;"		\
+			"run distro_bootcmd;run sd_bootcmd;"		\
 			"env exists secureboot && esbc_halt;"
 #else
 /* Try to boot an on-NOR kernel first, then do normal distro boot */
