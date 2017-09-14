@@ -1,5 +1,6 @@
 /*
- * Copyright 2014-2017 Freescale Semiconductor
+ * Copyright 2014-2015 Freescale Semiconductor, Inc.
+ * Copyright 2017 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -33,26 +34,31 @@ static void erratum_a009008(void)
 #ifdef CONFIG_SYS_FSL_ERRATUM_A009008
 #if defined(CONFIG_ARCH_LS1043A) || defined(CONFIG_ARCH_LS1046A) || \
 	defined(CONFIG_ARCH_LS1012A)
-u32 __iomem *scfg = (u32 __iomem *)SCFG_BASE;
-u32 val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB1 / 4);
-val &= ~(0xF << 6);
-scfg_out32(scfg + SCFG_USB3PRM1CR_USB1 / 4, val|(USB_TXVREFTUNE << 6));
+	u32 __iomem *scfg = (u32 __iomem *)SCFG_BASE;
+	u32 val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB1 / 4);
+
+	val &= ~(0xF << 6);
+	scfg_out32(scfg + SCFG_USB3PRM1CR_USB1 / 4,
+		   val | (USB_TXVREFTUNE << 6));
 #endif
 
 #if defined(CONFIG_ARCH_LS1043A) || defined(CONFIG_ARCH_LS1046A)
-val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB2 / 4);
-val &= ~(0xF << 6);
-scfg_out32(scfg + SCFG_USB3PRM1CR_USB2 / 4, val|(USB_TXVREFTUNE << 6));
-val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB3 / 4);
-val &= ~(0xF << 6);
-scfg_out32(scfg + SCFG_USB3PRM1CR_USB3 / 4, val|(USB_TXVREFTUNE << 6));
+	val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB2 / 4);
+	val &= ~(0xF << 6);
+	scfg_out32(scfg + SCFG_USB3PRM1CR_USB2 / 4,
+		   val | (USB_TXVREFTUNE << 6));
+	val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB3 / 4);
+	val &= ~(0xF << 6);
+	scfg_out32(scfg + SCFG_USB3PRM1CR_USB3 / 4,
+		   val | (USB_TXVREFTUNE << 6));
 #endif
 
 #if defined(CONFIG_ARCH_LS2080A)
-u32 __iomem *scfg = (u32 __iomem *)SCFG_BASE;
-u32 val = scfg_in32(scfg + SCFG_USB3PRM1CR / 4);
-val &= ~(0xF << 6);
-scfg_out32(scfg + SCFG_USB3PRM1CR / 4, val|(USB_TXVREFTUNE << 6));
+	u32 __iomem *scfg = (u32 __iomem *)SCFG_BASE;
+	u32 val = scfg_in32(scfg + SCFG_USB3PRM1CR / 4);
+
+	val &= ~(0xF << 6);
+	scfg_out32(scfg + SCFG_USB3PRM1CR / 4, val | (USB_TXVREFTUNE << 6));
 #endif
 #endif /* CONFIG_SYS_FSL_ERRATUM_A009008 */
 }
@@ -63,22 +69,24 @@ static void erratum_a009798(void)
 #ifdef CONFIG_SYS_FSL_ERRATUM_A009798
 #if defined(CONFIG_ARCH_LS1043A) || defined(CONFIG_ARCH_LS1046A) || \
 	defined(CONFIG_ARCH_LS1012A)
-u32 __iomem *scfg = (u32 __iomem *)SCFG_BASE;
-u32 val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB1 / 4);
-scfg_out32(scfg + SCFG_USB3PRM1CR_USB1 / 4 , val & USB_SQRXTUNE);
+	u32 __iomem *scfg = (u32 __iomem *)SCFG_BASE;
+	u32 val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB1 / 4);
+
+	scfg_out32(scfg + SCFG_USB3PRM1CR_USB1 / 4, val & USB_SQRXTUNE);
 #endif
 
 #if defined(CONFIG_ARCH_LS1043A) || defined(CONFIG_ARCH_LS1046A)
-val = gur_in32(scfg + SCFG_USB3PRM1CR_USB2 / 4);
-scfg_out32(scfg + SCFG_USB3PRM1CR_USB2 / 4 , val & USB_SQRXTUNE);
-val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB3 / 4);
-scfg_out32(scfg + SCFG_USB3PRM1CR_USB3 / 4 , val & USB_SQRXTUNE);
+	val = gur_in32(scfg + SCFG_USB3PRM1CR_USB2 / 4);
+	scfg_out32(scfg + SCFG_USB3PRM1CR_USB2 / 4, val & USB_SQRXTUNE);
+	val = scfg_in32(scfg + SCFG_USB3PRM1CR_USB3 / 4);
+	scfg_out32(scfg + SCFG_USB3PRM1CR_USB3 / 4, val & USB_SQRXTUNE);
 #endif
 
 #if defined(CONFIG_ARCH_LS2080A)
-u32 __iomem *scfg = (u32 __iomem *)SCFG_BASE;
-u32 val = scfg_in32(scfg + SCFG_USB3PRM1CR / 4);
-scfg_out32(scfg + SCFG_USB3PRM1CR / 4, val & USB_SQRXTUNE);
+	u32 __iomem *scfg = (u32 __iomem *)SCFG_BASE;
+	u32 val = scfg_in32(scfg + SCFG_USB3PRM1CR / 4);
+
+	scfg_out32(scfg + SCFG_USB3PRM1CR / 4, val & USB_SQRXTUNE);
 #endif
 #endif /* CONFIG_SYS_FSL_ERRATUM_A009798 */
 }
