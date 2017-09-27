@@ -443,7 +443,8 @@ unsigned long get_board_sys_clk(void);
 			"&& esbc_validate 0x20780000; "			\
 			"fsl_mc start mc 0x20a00000 0x20e00000 &&"	\
 			" fsl_mc lazyapply dpl 0x20d00000;"		\
-			"run distro_bootcmd;run qspi_bootcmd"
+			"run distro_bootcmd;run qspi_bootcmd;"		\
+			"env exists secureboot && esbc_halt;"
 #elif defined(CONFIG_SD_BOOT)
 #define CONFIG_BOOTCOMMAND						\
 			"env exists mcinitcmd && run mcinitcmd "	\
@@ -459,7 +460,7 @@ unsigned long get_board_sys_clk(void);
 			"&& esbc_validate 0x580780000; "		\
 			"fsl_mc start mc 0x580a00000 0x580e00000 &&"	\
 			" fsl_mc lazyapply dpl 0x580d00000;"		\
-			"run distro_bootcmd;run nor_bootcmd"		\
+			"run distro_bootcmd;run nor_bootcmd;"		\
 			"env exists secureboot && esbc_halt;"
 #endif
 
