@@ -1,0 +1,8 @@
+config UTIL_PE_DISABLED
+	bool
+	help
+	  Disable UTIL processor engine of PFE
+
+config SYS_FSL_PPFE_ADDR
+	hex "PFE base address"
+	default 0x04000000
