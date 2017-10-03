@@ -21,6 +21,9 @@
 #include <efi_loader.h>
 #include <fm_eth.h>
 #include <fsl-mc/fsl_mc.h>
+#ifdef CONFIG_FSL_PFE
+#include <pfe_eth/pfe_eth.h>
+#endif
 #ifdef CONFIG_FSL_ESDHC
 #include <fsl_esdhc.h>
 #endif
@@ -475,6 +478,11 @@ int cpu_mmc_init(bd_t *bis)
 int cpu_eth_init(bd_t *bis)
 {
 	int error = 0;
+
+#if defined(CONFIG_FSL_PFE)
+	gemac_initialize(bis, 0 , "pfe_eth0");
+	gemac_initialize(bis, 1 , "pfe_eth1");
+#endif
 
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)
 	error = fsl_mc_ldpaa_init(bis);
