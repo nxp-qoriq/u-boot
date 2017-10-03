@@ -5,6 +5,7 @@
 
 # Layerscape PFE driver
 obj-y += pfe.o		\
+	 pfe_cmd.o	\
 	 pfe_driver.o	\
 	 pfe_eth.o	\
 	 pfe_firmware.o
