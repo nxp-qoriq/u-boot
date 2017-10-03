@@ -42,6 +42,11 @@
 #define __SW_REV_A		0xF8
 #define __SW_REV_B		0xF0
 
+#define I2C_MUX_IO2_ADDR		0x25
+#define __PHY_MASK			0xF9
+#define __PHY_ETH2_MASK		0xFB
+#define __PHY_ETH1_MASK		0xFD
+
 /*  MMC  */
 #ifdef CONFIG_MMC
 #define CONFIG_FSL_ESDHC
