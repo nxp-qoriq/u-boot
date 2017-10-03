@@ -9,6 +9,20 @@
 
 #include "ls1012a_common.h"
 
+/* PFE Ethernet */
+#ifdef CONFIG_FSL_PFE
+#define EMAC1_PHY_ADDR          0x1e
+#define EMAC2_PHY_ADDR          0x1
+#define	SGMII_2500_PHY1_ADDR	0x1
+#define	SGMII_2500_PHY2_ADDR	0x2
+#define CONFIG_PHYLIB
+#define CONFIG_PHY_VITESSE
+#define CONFIG_PHY_REALTEK
+#define	CONFIG_PHY_AQUANTIA
+#define	CONFIG_PHYLIB_10G
+#define RGMII_RESET_WA
+#endif
+
 /* DDR */
 #define CONFIG_DIMM_SLOTS_PER_CTLR	1
 #define CONFIG_CHIP_SELECTS_PER_CTRL	1

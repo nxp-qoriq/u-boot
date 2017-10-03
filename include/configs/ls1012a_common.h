@@ -113,9 +113,9 @@
 #define CONFIG_BOOTARGS		"console=ttyS0,115200 root=/dev/ram0 " \
 				"earlycon=uart8250,mmio,0x21c0500 quiet lpj=250000"
 #undef CONFIG_BOOTCOMMAND
-#define CONFIG_BOOTCOMMAND		"sf probe 0:0; sf read $kernel_load "\
-					"$kernel_start $kernel_size && "\
-					"bootm $kernel_load"
+#define CONFIG_BOOTCOMMAND	"pfe stop; sf probe 0:0; sf read $kernel_load "\
+				"$kernel_start $kernel_size && "\
+				"bootm $kernel_load"
 
 /* Monitor Command Prompt */
 #define CONFIG_SYS_CBSIZE		512	/* Console I/O Buffer Size */

@@ -1,8 +1,29 @@
+menuconfig FSL_PFE
+	bool "Freescale PFE driver"
+	help
+	  This driver provides support for Freescale PFE.
+
+if FSL_PFE
+
 config UTIL_PE_DISABLED
 	bool
 	help
 	  Disable UTIL processor engine of PFE
 
-config SYS_FSL_PPFE_ADDR
+config SYS_FSL_PFE_ADDR
 	hex "PFE base address"
 	default 0x04000000
+
+config SYS_LS_PFE_FW_ADDR
+	hex "Flash address of PFE firmware"
+	default 0x40a00000
+
+config DDR_PFE_PHYS_BASEADDR
+	hex "PFE DDR physical base address"
+	default 0x03800000
+
+config DDR_PFE_BASEADDR
+	hex "PFE DDR base address"
+	default 0x83800000
+
+endif

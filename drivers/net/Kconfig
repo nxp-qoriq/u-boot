@@ -304,4 +304,5 @@ config FEC2_PHY_NORXERR
 	  The PHY does not have a RXERR line (RMII only).
 	  (so program the FEC to ignore it).
 
+source "drivers/net/pfe_eth/Kconfig"
 endif # NETDEVICES
