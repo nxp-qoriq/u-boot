@@ -725,9 +725,9 @@ int mc_init(u64 mc_fw_addr, u64 mc_dpc_addr)
 	 * Initialize the global default MC portal
 	 * And check that the MC firmware is responding portal commands:
 	 */
-	root_mc_io = (struct fsl_mc_io *)malloc(sizeof(struct fsl_mc_io));
+	root_mc_io = (struct fsl_mc_io *)calloc(sizeof(struct fsl_mc_io), 1);
 	if (!root_mc_io) {
-		printf(" No memory: malloc() failed\n");
+		printf(" No memory: calloc() failed\n");
 		return -ENOMEM;
 	}
 
@@ -877,11 +877,12 @@ static int dpio_init(void)
 	struct dpio_cfg dpio_cfg;
 	int err = 0;
 
-	dflt_dpio = (struct fsl_dpio_obj *)malloc(sizeof(struct fsl_dpio_obj));
+	dflt_dpio = (struct fsl_dpio_obj *)calloc(
+					sizeof(struct fsl_dpio_obj), 1);
 	if (!dflt_dpio) {
-		printf("No memory: malloc() failed\n");
+		printf("No memory: calloc() failed\n");
 		err = -ENOMEM;
-		goto err_malloc;
+		goto err_calloc;
 	}
 
 	dpio_cfg.channel_mode = DPIO_LOCAL_CHANNEL;
@@ -946,7 +947,7 @@ err_get_attr:
 	dpio_destroy(dflt_mc_io, MC_CMD_NO_FLAGS, dflt_dpio->dpio_handle);
 err_create:
 	free(dflt_dpio);
-err_malloc:
+err_calloc:
 	return err;
 }
 
@@ -1028,11 +1029,11 @@ static int dprc_init(void)
 		goto err_create;
 	}
 
-	dflt_mc_io = (struct fsl_mc_io *)malloc(sizeof(struct fsl_mc_io));
+	dflt_mc_io = (struct fsl_mc_io *)calloc(sizeof(struct fsl_mc_io), 1);
 	if (!dflt_mc_io) {
 		err  = -ENOMEM;
-		printf(" No memory: malloc() failed\n");
-		goto err_malloc;
+		printf(" No memory: calloc() failed\n");
+		goto err_calloc;
 	}
 
 	child_portal_id = MC_PORTAL_OFFSET_TO_PORTAL_ID(mc_portal_offset);
@@ -1057,7 +1058,7 @@ static int dprc_init(void)
 	return 0;
 err_child_open:
 	free(dflt_mc_io);
-err_malloc:
+err_calloc:
 	dprc_destroy_container(root_mc_io, MC_CMD_NO_FLAGS,
 			       root_dprc_handle, child_dprc_id);
 err_create:
@@ -1108,11 +1109,12 @@ static int dpbp_init(void)
 	struct dpbp_attr dpbp_attr;
 	struct dpbp_cfg dpbp_cfg;
 
-	dflt_dpbp = (struct fsl_dpbp_obj *)malloc(sizeof(struct fsl_dpbp_obj));
+	dflt_dpbp = (struct fsl_dpbp_obj *)calloc(
+					sizeof(struct fsl_dpbp_obj), 1);
 	if (!dflt_dpbp) {
-		printf("No memory: malloc() failed\n");
+		printf("No memory: calloc() failed\n");
 		err = -ENOMEM;
-		goto err_malloc;
+		goto err_calloc;
 	}
 
 	dpbp_cfg.options = 512;
@@ -1162,7 +1164,7 @@ err_get_attr:
 	dpbp_close(dflt_mc_io, MC_CMD_NO_FLAGS, dflt_dpbp->dpbp_handle);
 	dpbp_destroy(dflt_mc_io, MC_CMD_NO_FLAGS, dflt_dpbp->dpbp_handle);
 err_create:
-err_malloc:
+err_calloc:
 	return err;
 }
 
@@ -1204,11 +1206,12 @@ static int dpni_init(void)
 	struct dpni_extended_cfg dpni_extended_cfg;
 	struct dpni_cfg dpni_cfg;
 
-	dflt_dpni = (struct fsl_dpni_obj *)malloc(sizeof(struct fsl_dpni_obj));
+	dflt_dpni = (struct fsl_dpni_obj *)calloc(
+					sizeof(struct fsl_dpni_obj), 1);
 	if (!dflt_dpni) {
-		printf("No memory: malloc() failed\n");
+		printf("No memory: calloc() failed\n");
 		err = -ENOMEM;
-		goto err_malloc;
+		goto err_calloc;
 	}
 
 	memset(&dpni_extended_cfg, 0, sizeof(dpni_extended_cfg));
@@ -1270,7 +1273,7 @@ err_get_attr:
 err_create:
 err_prepare_extended_cfg:
 	free(dflt_dpni);
-err_malloc:
+err_calloc:
 	return err;
 }
 
