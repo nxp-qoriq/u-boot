@@ -62,7 +62,7 @@ int board_eth_init(bd_t *bis)
 	/* MAC2 */
 	ls1012a_set_mdio(1, miiphy_get_dev_by_name(DEFAULT_PFE_MDIO_NAME));
 	ls1012a_set_phy_address_mode(1, EMAC2_PHY_ADDR,
-				     PHY_INTERFACE_MODE_RGMII);
+				     PHY_INTERFACE_MODE_RGMII_TXID);
 
 	cpu_eth_init(bis);
 #endif
