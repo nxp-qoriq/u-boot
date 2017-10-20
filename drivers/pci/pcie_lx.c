@@ -232,7 +232,7 @@ void *lx_pcie_conf_address(struct lx_pcie *pcie, pci_dev_t bdf,
 		return pcie->ccsr + OFFSET_TO_PAGE_ADDR(offset);
 	}
 
-	target = PAB_TARGET_BUS(PCI_BUS(bdf)) |
+	target = PAB_TARGET_BUS(PCI_BUS(bdf) - bus->seq) |
 		 PAB_TARGET_DEV(PCI_DEV(bdf)) |
 		 PAB_TARGET_FUNC(PCI_FUNC(bdf));
 
