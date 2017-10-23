@@ -338,8 +338,6 @@ unsigned long get_board_sys_clk(void);
 
 #define CONFIG_MISC_INIT_R
 
-#define CONFIG_USB_XHCI_FSL
-
 #undef CONFIG_CMDLINE_EDITING
 #include <config_distro_defaults.h>
 

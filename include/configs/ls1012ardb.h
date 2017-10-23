@@ -27,8 +27,6 @@
 #define CONFIG_SYS_MEMTEST_START	0x80000000
 #define CONFIG_SYS_MEMTEST_END		0x9fffffff
 
-#define CONFIG_USB_XHCI_FSL
-
 /*
  * I2C IO expander
  */

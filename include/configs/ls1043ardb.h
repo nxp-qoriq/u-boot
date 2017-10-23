@@ -285,8 +285,6 @@
 #endif
 #endif
 
-#define CONFIG_USB_XHCI_FSL
-
 /* SATA */
 #ifndef SPL_NO_SATA
 #define CONFIG_LIBATA

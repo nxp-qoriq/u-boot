@@ -121,8 +121,6 @@
 #define CONFIG_SF_DEFAULT_BUS        1
 #define CONFIG_SF_DEFAULT_CS         0
 
-#define CONFIG_USB_XHCI_FSL
-
 /*  MMC  */
 #ifdef CONFIG_MMC
 #define CONFIG_FSL_ESDHC

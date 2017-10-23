@@ -373,8 +373,6 @@ unsigned long get_board_ddr_clk(void);
 #endif
 #endif
 
-#define CONFIG_USB_XHCI_FSL
-
 /*
  * Miscellaneous configurable options
  */

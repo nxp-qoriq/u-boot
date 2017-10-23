@@ -79,8 +79,6 @@
 #define CONFIG_BOOTCOMMAND "run distro_bootcmd;run qspi_bootcmd"
 #endif
 
-#define CONFIG_USB_XHCI_FSL
-
 #define CONFIG_CMD_MEMINFO
 #define CONFIG_CMD_MEMTEST
 #define CONFIG_SYS_MEMTEST_START	0x80000000

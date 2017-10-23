@@ -138,7 +138,6 @@ unsigned long get_board_ddr_clk(void);
 #endif
 
 #define CONFIG_USB_XHCI_HCD
-#define CONFIG_USB_XHCI_FSL
 #define CONFIG_USB_XHCI_DWC3
 #define CONFIG_USB_STORAGE
 
