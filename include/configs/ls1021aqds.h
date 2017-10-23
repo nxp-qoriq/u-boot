@@ -396,9 +396,7 @@ unsigned long get_board_ddr_clk(void);
 #endif
 #endif
 
-/*XHCI Support - enabled by default*/
 #define CONFIG_USB_XHCI_FSL
-#define CONFIG_USB_MAX_CONTROLLER_COUNT		1
 
 /*
  * Video

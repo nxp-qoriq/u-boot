@@ -79,11 +79,7 @@
 #define CONFIG_BOOTCOMMAND "run distro_bootcmd;run qspi_bootcmd"
 #endif
 
-/*
-* USB
-*/
 #define CONFIG_USB_XHCI_FSL
-#define CONFIG_USB_MAX_CONTROLLER_COUNT         1
 
 #define CONFIG_CMD_MEMINFO
 #define CONFIG_CMD_MEMTEST
