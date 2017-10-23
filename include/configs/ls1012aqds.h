@@ -122,12 +122,8 @@
 #define CONFIG_SF_DEFAULT_CS         0
 
 /*XHCI Support - enabled by default*/
-#define CONFIG_HAS_FSL_XHCI_USB
-
-#ifdef CONFIG_HAS_FSL_XHCI_USB
 #define CONFIG_USB_XHCI_FSL
 #define CONFIG_USB_MAX_CONTROLLER_COUNT         1
-#endif
 
 /*  MMC  */
 #ifdef CONFIG_MMC
