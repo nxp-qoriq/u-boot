@@ -462,7 +462,10 @@ static void initialize_dpmac_to_slot(void)
 
 void ls1088a_handle_phy_interface_sgmii(int dpmac_id)
 {
+#ifdef CONFIG_SGMII_PHYLIB
 	struct mii_dev *bus;
+#endif
+
 	struct ccsr_gur __iomem *gur = (void *)CONFIG_SYS_FSL_GUTS_ADDR;
 	u32 serdes1_prtcl, cfg;
 
@@ -508,8 +511,12 @@ void ls1088a_handle_phy_interface_sgmii(int dpmac_id)
 		return;
 	}
 	dpmac_info[dpmac_id].board_mux = EMI1_SLOT1;
+
+#ifdef CONFIG_SGMII_PHYLIB
 	bus = mii_dev_for_muxval(EMI1_SLOT1);
 	wriop_set_mdio(dpmac_id, bus);
+#endif
+
 }
 
 void ls1088a_handle_phy_interface_qsgmii(int dpmac_id)
