@@ -507,8 +507,3 @@ U_BOOT_DRIVER(pcie_lx) = {
 	.probe	= lx_pcie_probe,
 	.priv_auto_alloc_size = sizeof(struct lx_pcie),
 };
-
-/* No any fixup so far */
-void ft_pci_setup(void *blob, bd_t *bd)
-{
-}
