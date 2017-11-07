@@ -234,6 +234,8 @@
 	"kernelheader_size=0x40000\0"		\
 	"kernel_addr_sd=0x8000\0"		\
 	"kernel_size_sd=0x14000\0"		\
+	"kernelhdr_addr_sd=0x4000\0"		\
+	"kernelhdr_size_sd=0x10\0"		\
 	"console=ttyS0,115200\0"                \
 		MTDPARTS_DEFAULT "\0"		\
 	BOOTENV					\
@@ -276,6 +278,9 @@
 	"sd_bootcmd=echo Trying load from SD ..;"	\
 		"mmcinfo; mmc read $load_addr "		\
 		"$kernel_addr_sd $kernel_size_sd ;"	\
+		"env exists secureboot && mmc read $kernelheader_addr_r "		\
+		"$kernelhdr_addr_sd $kernelhdr_size_sd "		\
+		" && esbc_validate ${kernelheader_addr_r};"	\
 		" bootm $load_addr#$board\0"
 
 

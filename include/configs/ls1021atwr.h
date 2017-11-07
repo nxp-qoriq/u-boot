@@ -452,6 +452,8 @@
 	"kernel_size=0x2800000\0"	\
 	"kernel_addr_sd=0x8000\0"	\
 	"kernel_size_sd=0x14000\0"	\
+	"kernelhdr_addr_sd=0x4000\0"		\
+	"kernelhdr_size_sd=0x10\0"		\
 	BOOTENV				\
 	"boot_scripts=ls1021atwr_boot.scr\0"	\
 	"boot_script_hdr=hdr_ls1021atwr_bs.out\0"	\
@@ -498,6 +500,9 @@
 	"sd_bootcmd=echo Trying load from SD ..;"	\
 		"mmcinfo; mmc read $load_addr "		\
 		"$kernel_addr_sd $kernel_size_sd ;"	\
+		"env exists secureboot && mmc read $kernelheader_addr_r "		\
+		"$kernelhdr_addr_sd $kernelhdr_size_sd "		\
+		" && esbc_validate ${kernelheader_addr_r};"	\
 		" bootm $load_addr#$board\0"
 #endif
 
