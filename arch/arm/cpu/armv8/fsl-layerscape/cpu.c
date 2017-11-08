@@ -33,6 +33,7 @@
 #endif
 #include <asm/arch/clock.h>
 #include <hwconfig.h>
+#include <fsl_qbman.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
