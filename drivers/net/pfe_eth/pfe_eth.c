@@ -198,6 +198,7 @@ static int ls1012a_eth_recv(struct eth_device *dev)
 	/* Pass the packet up to the protocol layers. */
 	net_process_received_packet((void *)(long int)pkt_buf, len);
 
+	pfe_rx_done();
 	return 0;
 }
 

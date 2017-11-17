@@ -51,5 +51,6 @@ struct tx_desc_s {
 int pfe_send(int phy_port, void *data, int length);
 int pfe_recv(unsigned int *pkt_ptr, int *phy_port);
 int pfe_tx_done(void);
+void pfe_rx_done(void);
 
 #endif

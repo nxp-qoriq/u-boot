@@ -66,22 +66,47 @@ int pfe_recv(unsigned int *pkt_ptr, int *phy_port)
 	*phy_port = hif_header->port_no;
 	len -= sizeof(struct hif_header_s);
 
-	rx_desc->rx_to_read = (rx_desc->rx_to_read + 1)
-			       & (rx_desc->rx_ring_size - 1);
+	return len;
+}
 
-	/* reset bd control field */
+/*
+ * HIF to check the Rx done
+ *  This function will check the rx done indication of the current rx_to_read
+ * locations
+ *  if success, moves the rx_to_read to next location.
+ *
+ */
+void pfe_rx_done(void)
+{
+	struct rx_desc_s *rx_desc = g_rx_desc;
+	struct buf_desc *bd;
+
+	debug("%s:rx_base: %p, rx_to_read: %d\n", __func__, rx_desc->rx_base,
+	      rx_desc->rx_to_read);
+
+	bd = rx_desc->rx_base + rx_desc->rx_to_read;
+
+	/* reset the control field */
 	bd->ctrl = (MAX_FRAME_SIZE | BD_CTRL_LIFM | BD_CTRL_DESC_EN
 		    | BD_CTRL_DIR);
 	bd->status = 0;
 
+	debug("Rx Done : status: %08x, ctrl: %08x\n", bd->status, bd->ctrl);
+
 	/* Give START_STROBE to BDP to fetch the descriptor __NOW__,
 	 * BDP need not to wait for rx_poll_cycle time to fetch the descriptor,
 	 * In idle state (ie., no rx pkt), BDP will not fetch
-	 * the descriptor even if strobe is given(I think)
+	 * the descriptor even if strobe is given.
 	 */
 	writel((readl(HIF_RX_CTRL) | HIF_CTRL_BDP_CH_START_WSTB), HIF_RX_CTRL);
 
-	return len;
+	/* increment the rx_to_read index to next location */
+	rx_desc->rx_to_read = (rx_desc->rx_to_read + 1)
+			       & (rx_desc->rx_ring_size - 1);
+
+	debug("Rx next pkt location: %d\n", rx_desc->rx_to_read);
+
+	return 0;
 }
 
 /*
