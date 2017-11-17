@@ -475,17 +475,6 @@ static void pfe_bmu_init(struct pfe *pfe)
 	debug("bmu2 init: done\n");
 }
 
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-/*
- * PFE/Util initialization function.
- */
-static void pfe_util_init(struct pfe *pfe)
-{
-	util_init();
-	printf("util init complete\n");
-}
-#endif
-
 /*
  * PFE/GPI initialization function.
  *  - egpi1, egpi2, egpi3, hgpi
@@ -570,10 +559,6 @@ static int pfe_hw_init(struct pfe *pfe)
 	pfe_tmu_init(pfe);
 
 	pfe_bmu_init(pfe);
-
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-	pfe_util_init(pfe);
-#endif
 
 	pfe_gpi_init(pfe);
 

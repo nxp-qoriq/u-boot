@@ -222,9 +222,6 @@ void pfe_firmware_exit(void)
 
 	class_disable();
 	tmu_disable(0xf);
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-	util_disable();
-#endif
 	hif_tx_disable();
 	hif_rx_disable();
 }

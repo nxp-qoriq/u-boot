@@ -89,13 +89,6 @@ void pfe_lib_init(void *ddr_base, unsigned long ddr_phys_base)
 	pe[TMU3_ID].mem_access_wdata = (void *)TMU_MEM_ACCESS_WDATA;
 	pe[TMU3_ID].mem_access_addr = (void *)TMU_MEM_ACCESS_ADDR;
 	pe[TMU3_ID].mem_access_rdata = (void *)TMU_MEM_ACCESS_RDATA;
-
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-	pe[UTIL_ID].dmem_base_addr = (u32)UTIL_DMEM_BASE_ADDR;
-	pe[UTIL_ID].mem_access_wdata = (void *)UTIL_MEM_ACCESS_WDATA;
-	pe[UTIL_ID].mem_access_addr = (void *)UTIL_MEM_ACCESS_ADDR;
-	pe[UTIL_ID].mem_access_rdata = (void *)UTIL_MEM_ACCESS_RDATA;
-#endif
 }
 
 /*
@@ -387,60 +380,6 @@ void pe_lmem_write(u32 *src, u32 len, u32 offset)
 					0x03));
 }
 
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-/*
- * Writes UTIL program memory (DDR) from the host.
- *
- * @param[in] addr	Address to write (virtual, must be aligned on size)
- * @param[in] val	Value to write (in PE endianness, i.e BE)
- * @param[in] size	Number of bytes to write (2 or 4)
- */
-static void util_pmem_write(u32 val, void *addr, u8 size)
-{
-	void *addr64 = (void *)((unsigned long)addr & ~0x7);
-	unsigned long off = 8 - ((unsigned long)addr & 0x7) - size;
-
-	/* IMEM should  be loaded as a 64bit swapped value in a 64bit aligned
-	 * location
-	 */
-	if (size == 4)
-		writel(be32_to_cpu(val), addr64 + off);
-	else
-		writew(be16_to_cpu((u16)val), addr64 + off);
-}
-
-/*
- * Writes a buffer to UTIL program memory (DDR) from the host.
- *
- * @param[in] dst	Address to write (virtual, must be at least 16bit
- *					aligned)
- * @param[in] src	Buffer to write (in PE endianness, i.e BE, must have
- *				same alignment as dst)
- * @param[in] len	Number of bytes to write (must be at least 16bit
- *						aligned)
- */
-static void util_pmem_memcpy(void *dst, const void *src, unsigned int len)
-{
-	unsigned int len32;
-	int i;
-
-	if ((unsigned long)src & 0x2) {
-		util_pmem_write(*(u16 *)src, dst, 2);
-		src += 2;
-		dst += 2;
-		len -= 2;
-	}
-
-	len32 = len >> 2;
-
-	for (i = 0; i < len32; i++, dst += 4, src += 4)
-		util_pmem_write(*(u32 *)src, dst, 4);
-
-	if (len & 0x2)
-		util_pmem_write(*(u16 *)src, dst, len & 0x2);
-}
-#endif
-
 /*
  * Loads an elf section into pmem
  * Code needs to be at least 16bit aligned and only PROGBITS sections are
@@ -457,13 +396,6 @@ static int pe_load_pmem_section(int id, const void *data, Elf32_Shdr *shdr)
 	u32 addr = be32_to_cpu(shdr->sh_addr);
 	u32 size = be32_to_cpu(shdr->sh_size);
 	u32 type = be32_to_cpu(shdr->sh_type);
-
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-	if (id == UTIL_ID) {
-		printf("%s: unsupported pmem section for UTIL\n", __func__);
-		return -1;
-	}
-#endif
 
 	if (((unsigned long)(data + offset) & 0x3) != (addr & 0x3)) {
 		printf(
@@ -615,36 +547,6 @@ static int pe_load_ddr_section(int id, const void *data, Elf32_Shdr *shdr)
 				}
 			}
 
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-			else if (id == UTIL_ID) {
-				if (((unsigned long)(data + offset) & 0x3)
-					!= (addr & 0x3)) {
-					printf(
-						"%s: load address(%x) and elf file address(%lx) don't have the same alignment\n",
-							__func__, addr,
-						(unsigned long)data + offset);
-
-					return -1;
-				}
-
-				if (addr & 0x1) {
-					printf(
-						"%s: load address(%x) is not 16bit aligned\n"
-						, __func__, addr);
-					return -1;
-				}
-
-				if (size & 0x1) {
-					printf(
-						"%s: load length(%x) is not 16bit aligned\n"
-						, __func__, size);
-					return -1;
-				}
-
-				util_pmem_memcpy((void *)DDR_PFE_TO_VIRT(addr),
-						 data + offset, size);
-			}
-#endif
 			else {
 				printf(
 					"%s: unsupported ddr section type(%x) for PE(%d)\n"

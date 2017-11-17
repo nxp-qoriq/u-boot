@@ -292,14 +292,7 @@ static void pfe_pe_status(int argc, char * const argv[])
 		do_clear = 1;
 
 	for (id = CLASS0_ID; id < MAX_PE; id++) {
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-		if (id == UTIL_ID) {
-			printf("util:\n");
-			dmem_addr = PESTATUS_ADDR_UTIL;
-		} else if (id >= TMU0_ID) {
-#else
 		if (id >= TMU0_ID) {
-#endif
 			if (id == TMU2_ID)
 				continue;
 			if (id == TMU0_ID)
@@ -330,13 +323,7 @@ static void pfe_pe_status(int argc, char * const argv[])
 		if (do_clear)
 			pe_dmem_write(id, 0, dmem_addr, 4);
 		dmem_addr += 4;
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-		if (id == UTIL_ID) {
-			printf("state=%4s ctr=%08x rx=%x tx=%x\n",
-			       statebuf, cpu_to_be32(activity_counter),
-			       cpu_to_be32(rx), cpu_to_be32(tx));
-		} else
-#endif
+
 		if (id >= TMU0_ID) {
 			printf("%d: state=%4s ctr=%08x rx=%x qstatus=%x\n",
 			       id - TMU0_ID, statebuf,
@@ -350,6 +337,7 @@ static void pfe_pe_status(int argc, char * const argv[])
 			       cpu_to_be32(rx), cpu_to_be32(tx),
 			       cpu_to_be32(drop));
 		}
+
 #ifdef CONFIG_PFE_WARN_WA
 		debug_indicator = pe_dmem_read(id, dmem_addr, 4);
 		dmem_addr += 4;

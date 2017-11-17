@@ -12,7 +12,6 @@
 #include "cbus.h"
 
 #define PFE_LS1012A_RESET_WA
-#define CONFIG_UTIL_PE_DISABLED
 
 #define CLASS_DMEM_BASE_ADDR(i)	(0x00000000 | ((i) << 20))
 /* Only valid for mem access register interface */
@@ -93,9 +92,6 @@ enum {
 	TMU1_ID,
 	TMU2_ID,
 	TMU3_ID,
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-	UTIL_ID,
-#endif
 	MAX_PE
 };
 
@@ -106,10 +102,6 @@ enum {
 
 #define TMU_MASK	((1 << TMU0_ID) | (1 << TMU1_ID) | (1 << TMU3_ID))
 #define TMU_MAX_ID	TMU3_ID
-
-#if !defined(CONFIG_UTIL_PE_DISABLED)
-#define UTIL_MASK	(1 << UTIL_ID)
-#endif
 
 /*
  * PE information.
