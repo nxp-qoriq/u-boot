@@ -157,7 +157,7 @@ static int ls1012a_eth_send(struct eth_device *dev, void *data, int length)
 	rc = pfe_send(priv->gemac_port, data, length);
 
 	if (rc < 0) {
-		printf("Tx Q full\n");
+		printf("Tx Queue full\n");
 		return 0;
 	}
 
@@ -166,11 +166,11 @@ static int ls1012a_eth_send(struct eth_device *dev, void *data, int length)
 		if (rc == 0)
 			break;
 
-			udelay(100);
-			i++;
-			if (i == 30000)
-				printf("Tx timeout, send failed\n");
-			break;
+		udelay(100);
+		i++;
+		if (i == 30000)
+			printf("Tx timeout, send failed\n");
+		break;
 	}
 
 	return 0;

@@ -16,14 +16,14 @@ static struct rx_desc_s *g_rx_desc;
  * Reads the rx descriptor from the current location (rx_to_read).
  * - If the descriptor has a valid data/pkt, then get the data pointer
  * - check for the input rx phy number
- * - increments the rx data pointer by pkt_head_room_size
- * - decrements the data length by pkt_head_room_size
+ * - increment the rx data pointer by pkt_head_room_size
+ * - decrement the data length by pkt_head_room_size
  * - handover the packet to caller.
  *
- * @param[out]	pkt_ptr	Pointer to store rx packet pointer
- * @param[out] phy_port Pointer to store recv phy port
+ * @param[out] pkt_ptr - Pointer to store rx packet
+ * @param[out] phy_port - Pointer to store recv phy port
  *
- * @return	-1 if no packet, else returns length of packet.
+ * @return -1 if no packet, else return length of packet.
  */
 int pfe_recv(unsigned int *pkt_ptr, int *phy_port)
 {
@@ -70,11 +70,10 @@ int pfe_recv(unsigned int *pkt_ptr, int *phy_port)
 }
 
 /*
- * HIF to check the Rx done
- *  This function will check the rx done indication of the current rx_to_read
+ * HIF function to check the Rx done
+ * This function will check the rx done indication of the current rx_to_read
  * locations
- *  if success, moves the rx_to_read to next location.
- *
+ * if success, moves the rx_to_read to next location.
  */
 void pfe_rx_done(void)
 {
@@ -95,7 +94,7 @@ void pfe_rx_done(void)
 	      readl(&bd->ctrl));
 
 	/* Give START_STROBE to BDP to fetch the descriptor __NOW__,
-	 * BDP need not to wait for rx_poll_cycle time to fetch the descriptor,
+	 * BDP need not wait for rx_poll_cycle time to fetch the descriptor,
 	 * In idle state (ie., no rx pkt), BDP will not fetch
 	 * the descriptor even if strobe is given.
 	 */
@@ -107,16 +106,14 @@ void pfe_rx_done(void)
 
 	debug("Rx next pkt location: %d\n", rx_desc->rx_to_read);
 
-	return 0;
 }
 
 /*
  * HIF Tx interface function
  * This function sends a single packet to PFE from HIF interface.
  * - No interrupt indication on tx completion.
- * - After tx descriptor is updated and TX DMA is enabled.
- * - To support both chipit and read c2k environment, data is copied to
- *   tx buffers. After verification this copied can be avoided.
+ * - Data is copied to tx buffers before tx descriptor is updated
+ *   and TX DMA is enabled.
  *
  * @param[in] phy_port	Phy port number to send out this packet
  * @param[in] data	Pointer to the data
@@ -186,13 +183,13 @@ int pfe_send(int phy_port, void *data, int length)
 }
 
 /*
- * HIF to check the Tx done
- *  This function will chceck the tx done indication of the current tx_to_send
- * locations
+ * HIF function to check the Tx done
+ *  This function will check the tx done indication of the current tx_to_send
+ *  locations
  *  if success, moves the tx_to_send to next location.
  *
  * @return -1 if TX ownership bit is not cleared by hw.
- * else on success (tx done copletion) returns zero.
+ * else on success (tx done completion) return zero.
  */
 int pfe_tx_done(void)
 {
