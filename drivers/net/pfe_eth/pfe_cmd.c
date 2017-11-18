@@ -283,11 +283,7 @@ static void pfe_pe_status(int argc, char * const argv[])
 	u32 drop;
 	char statebuf[5];
 	u32 class_debug_reg = 0;
-#ifdef CONFIG_PFE_WARN_WA
-	u32 debug_indicator;
-	u32 debug[16];
-	int j;
-#endif
+
 	if (argc == 4 && strcmp(argv[3], "clear") == 0)
 		do_clear = 1;
 
@@ -337,28 +333,6 @@ static void pfe_pe_status(int argc, char * const argv[])
 			       cpu_to_be32(rx), cpu_to_be32(tx),
 			       cpu_to_be32(drop));
 		}
-
-#ifdef CONFIG_PFE_WARN_WA
-		debug_indicator = pe_dmem_read(id, dmem_addr, 4);
-		dmem_addr += 4;
-		if (debug_indicator == cpu_to_be32('DBUG')) {
-			int last = 0;
-			for (j = 0; j < 16; j++) {
-				debug[j] = pe_dmem_read(id, dmem_addr, 4);
-				if (debug[j]) {
-					last = j + 1;
-					if (do_clear)
-						pe_dmem_write(id, 0,
-							      dmem_addr, 4);
-				}
-				dmem_addr += 4;
-			}
-			for (j = 0; j < last; j++)
-				printf("%08x%s", cpu_to_be32(debug[j]),
-				       (j & 0x7) == 0x7 || j
-				       == last - 1 ? "\n" : " ")
-		}
-#endif
 	}
 }
 
