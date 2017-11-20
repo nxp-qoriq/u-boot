@@ -194,10 +194,10 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_SYS_NOR_FTIM1		(FTIM1_NOR_TACO(0x35) | \
 					FTIM1_NOR_TRAD_NOR(0x1a) | \
 					FTIM1_NOR_TSEQRAD_NOR(0x13))
-#define CONFIG_SYS_NOR_FTIM2		(FTIM2_NOR_TCS(0x4) | \
-					FTIM2_NOR_TCH(0x4) | \
+#define CONFIG_SYS_NOR_FTIM2		(FTIM2_NOR_TCS(0x8) | \
+					FTIM2_NOR_TCH(0x8) | \
 					FTIM2_NOR_TWPH(0xe) | \
-					FTIM2_NOR_TWP(0x1c))
+					FTIM2_NOR_TWP(0x38))
 #define CONFIG_SYS_NOR_FTIM3		0
 
 #define CONFIG_SYS_MAX_FLASH_BANKS	2	/* number of banks */
