@@ -270,4 +270,7 @@ int fdt_setup_simplefb_node(void *fdt, int node, u64 base_address, u32 width,
 int fdtdec_get_int(const void *blob, int node, const char *prop_name,
 		int default_val);
 #endif
+#ifdef CONFIG_FMAN_ENET
+int fdt_update_ethernet_dt(void *blob);
+#endif
 #endif /* ifndef __FDT_SUPPORT_H */
