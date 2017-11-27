@@ -13,6 +13,8 @@
 #define CONFIG_DISPLAY_BOARDINFO_LATE
 #endif
 
+#define CONFIG_MISC_INIT_R
+
 #if defined(CONFIG_QSPI_BOOT)
 #define CONFIG_ENV_IS_IN_SPI_FLASH
 #define CONFIG_ENV_SIZE			0x2000          /* 8KB */
