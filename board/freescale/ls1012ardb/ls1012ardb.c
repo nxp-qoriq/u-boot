@@ -28,6 +28,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int checkboard(void)
 {
+#ifdef CONFIG_TARGET_LS1012ARDB
 	u8 in1;
 
 	puts("Board: LS1012ARDB ");
@@ -57,6 +58,9 @@ int checkboard(void)
 		puts(": bank2\n");
 	else
 		puts("unknown\n");
+#else
+	puts("Board: LS1012A2G5RDB ");
+#endif
 
 	return 0;
 }
@@ -148,10 +152,12 @@ int esdhc_status_fixup(void *blob, const char *compat)
 	 *	10 - eMMC Memory
 	 *	11 - SPI
 	 */
+#ifdef CONFIG_TARGET_LS1012ARDB
 	if (i2c_read(I2C_MUX_IO1_ADDR, 0, 1, &io, 1) < 0) {
 		printf("Error reading i2c boot information!\n");
 		return 0; /* Don't want to hang() on this error */
 	}
+#endif
 
 	mux_sdhc2 = (io & 0x0c) >> 2;
 	/* Enable SDHC2 only when use SDIO wifi and eMMC */
