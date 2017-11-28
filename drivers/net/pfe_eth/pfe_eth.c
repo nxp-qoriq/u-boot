@@ -427,6 +427,9 @@ static void ls1012a_configure_serdes(struct ls1012a_eth_dev *priv)
 	value = PHY_SGMII_CR_DEF_VAL;
 	if (!sgmii_2500)
 		value |= PHY_SGMII_CR_RESET_AN;
+	/* Disable Auto neg for 2.5G SGMII as it doesn't support auto neg*/
+	if (sgmii_2500)
+		value &= ~PHY_SGMII_ENABLE_AN;
 	ls1012a_phy_write(&bus, 0, MDIO_DEVAD_NONE, 0, value);
 }
 
