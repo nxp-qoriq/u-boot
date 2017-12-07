@@ -336,9 +336,16 @@ out:
 
 int env_init(void)
 {
-	/* SPI flash isn't usable before relocation */
+#if defined(CONFIG_FSL_QSPI) & defined(CONFIG_ENV_ADDR)
+	env_t *env_ptr = (env_t *)(CONFIG_ENV_ADDR);
+
+	if (crc32(0, env_ptr->data, ENV_SIZE) == env_ptr->crc) {
+		gd->env_addr	= (ulong)&(env_ptr->data);
+		gd->env_valid	= 1;
+		return 0;
+	}
+#endif
 	gd->env_addr = (ulong)&default_environment[0];
 	gd->env_valid = 1;
-
 	return 0;
 }
