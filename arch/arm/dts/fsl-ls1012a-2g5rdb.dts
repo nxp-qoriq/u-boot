@@ -7,10 +7,37 @@
  */
 
 /dts-v1/;
-#include "fsl-ls1012a-rdb.dtsi"
+#include "fsl-ls1012a.dtsi"
 
 / {
-       chosen {
+	model = "LS1012A 2G5RDB Board";
+
+	aliases {
+		spi0 = &qspi;
+	};
+
+	chosen {
                stdout-path = &duart0;
        };
+};
+
+&qspi {
+	bus-num = <0>;
+	status = "okay";
+
+	qflash0: s25fl128s@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-flash";
+		spi-max-frequency = <20000000>;
+		reg = <0>;
+	};
+};
+
+&i2c0 {
+	status = "okay";
+};
+
+&duart0 {
+	status = "okay";
 };
