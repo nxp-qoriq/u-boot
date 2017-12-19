@@ -121,19 +121,6 @@
 #define CONFIG_SF_DEFAULT_BUS        1
 #define CONFIG_SF_DEFAULT_CS         0
 
-/*
-* USB
-*/
-/* EHCI Support - disbaled by default */
-/*#define CONFIG_HAS_FSL_DR_USB*/
-
-#ifdef CONFIG_HAS_FSL_DR_USB
-#define CONFIG_USB_EHCI_FSL
-#define CONFIG_USB_ULPI
-#define CONFIG_USB_ULPI_VIEWPORT
-#define CONFIG_EHCI_HCD_INIT_AFTER_RESET
-#endif
-
 /*XHCI Support - enabled by default*/
 #define CONFIG_HAS_FSL_XHCI_USB
 
