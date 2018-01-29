@@ -1,5 +1,6 @@
 /*
- * Copyright 2008-2014 Freescale Semiconductor, Inc.
+ * Copyright 2008-2016 Freescale Semiconductor, Inc.
+ * Copyright 2017-2018 NXP Semiconductor
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -892,7 +893,7 @@ static void set_ddr_sdram_cfg_2(const unsigned int ctrl_num,
 		}
 	}
 	sr_ie = popts->self_refresh_interrupt_en;
-	num_pr = 1;	/* Make this configurable */
+	num_pr = popts->package_3ds + 1;
 
 	/*
 	 * 8572 manual says
@@ -2006,7 +2007,7 @@ static void set_timing_cfg_7(const unsigned int ctrl_num,
 	if (ddr->ddr_sdram_cfg_2 & SDRAM_CFG2_AP_EN &&
 	    CONFIG_FSL_SDRAM_TYPE == SDRAM_TYPE_DDR4) {
 		/* for DDR4 only */
-		par_lat = (popts->rcw_2 & 0xf) + 1;
+		par_lat = (ddr->ddr_sdram_rcw_2 & 0xf) + 1;
 		debug("PAR_LAT = %u for mclk_ps = %d\n", par_lat, mclk_ps);
 	}
 
@@ -2094,9 +2095,23 @@ static void set_timing_cfg_8(const unsigned int ctrl_num,
 	debug("FSLDDR: timing_cfg_8 = 0x%08x\n", ddr->timing_cfg_8);
 }
 
-static void set_timing_cfg_9(fsl_ddr_cfg_regs_t *ddr)
+static void set_timing_cfg_9(const unsigned int ctrl_num,
+			     fsl_ddr_cfg_regs_t *ddr,
+			     const memctl_options_t *popts,
+			     const common_timing_params_t *common_dimm)
 {
-	ddr->timing_cfg_9 = 0;
+	unsigned int refrec_cid_mclk = 0;
+	unsigned int acttoact_cid_mclk = 0;
+
+	if (popts->package_3ds) {
+		refrec_cid_mclk =
+			picos_to_mclk(ctrl_num, common_dimm->trfc_slr_ps);
+		acttoact_cid_mclk = 4U;	/* tRRDS_slr */
+	}
+
+	ddr->timing_cfg_9 = (refrec_cid_mclk & 0x3ff) << 16	|
+			    (acttoact_cid_mclk & 0xf) << 8;
+
 	debug("FSLDDR: timing_cfg_9 = 0x%08x\n", ddr->timing_cfg_9);
 }
 
@@ -2361,6 +2376,16 @@ static void set_ddr_sdram_cfg_3(fsl_ddr_cfg_regs_t *ddr,
 	ddr->ddr_sdram_cfg_3 = (rd_pre & 0x1) << 16;
 	/* Disable MRS on parity error for RDIMMs */
 	ddr->ddr_sdram_cfg_3 |= popts->registered_dimm_en ? 1 : 0;
+
+	if (popts->package_3ds) {	/* only 2,4,8 are supported */
+		if ((popts->package_3ds + 1) & 0x1) {
+			printf("Error: Unsupported 3DS DIMM with %d die\n",
+			       popts->package_3ds + 1);
+		} else {
+			ddr->ddr_sdram_cfg_3 |= ((popts->package_3ds + 1) >> 1)
+						<< 4;
+		}
+	}
 
 	debug("FSLDDR: ddr_sdram_cfg_3 = 0x%08x\n", ddr->ddr_sdram_cfg_3);
 }
@@ -2674,7 +2699,7 @@ compute_fsl_memctl_config_regs(const unsigned int ctrl_num,
 	set_timing_cfg_6(ddr);
 	set_timing_cfg_7(ctrl_num, ddr, popts, common_dimm);
 	set_timing_cfg_8(ctrl_num, ddr, popts, common_dimm, cas_latency);
-	set_timing_cfg_9(ddr);
+	set_timing_cfg_9(ctrl_num, ddr, popts, common_dimm);
 	set_ddr_dq_mapping(ddr, dimm_params);
 #endif
 
