@@ -268,6 +268,40 @@ ENTRY(lowlevel_init)
 	mov	w0, #0xFFFFFFFF		/* Set nsaid_wr_en and nsaid_rd_en */
 	str	w0, [x1]
 #endif
+#ifdef CONFIG_FSL_TZASC_3
+	ldr	x1, =TZASC_GATE_KEEPER(2)
+	ldr	w0, [x1]		/* Filter 0 Gate Keeper Register */
+	orr	w0, w0, #1 << 0		/* Set open_request for Filter 0 */
+	str	w0, [x1]
+
+	ldr	x1, =TZASC_REGION_ATTRIBUTES_0(2)
+	ldr	w0, [x1]		/* Region-2 Attributes Register */
+	orr	w0, w0, #1 << 31	/* Set Sec global write en, Bit[31] */
+	orr	w0, w0, #1 << 30	/* Set Sec global read en, Bit[30] */
+	str	w0, [x1]
+
+	ldr	x1, =TZASC_REGION_ID_ACCESS_0(2)
+	ldr	w0, [x1]		/* Region-2 Access Register */
+	mov	w0, #0xFFFFFFFF		/* Set nsaid_wr_en and nsaid_rd_en */
+	str	w0, [x1]
+#endif
+#ifdef CONFIG_FSL_TZASC_4
+	ldr	x1, =TZASC_GATE_KEEPER(3)
+	ldr	w0, [x1]		/* Filter 0 Gate Keeper Register */
+	orr	w0, w0, #1 << 0		/* Set open_request for Filter 0 */
+	str	w0, [x1]
+
+	ldr	x1, =TZASC_REGION_ATTRIBUTES_0(3)
+	ldr	w0, [x1]		/* Region-3 Attributes Register */
+	orr	w0, w0, #1 << 31	/* Set Sec global write en, Bit[31] */
+	orr	w0, w0, #1 << 30	/* Set Sec global read en, Bit[30] */
+	str	w0, [x1]
+
+	ldr	x1, =TZASC_REGION_ID_ACCESS_0(3)
+	ldr	w0, [x1]		/* Region-3 Attributes Register */
+	mov	w0, #0xFFFFFFFF		/* Set nsaid_wr_en and nsaid_rd_en */
+	str	w0, [x1]
+#endif
 	isb
 	dsb	sy
 #endif

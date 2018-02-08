@@ -371,6 +371,12 @@ config FSL_TZASC_1
 config FSL_TZASC_2
 	bool
 
+config FSL_TZASC_3
+	bool
+
+config FSL_TZASC_4
+	bool
+
 endmenu
 
 menu "Layerscape clock tree configuration"
