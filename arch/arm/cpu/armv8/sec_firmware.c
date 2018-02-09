@@ -322,7 +322,6 @@ bool sec_firmware_support_hwrng(void)
 {
 	uint8_t rand[8];
 	if (sec_firmware_addr & SEC_FIRMWARE_RUNNING) {
-		if (!sec_firmware_get_random(rand, 8))
 			return true;
 	}
 
@@ -431,8 +430,10 @@ int fdt_fixup_kaslr(void *fdt)
 
 #if defined(CONFIG_ARMV8_SEC_FIRMWARE_SUPPORT)
 	/* Check if random seed generation is  supported */
-	if (sec_firmware_support_hwrng() == false)
+	if (sec_firmware_support_hwrng() == false) {
+		printf("WARNING: SEC firmware not running, no kaslr-seed\n");
 		return 0;
+	}
 
 	ret = sec_firmware_get_random(rand, 8);
 	if (ret < 0) {
