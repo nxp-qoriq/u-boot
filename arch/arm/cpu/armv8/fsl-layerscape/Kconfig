@@ -158,6 +158,45 @@ config ARCH_LS2080A
 	select SYS_I2C_MXC_I2C3
 	select SYS_I2C_MXC_I2C4
 
+config ARCH_LX2160A
+	bool
+	select ARMV8_SET_SMPEN
+	select FSL_LSCH3
+	select FSL_LSCH3_2
+	select SYS_FSL_SRDS_1
+	select SYS_FSL_SRDS_2
+	select SYS_FSL_SRDS_3
+	select SYS_HAS_SERDES
+	select SYS_FSL_DDR
+	select SYS_FSL_DDR_LE
+	select SYS_FSL_DDR_VER_50
+	select SYS_FSL_EC1
+	select SYS_FSL_EC2
+	select SYS_FSL_HAS_RGMII
+	select SYS_FSL_HAS_CCN508
+	select SYS_FSL_HAS_SEC
+	select SYS_FSL_HAS_DDR4
+	select SYS_FSL_SEC_COMPAT_5
+	select SYS_FSL_SEC_LE
+	select FSL_TZASC_1
+	select FSL_TZASC_2
+	select FSL_TZASC_3
+	select FSL_TZASC_4
+	select ARCH_EARLY_INIT_R
+	select BOARD_EARLY_INIT_F
+	select SYS_I2C_MXC
+	select SYS_I2C_MXC_I2C1
+	select SYS_I2C_MXC_I2C2
+	select SYS_I2C_MXC_I2C3
+	select SYS_I2C_MXC_I2C4
+	select SYS_I2C_MXC_I2C5
+	select SYS_I2C_MXC_I2C6
+	select SYS_I2C_MXC_I2C7
+	select SYS_I2C_MXC_I2C8
+	imply PANIC_HANG
+	imply SCSI
+	imply SCSI_AHCI
+
 config FSL_LSCH2
 	bool
 	select SYS_FSL_HAS_CCI400
@@ -179,7 +218,7 @@ config FSL_LSCH3_2
 
 config FSL_MC_ENET
 	bool "Management Complex network"
-	depends on ARCH_LS2080A || ARCH_LS1088A
+	depends on ARCH_LS2080A || ARCH_LS1088A || ARCH_LX2160A
 	default y
 	select RESV_RAM
 	help
@@ -265,6 +304,7 @@ config SYS_LS_PPA_FW_ADDR
 	default 0x40400000 if SYS_LS_PPA_FW_IN_XIP && QSPI_BOOT
 	default 0x580400000 if SYS_LS_PPA_FW_IN_XIP && ARCH_LS2080A
 	default 0x20400000 if SYS_LS_PPA_FW_IN_XIP && ARCH_LS1088A
+	default 0x20400000 if SYS_LS_PPA_FW_IN_XIP && ARCH_LX2160A
 	default 0x60400000 if SYS_LS_PPA_FW_IN_XIP
 	default 0x400000 if SYS_LS_PPA_FW_IN_MMC
 	default 0x400000 if SYS_LS_PPA_FW_IN_NAND
@@ -314,6 +354,7 @@ config MAX_CPUS
 	default 4 if ARCH_LS1046A
 	default 16 if ARCH_LS2080A
 	default 8 if ARCH_LS1088A
+	default 16 if ARCH_LX2160A
 	default 1
 	help
 	  Set this number to the maximum number of possible CPUs in the SoC.
@@ -356,6 +397,9 @@ config SYS_FSL_HAS_CCI400
 config SYS_FSL_HAS_CCN504
 	bool
 
+config SYS_FSL_HAS_CCN508
+	bool
+
 config SYS_FSL_HAS_DP_DDR
 	bool
 
@@ -363,6 +407,9 @@ config SYS_FSL_SRDS_1
 	bool
 
 config SYS_FSL_SRDS_2
+	bool
+
+config SYS_FSL_SRDS_3
 	bool
 
 config SYS_HAS_SERDES
@@ -535,7 +582,7 @@ config SYS_FSL_HAS_RGMII
 config SYS_MC_RSV_MEM_ALIGN
 	hex "Management Complex reserved memory alignment"
 	depends on RESV_RAM
-	default 0x20000000 if ARCH_LS2080A || ARCH_LS1088A
+	default 0x20000000 if ARCH_LS2080A || ARCH_LS1088A || ARCH_LX2160A
 	help
 	  Reserved memory needs to be aligned for MC to use. Default value
 	  is 512MB.
