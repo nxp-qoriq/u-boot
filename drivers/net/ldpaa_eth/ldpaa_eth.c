@@ -428,17 +428,30 @@ static int ldpaa_eth_open(struct eth_device *net_dev, bd_t *bd)
 
 	bus = wriop_get_mdio(priv->dpmac_id);
 	enet_if = wriop_get_enet_if(priv->dpmac_id);
-	if ((bus == NULL) &&
-	   ((enet_if == PHY_INTERFACE_MODE_XGMII) ||
-	   (enet_if == PHY_INTERFACE_MODE_SGMII))) {
+	if (!bus) {
 		priv->phydev = (struct phy_device *)
 				malloc(sizeof(struct phy_device));
 		memset(priv->phydev, 0, sizeof(struct phy_device));
 
-		if (enet_if == PHY_INTERFACE_MODE_XGMII)
+		switch (enet_if) {
+		case PHY_INTERFACE_MODE_XGMII:
 			priv->phydev->speed = SPEED_10000;
-		else
-			priv->phydev->speed = SPEED_1000;
+			break;
+		case PHY_INTERFACE_MODE_25G_AUI:
+			priv->phydev->speed = SPEED_25000;
+			break;
+		case PHY_INTERFACE_MODE_XLAUI:
+			priv->phydev->speed = SPEED_40000;
+			break;
+		case PHY_INTERFACE_MODE_CAUI2:
+			priv->phydev->speed = SPEED_50000;
+			break;
+		case PHY_INTERFACE_MODE_CAUI4:
+			priv->phydev->speed = SPEED_100000;
+			break;
+		default:
+			break;
+		}
 
 		priv->phydev->link = 1;
 		priv->phydev->duplex = DUPLEX_FULL;
