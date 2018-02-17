@@ -337,8 +337,10 @@ void bypass_smmu(void)
 void fsl_lsch3_early_init_f(void)
 {
 	erratum_rcw_src();
+#ifdef CONFIG_FSL_IFC
 #if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_FSL_QIXIS)
 	init_early_memctl_regs();	/* tighten IFC timing */
+#endif
 #endif
 #ifdef CONFIG_SYS_FSL_ERRATUM_A009203
 	erratum_a009203();
