@@ -1,0 +1,65 @@
+Overview
+--------
+The LX2160A Reference Design (RDB) is a high-performance computing,
+evaluation, and development platform that supports the QorIQ LX2160A
+Layerscape Architecture processor and its personalities.
+
+LX2160A SoC Overview
+--------------------------------------
+For details, please refer arch/arm/cpu/armv8/fsl-layerscape/doc/README.soc
+
+LX2160ARDB board Overview
+----------------------
+DDR Memory
+	Two ports of 72-bits (8-bits ECC) DDR4.
+	Each port supports four chip-selects and two DIMM
+	connectors. Data rate upto 3.2 GT/s.
+
+SERDES ports
+	Thress serdes controllers (24 lanes)
+	Serdes1: Supports two USXGMII connectors, each connected through
+	Aquantia AQR107 phy, two 25GbE SFP+ modules connected through an Inphi
+	IN112525 phy and one 40 GbE QSFP+ module connected through an Inphi
+	CS4223 phy.
+
+	Serdes2: Supports one PCIe x4 (Gen1/2/3/4) connector, four SATA 3.0
+	connectors
+
+	Serdes3: Supports one PCIe x8 (Gen1/2/3/4) connector
+
+eSDHC
+	eSDHC1: Supports a SD connector for connecting SD cards
+	eSDHC2: Supports 128GB Micron MTFC128GAJAECE-IT eMMC
+
+Octal SPI (XSPI)
+	Supports two 64 MB onbpard octal SPI flash memories, one SPI emulator
+	for off-board emulation
+
+I2C	All system devices on I2C1 multiplexed using PCA9547 multiplexer
+	Serial Ports
+
+USB 3.0
+	Two high speed USB 3.0 ports. First USB 3.0 port configured as
+	Host with Type-A connector, second USB 3.0 port configured as OTG
+	with micro-AB connector
+
+Serial Ports	Two UART ports
+Ethernet	Two RGMII interfaces
+Debug		ARM JTAG support
+
+Booting Options
+---------------
+a) Flexspi boot
+
+Memory map for xspi flash
+----------------------------
+Image				Flash Offset
+RCW+PBI				0x00000000
+Boot firmware (U-Boot)		0x00100000
+Boot firmware Environment	0x00300000
+PPA firmware			0x00400000
+IN112525 PHY firmware		0x00980000
+DPAA2 MC			0x00A00000
+DPAA2 DPL			0x00D00000
+DPAA2 DPC			0x00E00000
+Kernel.itb			0x01000000

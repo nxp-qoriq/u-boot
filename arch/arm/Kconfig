@@ -843,6 +843,20 @@ config TARGET_LS2081ARDB
 	  development platform that supports the QorIQ LS2081A/LS2041A
 	  Layerscape Architecture processor.
 
+config TARGET_LX2160ARDB
+	bool "Support lx2160ardb"
+	select ARCH_LX2160A
+	select ARM64
+	select ARMV8_MULTIENTRY
+	select BOARD_LATE_INIT
+	select SUPPORT_SPL
+	select ARCH_MISC_INIT
+	help
+	  Support for NXP LX2160ARDB platform.
+	  The lx2rdb1 (LX2160A Reference design board (RDB) - first version
+	  is a high-performance development platform that supports the
+	  QorIQ LX2160A/LX2120A/LX2080A Layerscape Architecture processor.
+
 config TARGET_HIKEY
 	bool "Support HiKey 96boards Consumer Edition Platform"
 	select ARM64
@@ -1196,6 +1210,7 @@ source "board/freescale/ls1046ardb/Kconfig"
 source "board/freescale/ls1012aqds/Kconfig"
 source "board/freescale/ls1012ardb/Kconfig"
 source "board/freescale/ls1012afrdm/Kconfig"
+source "board/freescale/lx2160a/Kconfig"
 source "board/freescale/mx23evk/Kconfig"
 source "board/freescale/mx25pdk/Kconfig"
 source "board/freescale/mx28evk/Kconfig"

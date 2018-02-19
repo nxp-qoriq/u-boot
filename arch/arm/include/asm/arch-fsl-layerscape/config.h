@@ -179,6 +179,8 @@
 
 /* LX2160A Soc Support */
 #elif defined(CONFIG_ARCH_LX2160A)
+#define CONFIG_SYS_I2C
+#define CONFIG_SYS_I2C_EARLY_INIT
 #define SRDS_MAX_LANES  8
 #ifndef L1_CACHE_BYTES
 #define L1_CACHE_SHIFT		6
@@ -190,7 +192,6 @@
 
 #define CONFIG_SYS_PAGE_SIZE			0x10000
 
-#define CONFIG_FSL_TZPC_BP147
 #define CONFIG_FSL_TZASC_400
 
 #define CONFIG_SYS_FSL_OCRAM_BASE		0x18000000 /* initial RAM */
@@ -208,7 +209,6 @@
 
 #define CONFIG_SYS_MEMAC_LITTLE_ENDIAN
 
-#define CONFIG_GICV3
 /* Generic Interrupt Controller Definitions */
 #define GICD_BASE				0x06000000
 #define GICR_BASE				0x06200000
