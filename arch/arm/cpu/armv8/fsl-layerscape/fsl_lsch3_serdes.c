@@ -1,5 +1,6 @@
 /*
  * Copyright 2014-2015 Freescale Semiconductor, Inc.
+ * Copyright 2018 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -16,6 +17,9 @@ static u8 serdes1_prtcl_map[SERDES_PRCTL_COUNT];
 #endif
 #ifdef CONFIG_SYS_FSL_SRDS_2
 static u8 serdes2_prtcl_map[SERDES_PRCTL_COUNT];
+#endif
+#ifdef CONFIG_SYS_FSL_SRDS_3
+static u8 serdes3_prtcl_map[SERDES_PRCTL_COUNT];
 #endif
 
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)
@@ -62,7 +66,12 @@ int is_serdes_configured(enum srds_prtcl device)
 
 	ret |= serdes2_prtcl_map[device];
 #endif
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	if (!serdes3_prtcl_map[NONE])
+		fsl_serdes_init();
 
+	ret |= serdes3_prtcl_map[device];
+#endif
 	return !!ret;
 }
 
@@ -85,6 +94,13 @@ int serdes_get_first_lane(u32 sd, enum srds_prtcl device)
 		cfg = gur_in32(&gur->rcwsr[FSL_CHASSIS3_SRDS2_REGSR - 1]);
 		cfg &= FSL_CHASSIS3_SRDS2_PRTCL_MASK;
 		cfg >>= FSL_CHASSIS3_SRDS2_PRTCL_SHIFT;
+		break;
+#endif
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	case FSL_SRDS_3:
+		cfg = gur_in32(&gur->rcwsr[FSL_CHASSIS3_SRDS3_REGSR - 1]);
+		cfg &= FSL_CHASSIS3_SRDS3_PRTCL_MASK;
+		cfg >>= FSL_CHASSIS3_SRDS3_PRTCL_SHIFT;
 		break;
 #endif
 	default:
@@ -206,6 +222,11 @@ int setup_serdes_volt(u32 svdd)
 	struct ccsr_serdes __iomem *serdes2_base;
 	u32 cfg_rcwsrds2 = gur_in32(&gur->rcwsr[FSL_CHASSIS3_SRDS2_REGSR - 1]);
 #endif
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	struct ccsr_serdes __iomem *serdes3_base;
+	u32 cfg_rcwsrds3 = gur_in32(&gur->rcwsr[FSL_CHASSIS3_SRDS3_REGSR - 1]);
+#endif
+
 	u32 cfg_tmp, reg = 0;
 	int svdd_cur, svdd_tar;
 	int ret = 1;
@@ -232,6 +253,9 @@ int setup_serdes_volt(u32 svdd)
 #ifdef CONFIG_SYS_FSL_SRDS_2
 	serdes2_base =  (void *)(CONFIG_SYS_FSL_LSCH3_SERDES_ADDR + 0x10000);
 #endif
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	serdes3_base =  (void *)(CONFIG_SYS_FSL_LSCH3_SERDES_ADDR + 0x20000);
+#endif
 
 	/* Put the all enabled lanes in reset */
 #ifdef CONFIG_SYS_FSL_SRDS_1
@@ -253,6 +277,17 @@ int setup_serdes_volt(u32 svdd)
 		reg = in_le32(&serdes2_base->lane[i].gcr0);
 		reg &= 0xFF9FFFFF;
 		out_le32(&serdes2_base->lane[i].gcr0, reg);
+	}
+#endif
+
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	cfg_tmp = cfg_rcwsrds3 & FSL_CHASSIS3_SRDS3_PRTCL_MASK;
+	cfg_tmp >>= FSL_CHASSIS3_SRDS3_PRTCL_SHIFT;
+
+	for (i = 0; i < 4 && cfg_tmp & (0xf << (3 - i)); i++) {
+		reg = in_le32(&serdes3_base->lane[i].gcr0);
+		reg &= 0xFF9FFFFF;
+		out_le32(&serdes3_base->lane[i].gcr0, reg);
 	}
 #endif
 
@@ -288,6 +323,22 @@ int setup_serdes_volt(u32 svdd)
 	out_le32(&serdes2_base->bank[i].rstctl, reg);
 #endif
 
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	cfg_tmp = cfg_rcwsrds3 & 0x30;
+	cfg_tmp >>= 4;
+	for (i = 0; i < 2 && !(cfg_tmp & (0x1 << (1 - i))); i++) {
+		reg = in_le32(&serdes3_base->bank[i].rstctl);
+		reg &= 0xFFFFFFBF;
+		reg |= 0x10000000;
+		out_le32(&serdes3_base->bank[i].rstctl, reg);
+	}
+	udelay(1);
+
+	reg = in_le32(&serdes3_base->bank[i].rstctl);
+	reg &= 0xFFFFFF1F;
+	out_le32(&serdes3_base->bank[i].rstctl, reg);
+#endif
+
 	/* Put the Rx/Tx calibration into reset */
 #ifdef CONFIG_SYS_FSL_SRDS_1
 	reg = in_le32(&serdes1_base->srdstcalcr);
@@ -305,6 +356,15 @@ int setup_serdes_volt(u32 svdd)
 	reg = in_le32(&serdes2_base->srdsrcalcr);
 	reg &= 0xF7FFFFFF;
 	out_le32(&serdes2_base->srdsrcalcr, reg);
+#endif
+
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	reg = in_le32(&serdes3_base->srdstcalcr);
+	reg &= 0xF7FFFFFF;
+	out_le32(&serdes3_base->srdstcalcr, reg);
+	reg = in_le32(&serdes3_base->srdsrcalcr);
+	reg &= 0xF7FFFFFF;
+	out_le32(&serdes3_base->srdsrcalcr, reg);
 #endif
 
 	ret = set_serdes_volt(svdd);
@@ -367,6 +427,34 @@ int setup_serdes_volt(u32 svdd)
 	}
 #endif
 
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	cfg_tmp = cfg_rcwsrds3 & 0x30;
+	cfg_tmp >>= 4;
+	for (i = 0; i < 2 && !(cfg_tmp & (0x1 << (1 - i))); i++) {
+		reg = in_le32(&serdes3_base->bank[i].rstctl);
+		reg |= 0x00000020;
+		out_le32(&serdes3_base->bank[i].rstctl, reg);
+		udelay(1);
+
+		reg = in_le32(&serdes3_base->bank[i].rstctl);
+		reg |= 0x00000080;
+		out_le32(&serdes3_base->bank[i].rstctl, reg);
+		udelay(1);
+
+		/* Take the Rx/Tx calibration out of reset */
+		if (!(cfg_tmp == 0x3 && i == 1)) {
+			udelay(1);
+			reg = in_le32(&serdes3_base->srdstcalcr);
+			reg |= 0x08000000;
+			out_le32(&serdes3_base->srdstcalcr, reg);
+			reg = in_le32(&serdes3_base->srdsrcalcr);
+			reg |= 0x08000000;
+			out_le32(&serdes3_base->srdsrcalcr, reg);
+		}
+		udelay(1);
+	}
+#endif
+
 	/* Wait for at atleast 625us, ensure the PLLs being reset are locked */
 	udelay(800);
 
@@ -410,6 +498,28 @@ int setup_serdes_volt(u32 svdd)
 		}
 	}
 #endif
+
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	cfg_tmp = cfg_rcwsrds3 & 0x30;
+	cfg_tmp >>= 4;
+
+	for (i = 0; i < 2 && !(cfg_tmp & (0x1 << (1 - i))); i++) {
+		reg = in_le32(&serdes3_base->bank[i].pllcr0);
+		if (!((reg >> 23) & 0x1)) {
+			reg = in_le32(&serdes3_base->bank[i].rstctl);
+			reg |= 0x20000000;
+			out_le32(&serdes3_base->bank[i].rstctl, reg);
+		} else {
+			udelay(1);
+			reg = in_le32(&serdes3_base->bank[i].rstctl);
+			reg &= 0xFFFFFFEF;
+			reg |= 0x00000040;
+			out_le32(&serdes3_base->bank[i].rstctl, reg);
+			udelay(1);
+		}
+	}
+#endif
+
 	/* Take the all enabled lanes out of reset */
 #ifdef CONFIG_SYS_FSL_SRDS_1
 	cfg_tmp = cfg_rcwsrds1 & FSL_CHASSIS3_SRDS1_PRTCL_MASK;
@@ -431,6 +541,18 @@ int setup_serdes_volt(u32 svdd)
 		out_le32(&serdes2_base->lane[i].gcr0, reg);
 	}
 #endif
+
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	cfg_tmp = cfg_rcwsrds3 & FSL_CHASSIS3_SRDS3_PRTCL_MASK;
+	cfg_tmp >>= FSL_CHASSIS3_SRDS3_PRTCL_SHIFT;
+
+	for (i = 0; i < 4 && cfg_tmp & (0xf << (3 - i)); i++) {
+		reg = in_le32(&serdes3_base->lane[i].gcr0);
+		reg |= 0x00600000;
+		out_le32(&serdes3_base->lane[i].gcr0, reg);
+	}
+#endif
+
 
 	/* For each PLL being reset, and achieved PLL lock set RST_DONE */
 #ifdef CONFIG_SYS_FSL_SRDS_1
@@ -458,6 +580,19 @@ int setup_serdes_volt(u32 svdd)
 	}
 #endif
 
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	cfg_tmp = cfg_rcwsrds1 & 0x30;
+	cfg_tmp >>= 4;
+
+	for (i = 0; i < 2; i++) {
+		reg = in_le32(&serdes3_base->bank[i].pllcr0);
+		if (!(cfg_tmp & (0x1 << (1 - i))) && ((reg >> 23) & 0x1)) {
+			reg = in_le32(&serdes3_base->bank[i].rstctl);
+			reg |= 0x40000000;
+			out_le32(&serdes3_base->bank[i].rstctl, reg);
+		}
+	}
+#endif
 	return ret;
 }
 
@@ -500,5 +635,13 @@ void fsl_serdes_init(void)
 		    FSL_CHASSIS3_SRDS2_PRTCL_MASK,
 		    FSL_CHASSIS3_SRDS2_PRTCL_SHIFT,
 		    serdes2_prtcl_map);
+#endif
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	serdes_init(FSL_SRDS_3,
+		    CONFIG_SYS_FSL_LSCH3_SERDES_ADDR + FSL_SRDS_3 * 0x10000,
+		    FSL_CHASSIS3_SRDS3_REGSR,
+		    FSL_CHASSIS3_SRDS3_PRTCL_MASK,
+		    FSL_CHASSIS3_SRDS3_PRTCL_SHIFT,
+		    serdes3_prtcl_map);
 #endif
 }

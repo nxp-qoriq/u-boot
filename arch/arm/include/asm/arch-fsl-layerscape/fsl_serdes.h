@@ -87,6 +87,9 @@ enum srds_prtcl {
 enum srds {
 	FSL_SRDS_1  = 0,
 	FSL_SRDS_2  = 1,
+#ifdef CONFIG_SYS_FSL_SRDS_3
+	FSL_SRDS_3  = 2,
+#endif
 };
 #elif defined(CONFIG_FSL_LSCH2)
 enum srds_prtcl {
