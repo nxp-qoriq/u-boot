@@ -19,8 +19,12 @@ static u8 serdes2_prtcl_map[SERDES_PRCTL_COUNT];
 #endif
 
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)
-int xfi_dpmac[XFI8 + 1];
-int sgmii_dpmac[SGMII16 + 1];
+int xfi_dpmac[XFI14 + 1];
+int sgmii_dpmac[SGMII18 + 1];
+int a25gaui_dpmac[_25GE10 + 1];
+int xlaui_dpmac[_40GE2 + 1];
+int caui2_dpmac[_50GE2 + 1];
+int caui4_dpmac[_100GE2 + 1];
 #endif
 
 __weak void wriop_init_dpmac_qsgmii(int sd, int lane_prtcl)
@@ -138,16 +142,41 @@ void serdes_init(u32 sd, u32 sd_addr, u32 rcwsr, u32 sd_prctl_mask,
 				wriop_init_dpmac_qsgmii(sd, (int)lane_prtcl);
 				break;
 			default:
-				if (lane_prtcl >= XFI1 && lane_prtcl <= XFI8)
+				if (lane_prtcl >= XFI1 && lane_prtcl <= XFI14)
 					wriop_init_dpmac(sd,
 							 xfi_dpmac[lane_prtcl],
 							 (int)lane_prtcl);
 
 				 if (lane_prtcl >= SGMII1 &&
-				     lane_prtcl <= SGMII16)
+				     lane_prtcl <= SGMII18)
 					wriop_init_dpmac(sd, sgmii_dpmac[
 							 lane_prtcl],
 							 (int)lane_prtcl);
+
+				if (lane_prtcl >= _25GE1 &&
+				    lane_prtcl <= _25GE10)
+					wriop_init_dpmac(sd, a25gaui_dpmac[
+							 lane_prtcl],
+							 (int)lane_prtcl);
+
+				if (lane_prtcl >= _40GE1 &&
+				    lane_prtcl <= _40GE2)
+					wriop_init_dpmac(sd, xlaui_dpmac[
+							 lane_prtcl],
+							 (int)lane_prtcl);
+
+				if (lane_prtcl >= _50GE1 &&
+				    lane_prtcl <= _50GE2)
+					wriop_init_dpmac(sd, caui2_dpmac[
+							 lane_prtcl],
+							 (int)lane_prtcl);
+
+				if (lane_prtcl >= _100GE1 &&
+				    lane_prtcl <= _100GE2)
+					wriop_init_dpmac(sd, caui4_dpmac[
+							 lane_prtcl],
+							 (int)lane_prtcl);
+
 				break;
 			}
 #endif
@@ -437,11 +466,23 @@ void fsl_serdes_init(void)
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)
 	int i , j;
 
-	for (i = XFI1, j = 1; i <= XFI8; i++, j++)
+	for (i = XFI1, j = 1; i <= XFI14; i++, j++)
 		xfi_dpmac[i] = j;
 
-	for (i = SGMII1, j = 1; i <= SGMII16; i++, j++)
+	for (i = SGMII1, j = 1; i <= SGMII18; i++, j++)
 		sgmii_dpmac[i] = j;
+
+	for (i = _25GE1, j = 1; i <= _25GE10; i++, j++)
+		a25gaui_dpmac[i] = j;
+
+	for (i = _40GE1, j = 1; i <= _40GE2; i++, j++)
+		xlaui_dpmac[i] = j;
+
+	for (i = _50GE1, j = 1; i <= _50GE2; i++, j++)
+		caui2_dpmac[i] = j;
+
+	for (i = _100GE1, j = 1; i <= _100GE2; i++, j++)
+		caui4_dpmac[i] = j;
 #endif
 
 #ifdef CONFIG_SYS_FSL_SRDS_1
