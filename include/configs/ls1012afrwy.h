@@ -56,9 +56,15 @@
 	"initrd_high=0xffffffffffffffff\0"	\
 	"fdt_addr=0x00f00000\0"			\
 	"kernel_addr=0x01000000\0"		\
+	"kernel_size_sd=0x16000\0"		\
+	"kernelhdr_size_sd=0x10\0"		\
+	"kernel_addr_sd=0x8000\0"		\
+	"kernelhdr_addr_sd=0x4000\0"		\
+	"kernelheader_addr=0x1fc000\0"		\
 	"scriptaddr=0x80000000\0"		\
 	"fdtheader_addr_r=0x80100000\0"		\
 	"kernelheader_addr_r=0x80200000\0"	\
+	"kernelheader_size=0x40000\0"		\
 	"kernel_addr_r=0x96000000\0"		\
 	"fdt_addr_r=0x90000000\0"		\
 	"load_addr=0x96000000\0"		\
@@ -83,16 +89,35 @@
 			"run scan_dev_for_scripts; "	  \
 		"done;"					  \
 		"\0"					  \
+	"boot_a_script="				  \
+		"load ${devtype} ${devnum}:${distro_bootpart} "  \
+			"${scriptaddr} ${prefix}${script}; "    \
+		"env exists secureboot && load ${devtype} "     \
+			"${devnum}:${distro_bootpart} "		\
+			"${scripthdraddr} ${prefix}${boot_script_hdr} " \
+			"&& esbc_validate ${scripthdraddr};"    \
+		"source ${scriptaddr}\0"	  \
 	"installer=load usb 0:2 $load_addr "	\
 		   "/flex_installer_arm64.itb; "	\
 		   "bootm $load_addr#$board\0"	\
 	"qspi_bootcmd=echo Trying load from qspi..;"	\
 		"sf probe && sf read $load_addr "	\
-		"$kernel_addr $kernel_size && bootm $load_addr#$board\0" \
+		"$kernel_addr $kernel_size; env exists secureboot "	\
+		"&& sf read $kernelheader_addr_r $kernelheader_addr "	\
+		"$kernelheader_size && esbc_validate ${kernelheader_addr_r}; " \
+		"bootm $load_addr#$board\0"	\
+	"sd_bootcmd=echo Trying load from sd card..;"		\
+		"mmcinfo; mmc read $load_addr "			\
+		"$kernel_addr_sd $kernel_size_sd ;"		\
+		"env exists secureboot && mmc read $kernelheader_addr_r "\
+		"$kernelhdr_addr_sd $kernelhdr_size_sd "		\
+		" && esbc_validate ${kernelheader_addr_r};"	\
+		"bootm $load_addr\0"
 
 #undef CONFIG_BOOTCOMMAND
 #if defined(CONFIG_QSPI_BOOT) || defined(CONFIG_SD_BOOT_QSPI)
-#define CONFIG_BOOTCOMMAND "run distro_bootcmd;run qspi_bootcmd"
+#define CONFIG_BOOTCOMMAND "run distro_bootcmd; run sd_bootcmd; " \
+			   "env exists secureboot && esbc_halt;"
 #endif
 
 /*
@@ -110,4 +135,5 @@
 #define CONFIG_SYS_MEMTEST_START	0x80000000
 #define CONFIG_SYS_MEMTEST_END		0x9fffffff
 
+#include <asm/fsl_secure_boot.h>
 #endif /* __LS1012AFRWY_H__ */
