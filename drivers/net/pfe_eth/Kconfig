@@ -16,7 +16,7 @@ config SYS_FSL_PFE_ADDR
 
 config SYS_LS_PFE_FW_ADDR
 	hex "Flash address of PFE firmware"
-	default 0x40a00000
+	default 0x40020000
 
 config DDR_PFE_PHYS_BASEADDR
 	hex "PFE DDR physical base address"
