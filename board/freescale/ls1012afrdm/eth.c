@@ -45,6 +45,7 @@ int board_eth_init(bd_t *bis)
 #ifdef CONFIG_FSL_PFE
 	struct mii_dev *bus;
 	struct mdio_info mac1_mdio_info;
+	int rc = 0;
 
 	reset_phy();
 
@@ -80,7 +81,10 @@ int board_eth_init(bd_t *bis)
 	ls1012a_set_phy_address_mode(1, EMAC2_PHY_ADDR,
 				     PHY_INTERFACE_MODE_SGMII);
 
-
-	return cpu_eth_init(bis);
+	rc = cpu_eth_init(bis);
+#ifdef CONFIG_TARGET_LS1012AFRWY
+	rc = pci_eth_init(bis);
+#endif
+	return rc;
 #endif
 }
