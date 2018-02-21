@@ -30,6 +30,10 @@ config SYS_SOC
 config SYS_CONFIG_NAME
         default "ls1012afrwy"
 
+config SYS_LS_PPA_FW_ADDR
+        hex "PPA Firmware Addr"
+        default 0x40060000
+
 source "board/freescale/common/Kconfig"
 
 endif
