@@ -14,6 +14,7 @@
 #endif
 #include <asm/arch/mmu.h>
 #include <asm/arch/soc.h>
+#include <fsl_esdhc.h>
 #include <hwconfig.h>
 #include <environment.h>
 #include <fsl_mmdc.h>
@@ -23,10 +24,28 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int checkboard(void)
 {
+#ifdef CONFIG_TARGET_LS1012AFRDM
 	puts("Board: LS1012AFRDM ");
-
+#else
+	puts("Board: LS1012AFRWY ");
+#endif
 	return 0;
 }
+
+#ifdef CONFIG_TARGET_LS1012AFRWY
+int esdhc_status_fixup(void *blob, const char *compat)
+{
+	char esdhc0_path[] = "/soc/esdhc@1560000";
+	char esdhc1_path[] = "/soc/esdhc@1580000";
+
+	do_fixup_by_path(blob, esdhc0_path, "status", "okay",
+			 sizeof("okay"), 1);
+
+	do_fixup_by_path(blob, esdhc1_path, "status", "disabled",
+			 sizeof("disabled"), 1);
+	return 0;
+}
+#endif
 
 int dram_init(void)
 {
