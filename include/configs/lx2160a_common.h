@@ -166,6 +166,12 @@
 #define CONFIG_USB_MAX_CONTROLLER_COUNT	2
 #endif
 
+/* FlexSPI */
+#ifdef CONFIG_NXP_FSPI
+#define NXP_FSPI_FLASH_SIZE		SZ_64M
+#define NXP_FSPI_FLASH_NUM		1
+#endif
+
 #ifndef __ASSEMBLY__
 unsigned long get_board_sys_clk(void);
 unsigned long get_board_ddr_clk(void);
