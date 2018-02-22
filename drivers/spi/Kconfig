@@ -195,6 +195,13 @@ config OMAP3_SPI
 	  (McSPI). This driver be used to access SPI chips on platforms
 	  embedding this OMAP3 McSPI IP core.
 
+config NXP_FSPI
+	bool "NXP FLEXSPI driver"
+	help
+	  Enable the NXP Flex-SPI (FSPI) driver. This driver can be used to
+	  access SPI NOR flash on platforms embedding this NXP IP code.
+	  This driver support SPI flash read, write and erase.
+
 endif # if DM_SPI
 
 config SOFT_SPI
