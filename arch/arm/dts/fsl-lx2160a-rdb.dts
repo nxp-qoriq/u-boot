@@ -16,8 +16,25 @@
 / {
 	model = "NXP Layerscape LX2160ARDB Board";
 	compatible = "fsl,lx2160ardb", "fsl,lx2160a";
+
+	aliases {
+		spi0 = &fspi;
+	};
+
 	chosen {
 		stdout-path = &uart0;
 	};
+};
 
+&fspi {
+	bus-num = <0>;
+	status = "okay";
+
+	qflash0: mt35xu512g@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-flash";
+		spi-max-frequency = <20000000>; /* TODO Need to ck*/
+		reg = <0>;
+	};
 };
