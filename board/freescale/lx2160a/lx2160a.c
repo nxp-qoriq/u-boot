@@ -115,7 +115,15 @@ unsigned long get_board_sys_clk(void)
 
 unsigned long get_board_ddr_clk(void)
 {
-	return 100000000;
+	/*
+	 *The value returned here depends on
+	 *clock of reference platform.
+	 *As per LX2160A RDB schematics, this is 100MHz.
+	 *For QDS, it dependes on FPGA.
+	 *For Simulator, 133MHz is tested to be working fine.
+	 *TODO: Add code changes for RDB, QDS.
+	 */
+	return 133333333;
 }
 
 int board_init(void)
