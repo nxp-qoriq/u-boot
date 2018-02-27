@@ -38,6 +38,10 @@ config SYS_LS_PPA_ESBC_ADDR
 	hex "PPA Firmware HDR Addr"
 	default 0x401f4000
 
+config SYS_LS_PFE_ESBC_ADDR
+	hex "PFE Firmware HDR Addr"
+	default 0x401f8000
+
 source "board/freescale/common/Kconfig"
 
 endif
