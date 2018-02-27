@@ -468,8 +468,11 @@ static int bootm_load_os(bootm_headers_t *images, unsigned long *load_end,
 			return BOOTM_ERR_OVERLAP;
 		} else {
 			puts("ERROR: new format image overwritten - must RESET the board to recover\n");
+/* TODO: FIXME */
+#if 0
 			bootstage_error(BOOTSTAGE_ID_OVERWRITTEN);
 			return BOOTM_ERR_RESET;
+#endif
 		}
 	}
 
