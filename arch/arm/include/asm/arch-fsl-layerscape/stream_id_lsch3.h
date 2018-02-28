@@ -83,7 +83,7 @@
 /* PCI - programmed in PEXn_LUT */
 #define FSL_PEX_STREAM_ID_START		7
 
-#if defined(CONFIG_ARCH_LS2080A)
+#if defined(CONFIG_ARCH_LS2080A) || defined(CONFIG_ARCH_LS1028A)
 #define FSL_PEX_STREAM_ID_END		22
 #elif defined(CONFIG_ARCH_LS1088A)
 #define FSL_PEX_STREAM_ID_END		18
