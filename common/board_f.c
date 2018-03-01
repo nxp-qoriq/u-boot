@@ -152,7 +152,7 @@ static int show_dram_config(void)
 {
 	unsigned long long size;
 
-#ifdef CONFIG_NR_DRAM_BANKS
+#if !defined(CONFIG_EMU_DDR) && defined(CONFIG_NR_DRAM_BANKS)
 	int i;
 
 	debug("\nRAM Configuration:\n");

@@ -154,6 +154,7 @@ static inline void final_mmu_setup(void)
 
 	mem_map = final_map;
 
+#ifndef CONFIG_EMU_DDR
 	/* Update mapping for DDR to actual size */
 	for (index = 0; index < ARRAY_SIZE(final_map) - 2; index++) {
 		/*
@@ -193,6 +194,7 @@ static inline void final_mmu_setup(void)
 			break;
 		}
 	}
+#endif
 
 #ifdef CONFIG_SYS_MEM_RESERVE_SECURE
 	if (gd->arch.secure_ram & MEM_RESERVE_SECURE_MAINTAINED) {
