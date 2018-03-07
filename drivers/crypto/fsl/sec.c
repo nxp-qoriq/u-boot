@@ -165,6 +165,15 @@ void fdt_fixup_crypto_node(void *blob, int sec_rev)
 {
 	u8 era;
 
+	/*
+	 * Simulator workarounds (DTSIM-2761)
+	 * -secvid_ms register is zero
+	 * -due to ccbvid register is initialized incorrectly, reported Era
+	 *  is 8 instead of 10
+	 */
+#ifdef CONFIG_ARCH_LX2160A_SIMU
+	era = 10;
+#else
 	if (!sec_rev) {
 		fdt_del_node_and_alias(blob, "crypto");
 		return;
@@ -172,6 +181,7 @@ void fdt_fixup_crypto_node(void *blob, int sec_rev)
 
 	/* Add SEC ERA information in compatible */
 	era = caam_get_era();
+#endif
 	if (era) {
 		fdt_fixup_crypto_era(blob, era);
 	} else {
