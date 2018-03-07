@@ -142,12 +142,9 @@ int board_init(void)
 #ifdef CONFIG_FSL_CAAM
 	sec_init();
 #endif
+
 #ifdef CONFIG_FSL_LS_PPA
 	ppa_init();
-#endif
-
-#ifdef CONFIG_FSL_CAAM
-	sec_init();
 #endif
 
 	return 0;
