@@ -18,3 +18,11 @@
 	compatible = "fsl,lx2160ardb", "fsl,lx2160a";
 
 };
+
+&esdhc0 {
+	status = "okay";
+};
+
+&esdhc1 {
+	status = "okay";
+};
