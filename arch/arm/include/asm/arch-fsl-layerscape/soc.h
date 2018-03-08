@@ -83,12 +83,9 @@ struct cpu_type {
 #define SVR_MIN(svr)		(((svr) >> 0) & 0xf)
 #define SVR_REV(svr)		(((svr) >> 0) & 0xff)
 #define SVR_SOC_VER(svr)	(((svr) >> 8) & SVR_WO_E)
-#ifndef CONFIG_ARCH_LX2160A
 #define IS_E_PROCESSOR(svr)	(!((svr >> 8) & 0x1))
-#else
-#define IS_E_PROCESSOR(svr)	((((svr >> 8) & 0x11)) == 0x10) ? 1 : 0
-#define IS_N_PROCESSOR(svr)	((((svr >> 8) & 0x11)) == 0x11) ? 1 : 0
-#define IS_C_PROCESSOR(svr)	((((svr >> 8) & 0x11)) == 0x00) ? 1 : 0
+#ifdef CONFIG_ARCH_LX2160A
+#define IS_C_PROCESSOR(svr)	(!((svr >> 12) & 0x1))
 #endif
 #define IS_SVR_REV(svr, maj, min) \
 		((SVR_MAJ(svr) == (maj)) && (SVR_MIN(svr) == (min)))

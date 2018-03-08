@@ -52,7 +52,10 @@ void cpu_name(char *name)
 	for (i = 0; i < ARRAY_SIZE(cpu_type_list); i++)
 		if ((cpu_type_list[i].soc_ver & SVR_WO_E) == ver) {
 			strcpy(name, cpu_type_list[i].name);
-
+#ifdef CONFIG_ARCH_LX2160A
+			if (IS_C_PROCESSOR(svr))
+				strcat(name, "C");
+#endif
 			if (IS_E_PROCESSOR(svr))
 				strcat(name, "E");
 
