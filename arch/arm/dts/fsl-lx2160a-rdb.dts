@@ -45,3 +45,11 @@
 	 * No need to provide node info for second flash device.
 	 */
 };
+
+&esdhc0 {
+	status = "okay";
+};
+
+&esdhc1 {
+	status = "okay";
+};
