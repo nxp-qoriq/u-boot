@@ -100,6 +100,33 @@
 		bus-width = <4>;
 	};
 
+	dspi0: dspi@2100000 {
+                compatible = "fsl,vf610-dspi";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0x0 0x2100000 0x0 0x10000>;
+                interrupts = <0 26 0x4>; /* Level high type */
+                num-cs = <6>;
+        };
+
+	dspi1: dspi@2110000 {
+                compatible = "fsl,vf610-dspi";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0x0 0x2110000 0x0 0x10000>;
+                interrupts = <0 240 0x4>; /* Level high type */
+                num-cs = <6>;
+        };
+
+	dspi2: dspi@2120000 {
+                compatible = "fsl,vf610-dspi";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0x0 0x2120000 0x0 0x10000>;
+                interrupts = <0 241 0x4>; /* Level high type */
+                num-cs = <6>;
+        };
+
 	fspi: flexspi@20c0000 {
 		compatible = "nxp,lx2160a-fspi";
 		#address-cells = <1>;
