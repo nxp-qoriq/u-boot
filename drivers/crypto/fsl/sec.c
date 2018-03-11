@@ -99,6 +99,7 @@ void fdt_fixup_crypto_node(void *blob, int sec_rev)
 		       fdt_strerror(err));
 }
 #elif CONFIG_SYS_FSL_SEC_COMPAT >= 4  /* SEC4 */
+#ifndef CONFIG_ARCH_LX2160A_SIMU
 static u8 caam_get_era(void)
 {
 	static const struct {
@@ -142,6 +143,7 @@ static u8 caam_get_era(void)
 
 	return 0;
 }
+#endif
 
 static void fdt_fixup_crypto_era(void *blob, u32 era)
 {

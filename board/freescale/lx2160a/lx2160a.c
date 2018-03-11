@@ -203,8 +203,9 @@ int ft_board_setup(void *blob, bd_t *bd)
 	int i;
 	u64 base[CONFIG_NR_DRAM_BANKS];
 	u64 size[CONFIG_NR_DRAM_BANKS];
-
+#ifdef CONFIG_PHY_IN112525
 	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
+#endif
 
 	ft_cpu_setup(blob, bd);
 
