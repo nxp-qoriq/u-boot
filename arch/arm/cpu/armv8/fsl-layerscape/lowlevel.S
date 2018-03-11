@@ -209,7 +209,12 @@ ENTRY(lowlevel_init)
 #ifdef CONFIG_FSL_TZPC_BP147
 	/* Set Non Secure access for all devices protected via TZPC */
 	ldr	x1, =TZPCDECPROT_0_SET_BASE /* Decode Protection-0 Set Reg */
+#ifndef CONFIG_ARCH_LX2160A
 	orr	w0, w0, #1 << 3 /* DCFG_RESET is accessible from NS world */
+#else
+	/* DCFG_RESET and UART_1 are accessible from NS world */
+	orr	w0, w0, #3 << 3
+#endif
 	str	w0, [x1]
 
 	isb
