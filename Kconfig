@@ -76,6 +76,17 @@ config DISTRO_DEFAULTS
 	  Select this to enable various options and commands which are suitable
 	  for building u-boot for booting general purpose Linux distributions.
 
+config ARCH_LX2160A_SIMU
+	bool "Enable LX2160A Simulator model build"
+	default n
+	help
+	  This config enables LX2160A Simulator model build.
+	  Due to Model limitaion, difference w.r.t. RDB board,
+	  some workarounds are required on top of rdb u-boot build.
+	  This config enables those workarounds. To build
+		./scripts/kconfig/merge_config.sh configs/lx2160ardb_defconfig
+		configs/lx2160asimu_defconfig
+
 config SYS_MALLOC_F
 	bool "Enable malloc() pool before relocation"
 	default y if DM
