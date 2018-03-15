@@ -69,8 +69,6 @@
 #define RGMII_PHY_ADDR1		0x01
 #define RGMII_PHY_ADDR2		0x02
 
-#define IN112525_IRQ_CCSR_MASK 0x600
-
 #endif
 #endif
 

@@ -207,10 +207,6 @@ int ft_board_setup(void *blob, bd_t *bd)
 	int i;
 	u64 base[CONFIG_NR_DRAM_BANKS];
 	u64 size[CONFIG_NR_DRAM_BANKS];
-#ifdef CONFIG_PHY_IN112525
-	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
-#endif
-
 	ft_cpu_setup(blob, bd);
 
 	/* fixup DT for the three GPP DDR banks */
@@ -241,11 +237,6 @@ int ft_board_setup(void *blob, bd_t *bd)
 #ifdef CONFIG_FSL_MC_ENET
 	fdt_fsl_mc_fixup_iommu_map_entry(blob);
 	fdt_fixup_board_enet(blob);
-
-#ifdef CONFIG_PHY_IN112525
-	/* invert INT9 and INT10 pins polarity */
-	out_le32(irq_ccsr + IRQCR_OFFSET / 4, IN112525_IRQ_CCSR_MASK);
-#endif
 #endif
 
 	return 0;
