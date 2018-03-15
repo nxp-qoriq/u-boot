@@ -84,6 +84,7 @@ DECLARE_GLOBAL_DATA_PTR;
  * @reg_base: Base address of FSPI registers
  * @amba_base: Base address of FSPI memory mapping
  * @amba_total_size: size of FSPI memory mapping
+ * @memmap_phy: Physical base address of FSPI memory mapping
  * @flash_num: Number of active slave devices
  * @num_chipselect: Number of FSPI chipselect signals
  */
@@ -93,6 +94,7 @@ struct nxp_fspi_platdata {
 	fdt_addr_t reg_base;
 	fdt_addr_t amba_base;
 	fdt_size_t amba_total_size;
+	fdt_size_t memmap_phy;
 	u32 flash_num;
 	u32 num_chipselect;
 };
@@ -110,6 +112,7 @@ struct nxp_fspi_platdata {
  * @cur_amba_base: Base address of FSPI memory mapping of current CS
  * @flash_num: Number of active slave devices
  * @num_chipselect: Number of FSPI chipselect signals
+ * @memmap_phy: Physical base address of FSPI memory mapping
  * @regs: Point to FSPI register structure for I/O access
  */
 struct nxp_fspi_priv {
@@ -123,6 +126,7 @@ struct nxp_fspi_priv {
 	u32 cur_amba_base;
 	u32 flash_num;
 	u32 num_chipselect;
+	u32 memmap_phy;
 	struct nxp_fspi_regs *regs;
 };
 
@@ -352,7 +356,9 @@ static inline void fspi_ahb_read(struct nxp_fspi_priv *priv, u8 *rxbuf, int len)
 	void *rx_addr = NULL;
 
 	debug("FSPI AHB Read Invoked\n");
-	rx_addr = (void *)(uintptr_t)(priv->cur_amba_base + priv->sf_addr);
+	rx_addr = (void *)(uintptr_t)(priv->memmap_phy +
+			              priv->cur_amba_base +
+				      priv->sf_addr);
 
 	/* Read out the data directly from the AHB buffer. */
 	memcpy(rxbuf, rx_addr , len);
@@ -781,6 +787,7 @@ static int nxp_fspi_probe(struct udevice *bus)
 	priv->speed_hz = plat->speed_hz;
 	priv->amba_base[0] = plat->amba_base;
 	priv->amba_total_size = plat->amba_total_size;
+	priv->memmap_phy = plat->memmap_phy;
 	priv->flash_num = plat->flash_num;
 	priv->num_chipselect = plat->num_chipselect;
 
@@ -899,6 +906,7 @@ static int nxp_fspi_ofdata_to_platdata(struct udevice *bus)
 
 	plat->reg_base = res_regs.start;
 	plat->amba_base = 0;
+	plat->memmap_phy = res_mem.start;
 	plat->amba_total_size = res_mem.end;
 	plat->flash_num = flash_num;
 
