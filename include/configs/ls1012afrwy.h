@@ -31,6 +31,7 @@
 #ifndef CONFIG_SPL_BUILD
 #undef BOOT_TARGET_DEVICES
 #define BOOT_TARGET_DEVICES(func) \
+	func(MMC, mmc, 0) \
 	func(USB, usb, 0)
 #endif
 
@@ -62,6 +63,7 @@
 	"kernelhdr_addr_sd=0x4000\0"		\
 	"kernelheader_addr=0x1fc000\0"		\
 	"scriptaddr=0x80000000\0"		\
+	"scripthdraddr=0x80080000\0"		\
 	"fdtheader_addr_r=0x80100000\0"		\
 	"kernelheader_addr_r=0x80200000\0"	\
 	"kernelheader_size=0x40000\0"		\
@@ -71,7 +73,8 @@
 	"kernel_size=0x2800000\0"		\
 	"console=ttyS0,115200\0"		\
 	BOOTENV					\
-	"boot_scripts=ls1012afrdm_boot.scr\0"	\
+	"boot_scripts=ls1012afrwy_boot.scr\0"	\
+	"boot_script_hdr=hdr_ls1012afrwy_bs.out\0"	\
 	"scan_dev_for_boot_part="		\
 	     "part list ${devtype} ${devnum} devplist; "	\
 	     "env exists devplist || setenv devplist 1; "	\
