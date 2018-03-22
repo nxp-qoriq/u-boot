@@ -176,8 +176,10 @@ int pfe_firmware_init(void)
 	const void *raw_image_addr;
 	size_t raw_image_size = 0;
 	uint8_t *pfe_firmware;
+#ifdef CONFIG_CHAIN_OF_TRUST
 	uintptr_t pfe_esbc_hdr = 0;
 	uintptr_t pfe_img_addr = 0;
+#endif
 	int ret = 0;
 	int fw_count;
 
