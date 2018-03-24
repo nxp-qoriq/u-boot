@@ -103,7 +103,11 @@
 #define CONFIG_SYS_LS_MC_DRAM_DPC_OFFSET	0x00F00000
 #define CONFIG_SYS_LS_MC_DPL_MAX_LENGTH		0x20000
 #define CONFIG_SYS_LS_MC_DRAM_DPL_OFFSET	0x00F20000
+#ifdef CONFIG_ARCH_LX2160A_CFP
+#define CONFIG_SYS_LS_MC_BOOT_TIMEOUT_MS	200000
+#else
 #define CONFIG_SYS_LS_MC_BOOT_TIMEOUT_MS	5000
+#endif
 
 /* Define phy_reset function to boot the MC based on mcinitcmd.
  * This happens late enough to properly fixup u-boot env MAC addresses.
