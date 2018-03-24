@@ -97,6 +97,16 @@ config ARCH_LX2160A_EMU_COMMON
 	  some workarounds are required on top of rdb u-boot build.
 	  This config enables those workarounds.
 
+config ARCH_LX2160A_CFP
+	bool "Enable LX2160A CFP model build"
+	default n
+	help
+	  This config enables u-boot build for LX2160A CFP model.
+	  Due to Model limitaion, difference w.r.t. RDB board,
+	  some workarounds are required on top of rdb u-boot build.
+	  This config enables those workarounds. To build, use
+		configs/lx2160acfp_defconfig
+
 config SYS_MALLOC_F
 	bool "Enable malloc() pool before relocation"
 	default y if DM

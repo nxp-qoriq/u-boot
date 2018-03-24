@@ -134,7 +134,11 @@ int get_clocks(void)
 {
 	struct sys_info sys_info;
 	get_sys_info(&sys_info);
+#ifdef CONFIG_ARCH_LX2160A_CFP
+	gd->cpu_clk = 1800000000;
+#else
 	gd->cpu_clk = sys_info.freq_processor[0];
+#endif
 	gd->bus_clk = sys_info.freq_systembus / CONFIG_SYS_FSL_PCLK_DIV;
 	gd->mem_clk = sys_info.freq_ddrbus;
 #ifdef CONFIG_SYS_FSL_HAS_DP_DDR

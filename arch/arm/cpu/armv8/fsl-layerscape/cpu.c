@@ -425,15 +425,19 @@ uint get_svr(void)
 int print_cpuinfo(void)
 {
 	struct ccsr_gur __iomem *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
-	struct sys_info sysinfo;
 	char buf[32];
+	u32 svr = gur_in32(&gur->svr);
+#ifndef CONFIG_ARCH_LX2160A_CFP
+	struct sys_info sysinfo;
 	unsigned int i, core;
-	u32 type, rcw, svr = gur_in32(&gur->svr);
+	u32 type, rcw;
+#endif
 
 	puts("SoC: ");
 
 	cpu_name(buf);
 	printf(" %s (0x%x)\n", buf, svr);
+#ifndef CONFIG_ARCH_LX2160A_CFP
 	memset((u8 *)buf, 0x00, ARRAY_SIZE(buf));
 	get_sys_info(&sysinfo);
 	puts("Clock Configuration:");
@@ -475,6 +479,9 @@ int print_cpuinfo(void)
 		printf(" %08x", rcw);
 	}
 	puts("\n");
+#else
+	puts("RCW is not supported on CFP model\n");
+#endif
 
 	return 0;
 }
