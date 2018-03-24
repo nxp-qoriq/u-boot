@@ -136,10 +136,14 @@ static struct mm_region early_map[] = {
 #endif
 	{ CONFIG_SYS_FSL_DRAM_BASE1, CONFIG_SYS_FSL_DRAM_BASE1,
 	  CONFIG_SYS_FSL_DRAM_SIZE1,
+#ifdef CONFIG_DDR_BOOT
+	  PTE_BLOCK_MEMTYPE(MT_NORMAL) |
+#else
 #if defined(CONFIG_SPL) && !defined(CONFIG_SPL_BUILD)
 	  PTE_BLOCK_MEMTYPE(MT_NORMAL) |
 #else	/* Start with nGnRnE and PXN and UXN to prevent speculative access */
 	  PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) | PTE_BLOCK_PXN | PTE_BLOCK_UXN |
+#endif
 #endif
 	  PTE_BLOCK_OUTER_SHARE | PTE_BLOCK_NS
 	},

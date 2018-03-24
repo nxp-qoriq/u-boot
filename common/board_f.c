@@ -153,7 +153,8 @@ static int show_dram_config(void)
 {
 	unsigned long long size;
 
-#ifdef CONFIG_NR_DRAM_BANKS
+#if !defined(CONFIG_DDR_BOOT) && \
+		defined(CONFIG_NR_DRAM_BANKS)
 	int i;
 
 	debug("\nRAM Configuration:\n");
@@ -171,7 +172,9 @@ static int show_dram_config(void)
 #endif
 
 	print_size(size, "");
+#ifndef CONFIG_DDR_BOOT
 	board_add_ram_info(0);
+#endif
 	putc('\n');
 
 	return 0;

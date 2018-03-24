@@ -162,6 +162,7 @@ static inline void final_mmu_setup(void)
 
 	mem_map = final_map;
 
+#ifndef CONFIG_DDR_BOOT
 	/* Update mapping for DDR to actual size */
 	for (index = 0; index < ARRAY_SIZE(final_map) - 2; index++) {
 		/*
@@ -201,6 +202,7 @@ static inline void final_mmu_setup(void)
 			break;
 		}
 	}
+#endif
 
 #ifdef CONFIG_SYS_MEM_RESERVE_SECURE
 	if (gd->arch.secure_ram & MEM_RESERVE_SECURE_MAINTAINED) {
@@ -239,8 +241,13 @@ static inline void final_mmu_setup(void)
 	gd->arch.tlb_addr = tlb_addr_save;
 
 	/* Disable cache and MMU */
+#ifndef CONFIG_DDR_BOOT
 	dcache_disable();	/* TLBs are invalidated */
 	invalidate_icache_all();
+#else
+	flush_dcache_range(gd->arch.tlb_addr,
+			   gd->arch.tlb_addr + gd->arch.tlb_size);
+#endif
 
 	/* point TTBR to the new table */
 	set_ttbr_tcr_mair(el, gd->arch.tlb_addr, get_tcr(el, NULL, NULL),
@@ -938,7 +945,9 @@ __weak int dram_init(void)
 #ifndef CONFIG_SYS_DCACHE_OFF
 #if !defined(CONFIG_SPL) || defined(CONFIG_SPL_BUILD)
 	/* This will break-before-make MMU for DDR */
+#ifndef CONFIG_DDR_BOOT
 	update_early_mmu_table();
+#endif
 #endif
 #endif
 

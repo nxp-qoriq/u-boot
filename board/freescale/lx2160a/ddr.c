@@ -125,9 +125,15 @@ int fsl_initdram(void)
 #if defined(CONFIG_SPL) && !defined(CONFIG_SPL_BUILD)
 	gd->ram_size = fsl_ddr_sdram_size();
 #else
+#ifndef CONFIG_DDR_BOOT
 	puts("Initializing DDR....using SPD\n");
 
 	gd->ram_size = fsl_ddr_sdram();
+#else
+	puts("DDR initialized via backend\n");
+	gd->ram_size = CONFIG_SYS_SDRAM_SIZE;
+	puts("Limiting dram_size to SDRAM_SIZE.\n");
+#endif
 #endif
 
 	return 0;

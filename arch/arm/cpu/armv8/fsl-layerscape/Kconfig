@@ -305,6 +305,7 @@ config SYS_LS_PPA_FW_ADDR
 	default 0x40400000 if SYS_LS_PPA_FW_IN_XIP && QSPI_BOOT
 	default 0x580400000 if SYS_LS_PPA_FW_IN_XIP && ARCH_LS2080A
 	default 0x20400000 if SYS_LS_PPA_FW_IN_XIP && ARCH_LS1088A
+	default 0x80400000 if SYS_LS_PPA_FW_IN_XIP && ARCH_LX2160A && DDR_BOOT
 	default 0x20400000 if SYS_LS_PPA_FW_IN_XIP && ARCH_LX2160A
 	default 0x60400000 if SYS_LS_PPA_FW_IN_XIP
 	default 0x400000 if SYS_LS_PPA_FW_IN_MMC
@@ -340,6 +341,15 @@ config LS_PPA_ESBC_HDR_SIZE
 	help
 	  Length (in bytes) of PPA ESBC header to be copied from MMC/SD or
 	  NAND to memory to validate PPA image.
+
+config DDR_BOOT
+	bool "Enable boot via DDR for LX2"
+	help
+	  Enable boot via DDR for LX2
+	  DDR is configured via backend using ccs.
+	  Assumes running from DDR.
+	  Disables DDR initialization in u-boot.
+	  Verfied on CFP emulator.
 
 endmenu
 
