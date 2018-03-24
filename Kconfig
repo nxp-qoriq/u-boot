@@ -87,6 +87,16 @@ config ARCH_LX2160A_SIMU
 		./scripts/kconfig/merge_config.sh configs/lx2160ardb_defconfig
 		configs/lx2160asimu_defconfig
 
+config ARCH_LX2160A_EMU_COMMON
+	bool "Enable LX2160A EMU model build"
+	default n
+	help
+	  This config enables common code for u-boot build
+	  for LX2160A CFP model and PXP model..
+	  Due to Model limitaion, difference w.r.t. RDB board,
+	  some workarounds are required on top of rdb u-boot build.
+	  This config enables those workarounds.
+
 config SYS_MALLOC_F
 	bool "Enable malloc() pool before relocation"
 	default y if DM

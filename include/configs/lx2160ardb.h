@@ -9,6 +9,7 @@
 
 #include "lx2160a_common.h"
 
+#ifndef CONFIG_ARCH_LX2160A_EMU_COMMON
 /* Qixis */
 #define QIXIS_XMAP_MASK			0x07
 #define QIXIS_XMAP_SHIFT		5
@@ -70,6 +71,7 @@
 
 #define IN112525_IRQ_CCSR_MASK 0x600
 
+#endif
 #endif
 
 #include <asm/fsl_secure_boot.h>

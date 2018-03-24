@@ -119,6 +119,7 @@
 #define I2C_MUX_PCA_ADDR_PRI		0x77 /* Primary Mux*/
 #define I2C_MUX_CH_DEFAULT		0x8
 
+#ifndef CONFIG_ARCH_LX2160A_EMU_COMMON
 /* RTC */
 #define RTC
 #define CONFIG_RTC_PCF8563		1
@@ -136,6 +137,7 @@
 
 /* Qixis */
 #define CONFIG_FSL_QIXIS
+#endif
 #define CONFIG_QIXIS_I2C_ACCESS
 #define CONFIG_SYS_I2C_FPGA_ADDR		0x66
 
@@ -230,9 +232,16 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_BOOTCOMMAND	"fsl_mc apply dpl 0x20d00000;" \
 				"bootm 0x81000000"
 
+#ifndef CONFIG_ARCH_LX2160A_EMU_COMMON
 #define CONFIG_BOOTARGS		"console=ttyAMA0,115200 root=/dev/ram0 " \
 				"earlycon=pl011,mmio32,0x21c0000 " \
 				"ramdisk_size=0x2000000 default_hugepagesz=2m" \
 				" hugepagesz=2m hugepages=256"
+#else
+#define CONFIG_BOOTARGS		"console=ttyAMA0,115200 root=/dev/ram0 " \
+				"earlycon=pl011,mmio32,0x21c0000 " \
+				"ramdisk_size=0x2000000 default_hugepagesz=2m" \
+				" hugepagesz=2m hugepages=16 maxcpus=4"
+#endif
 
 #endif /* __LX2_COMMON_H */

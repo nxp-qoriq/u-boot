@@ -24,6 +24,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int board_eth_init(bd_t *bis)
 {
+#ifndef CONFIG_ARCH_LX2160A_EMU_COMMON
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)
 	struct memac_mdio_info mdio_info;
 	struct memac_mdio_controller *reg;
@@ -56,6 +57,7 @@ int board_eth_init(bd_t *bis)
 	gd->jt->phy_find_by_mask = phy_find_by_mask;
 	gd->jt->mdio_phydev_for_ethname = mdio_phydev_for_ethname;
 	gd->jt->miiphy_set_current_dev = miiphy_set_current_dev;
+#endif
 #endif
 	return pci_eth_init(bis);
 }

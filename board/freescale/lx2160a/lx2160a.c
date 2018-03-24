@@ -128,6 +128,7 @@ unsigned long get_board_ddr_clk(void)
 
 int board_init(void)
 {
+#ifndef CONFIG_ARCH_LX2160A_EMU_COMMON
 #ifdef CONFIG_ENV_IS_NOWHERE
 	gd->env_addr = (ulong)&default_environment[0];
 #endif
@@ -137,6 +138,7 @@ int board_init(void)
 
 #ifdef CONFIG_FSL_QIXIS
 	QIXIS_WRITE(rst_ctl, QIXIS_RST_CTL_RESET_EN);
+#endif
 #endif
 
 #ifdef CONFIG_FSL_CAAM
