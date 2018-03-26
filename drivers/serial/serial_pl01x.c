@@ -164,6 +164,15 @@ static int pl01x_generic_setbrg(struct pl01x_regs *regs, enum pl01x_type type,
 		temp = (8 * remainder) / baudrate;
 		fraction = (temp >> 1) + (temp & 1);
 
+#ifdef CONFIG_ARCH_LX2160A_EMU_COMMON
+#ifdef CONFIG_ARCH_LX2160A_CFP
+		divider = 0x1;
+		fraction = 0xd;
+#else
+		divider = 0x3;
+		fraction = 0x5;
+#endif
+#endif
 		writel(divider, &regs->pl011_ibrd);
 		writel(fraction, &regs->pl011_fbrd);
 
