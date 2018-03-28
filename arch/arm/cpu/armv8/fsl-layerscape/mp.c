@@ -50,6 +50,7 @@ void wake_secondary_core_n(int cluster, int core, int cluster_cores)
 	asm volatile("dsb st" : : : "memory");
 	rst->brrl |= 1 << ((cluster * cluster_cores) + core);
 	asm volatile("dsb st" : : : "memory");
+#ifndef CONFIG_ARCH_LX2160A
 	/*
 	 * scratchrw[6] register value is polled
 	 * when the value becomes zero, this means that this core is up
@@ -57,6 +58,7 @@ void wake_secondary_core_n(int cluster, int core, int cluster_cores)
 	 */
 	while (gur_in32(&gur->scratchrw[6]) != 0)
 		;
+#endif
 }
 #endif
 
