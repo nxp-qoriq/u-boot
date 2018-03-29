@@ -8,6 +8,7 @@
 #include <fsl-mc/ldpaa_wriop.h>
 #include <asm/io.h>
 #include <asm/arch/fsl_serdes.h>
+#include <asm/arch/soc.h>
 
 u32 dpmac_to_devdisr[] = {
 	[WRIOP1_DPMAC1] = FSL_CHASSIS3_DEVDISR2_DPMAC1,
@@ -109,3 +110,17 @@ void wriop_init_dpmac_qsgmii(int sd, int lane_prtcl)
 		break;
 	}
 }
+
+#if defined(CONFIG_TARGET_LX2160AQDS_INTERPOSER)
+#ifdef CONFIG_SYS_FSL_HAS_RGMII
+void fsl_rgmii_init(void)
+{
+/*
+ * TODO: RGMII support for ls2080a is added for mii mapping for
+ * lx2 interposer. This should ideally be done for LX2 Soc.
+ */
+	wriop_init_dpmac_enet_if(17, PHY_INTERFACE_MODE_RGMII);
+	wriop_init_dpmac_enet_if(18, PHY_INTERFACE_MODE_RGMII);
+}
+#endif
+#endif

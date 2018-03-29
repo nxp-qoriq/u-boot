@@ -133,7 +133,11 @@ const struct spi_flash_info spi_flash_ids[] = {
 	{"n25q1024a",	   INFO(0x20bb21, 0x0,  64 * 1024,  2048, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
 	{"mt25qu02g",	   INFO(0x20bb22, 0x0,  64 * 1024,  4096, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
 	{"mt25ql02g",	   INFO(0x20ba22, 0x0,  64 * 1024,  4096, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
+#if defined (CONFIG_TARGET_LX2160AQDS_INTERPOSER)
+	{"mt35xu512g",     INFO6(0x2c5b1a, 0x104100, 128 * 1024, 512, SECT_4K | ADDR_4B) },
+#else
 	{"mt35xu512g",     INFO6(0x2c5b1a, 0x104100, 128 * 1024, 512, E_FSR | SECT_4K | ADDR_4B) },
+#endif
 #endif
 #ifdef CONFIG_SPI_FLASH_SST		/* SST */
 	{"sst25vf040b",	   INFO(0xbf258d, 0x0,	64 * 1024,     8, SECT_4K | SST_WR) },
