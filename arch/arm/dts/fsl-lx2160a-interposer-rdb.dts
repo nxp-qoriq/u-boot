@@ -1,0 +1,43 @@
+/*
+ * NXP LX2 RDB interposer device tree source for QSPI-boot
+ *
+ * Author: Sriram Dash <sriram.dash@nxp.com>
+ *
+ * Copyright 2017-2018 NXP
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
+ */
+
+/dts-v1/;
+
+#include "fsl-ls2080a.dtsi"
+
+/ {
+	model = "NXP Layerscape LX2 RDB Interposer Board";
+	compatible = "fsl,lx2-interposer-rdb1", "fsl,ls2080a";
+
+	aliases {
+		spi0 = &qspi;
+	};
+};
+
+&qspi {
+	bus-num = <0>;
+	status = "okay";
+
+	qflash0: mt35xu512g@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-flash";
+		spi-max-frequency = <50000000>;
+		reg = <0>;
+	};
+
+	qflash1: mt35xu512g@1 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-flash";
+		spi-max-frequency = <50000000>;
+		reg = <1>;
+	};
+};

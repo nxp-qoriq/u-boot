@@ -111,7 +111,7 @@ void wriop_init_dpmac_qsgmii(int sd, int lane_prtcl)
 	}
 }
 
-#if defined(CONFIG_TARGET_LX2160AQDS_INTERPOSER)
+#if defined(CONFIG_TARGET_LX2160AQDS_INTERPOSER) || defined(CONFIG_TARGET_LX2160ARDB_INTERPOSER)
 #ifdef CONFIG_SYS_FSL_HAS_RGMII
 void fsl_rgmii_init(void)
 {
