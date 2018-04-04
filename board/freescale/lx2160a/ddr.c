@@ -126,9 +126,15 @@ int fsl_initdram(void)
 	gd->ram_size = fsl_ddr_sdram_size();
 #else
 #ifndef CONFIG_DDR_BOOT
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	puts("Initializing DDR....using fixed timing\n");
+
+	gd->ram_size = CONFIG_SYS_SDRAM_SIZE;
+#else
 	puts("Initializing DDR....using SPD\n");
 
 	gd->ram_size = fsl_ddr_sdram();
+#endif
 #else
 	puts("DDR initialized via backend\n");
 	gd->ram_size = CONFIG_SYS_SDRAM_SIZE;

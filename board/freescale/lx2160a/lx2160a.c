@@ -152,6 +152,7 @@ int board_init(void)
 	return 0;
 }
 
+#ifndef CONFIG_ARCH_LX2160A_PXP
 void detail_board_ddr_info(void)
 {
 	int i;
@@ -163,6 +164,7 @@ void detail_board_ddr_info(void)
 	print_size(ddr_size, "");
 	print_ddr_info(0);
 }
+#endif
 
 #if defined(CONFIG_ARCH_MISC_INIT)
 int arch_misc_init(void)
