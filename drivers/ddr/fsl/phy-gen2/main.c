@@ -15,6 +15,9 @@
 #include "include/init.h"
 #include "include/dimm.h"
 #include "include/phy_gen2_fit.h"
+#ifdef CONFIG_ARCH_LX2160A_PXP
+#include "include/io.h"
+#endif
 
 unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 		const memctl_options_t *popts,
@@ -79,6 +82,12 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 	       "LRDIMM" : "UDIMM", dimm->n_ranks, dimm->primary_sdram_width,
 	       dimm->data_width);
 
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	phy_io_write16(ctrl_num, t_apbonly | csr_micro_cont_mux_sel_addr, 0);
+	prog_tx_odt_drv_stren(ctrl_num, input);
+	phy_io_write16(ctrl_num, t_apbonly | csr_micro_cont_mux_sel_addr, 1);
+#endif
+
 	if (msg_1d)
 		free(msg_1d);
 	if (msg_2d)
@@ -87,5 +96,6 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 		free(input);
 	if (dimm)
 		free(dimm);
+
 	return 0;
 }

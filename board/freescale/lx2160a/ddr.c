@@ -9,6 +9,10 @@
 #include <fsl_ddr_dimm_params.h>
 #include <asm/arch/soc.h>
 #include <asm/arch/clock.h>
+#ifdef CONFIG_ARCH_LX2160A_PXP
+#include <asm/io.h>
+#include <fsl_ddr.h>
+#endif
 #include "ddr.h"
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -120,6 +124,144 @@ found:
 	}
 }
 
+#ifdef CONFIG_ARCH_LX2160A_PXP
+static void ddr_cntlr_fixed_settings(void)
+{
+#if 1
+	puts("Setting sysbardisable to 1; hni_pos and early_wr_comp to 0 (04D7)\n");
+	out_le32(0x1e00620,0x80000000);
+	out_le32(0x4080000,0x0);
+	out_le32(0x4090000,0x0);
+	out_le32(0x4080500,0x000004D7);
+	out_le32(0x4090500,0x000004D7);
+
+	puts("CCN HN-F snoop domains -> 0x000800 for 1 cluster!\n");
+	out_le32(0x4200210,0x000800);
+	out_le32(0x4210210,0x000800);
+	out_le32(0x4220210,0x000800);
+	out_le32(0x4230210,0x000800);
+	out_le32(0x4240210,0x000800);
+	out_le32(0x4250210,0x000800);
+	out_le32(0x4260210,0x000800);
+	out_le32(0x4270210,0x000800);
+
+	puts("CCN HN-F -> SBSX 3, 8 mapping\n");
+	out_le32(0x4200008,0x00000003);
+	out_le32(0x4210008,0x00000003);
+	out_le32(0x4220008,0x00000003);
+	out_le32(0x4230008,0x00000003);
+
+	out_le32(0x4240008,0x00000008);
+	out_le32(0x4250008,0x00000008);
+	out_le32(0x4260008,0x00000008);
+	out_le32(0x4270008,0x00000008);
+#endif
+	out_le32(0x01080000,0x000001ff);
+	out_le32(0x01080008,0x000001ff);
+	out_le32(0x01080010,0x020002ff);
+	out_le32(0x01080018,0x030003ff);
+	out_le32(0x01080040,0xfcfcfc80);
+	out_le32(0x01080044,0x7c787470);
+	out_le32(0x01080048,0x6c686460);
+	out_le32(0x0108004c,0x5c585450);
+	out_le32(0x01080050,0x4c48fc34);
+	out_le32(0x01080054,0x302c2824);
+	out_le32(0x01080058,0x201c1410);
+	out_le32(0x0108005c,0x0c403cfc);
+	out_le32(0x01080060,0xfcfc4438);
+	out_le32(0x01080064,0x18000001);
+	out_le32(0x01080080,0x80000322);
+	out_le32(0x01080084,0x80000322);
+	out_le32(0x01080088,0x00000322);
+	out_le32(0x0108008C,0x00000322);
+	out_le32(0x01080104,0x37c5c01c);
+	out_le32(0x01080108,0x44478844);
+	out_le32(0x0108010C,0x0005c9e6);
+	out_le32(0x01080100,0x134f2100);
+	out_le32(0x01080160,0x00000001);
+	out_le32(0x01080164,0x01203200);
+	out_le32(0x01080168,0x00000000);
+	out_le32(0x0108016C,0x3bb00000);
+	out_le32(0x01080250,0x00448c00);
+	out_le32(0x01080260,0x00000000);
+	out_le32(0x01080170,0x8a09070f);
+	out_le32(0x0108017C,0x00000000);
+	out_le32(0x01080114,0x00400100);
+	out_le32(0x01080118,0x00010c44);
+	out_le32(0x0108011C,0x00280000);
+	out_le32(0x01080204,0x00280000);
+	out_le32(0x0108020C,0x00280000);
+	out_le32(0x01080214,0x00280000);
+	out_le32(0x01080200,0x00010c44);
+	out_le32(0x01080208,0x00010c44);
+	out_le32(0x01080210,0x00010c44);
+	out_le32(0x01080220,0x00000400);
+	out_le32(0x01080224,0x04000000);
+	out_le32(0x01080228,0x00000400);
+	out_le32(0x0108022C,0x04000000);
+	out_le32(0x01080230,0x00000400);
+	out_le32(0x01080234,0x04000000);
+	out_le32(0x01080238,0x00000400);
+	out_le32(0x0108023C,0x04000000);
+	out_le32(0x01080124,0x30c00200);
+	out_le32(0x01080124,0x30c00080);
+	out_le32(0x01080128,0xa5a55a5a);
+	out_le32(0x01080E44,0x00000000);
+	out_le32(0x01080E48,0x00000000);
+	out_le32(0x01080E58,0x00ba0000);
+	out_le32(0x01080F04,0x00000080);
+	out_le32(0x01080F48,0x00200000);
+#if 0
+	out_le32(0x01080110,0xc5044000); /* SDRAM_CFG [BI] = 0 */
+#else
+	out_le32(0x01080110,0xc5044001); /* SDRAM_CFG [BI] = 1 */
+#endif
+
+#if 1
+	// Programming TZC memory
+	puts("Programming TZC1 memory\n");
+	out_le32(0x01100004,0x1);
+	out_le32(0x01100110,0xc0000000);
+	out_le32(0x01100114,0xffffffff);
+	out_le32(0x01100128,0xfffff000);
+	out_le32(0x0110012C,0xff);
+	out_le32(0x01100130,0xc0000001);
+	out_le32(0x01100134,0xffffffff);
+	out_le32(0x01100008,0x1);
+
+	puts("Programming TZC1_1 memory\n");
+	out_le32(0x01110004,0x1);
+	out_le32(0x01110110,0xc0000000);
+	out_le32(0x01110114,0xffffffff);
+	out_le32(0x01110128,0xfffff000);
+	out_le32(0x0111012C,0xff);
+	out_le32(0x01110130,0xc0000001);
+	out_le32(0x01110134,0xffffffff);
+	out_le32(0x01110008,0x1);
+
+	puts("Programming TZC2 memory\n");
+	out_le32(0x01120004,0x1);
+	out_le32(0x01120110,0xc0000000);
+	out_le32(0x01120114,0xffffffff);
+	out_le32(0x01120128,0xfffff000);
+	out_le32(0x0112012C,0xff);
+	out_le32(0x01120130,0xc0000001);
+	out_le32(0x01120134,0xffffffff);
+	out_le32(0x01120008,0x1);
+
+	puts("Programming TZC2_2 memory\n");
+	out_le32(0x01130004,0x1);
+	out_le32(0x01130110,0xc0000000);
+	out_le32(0x01130114,0xffffffff);
+	out_le32(0x01130128,0xfffff000);
+	out_le32(0x0113012C,0xff);
+	out_le32(0x01130130,0xc0000001);
+	out_le32(0x01130134,0xffffffff);
+	out_le32(0x01130008,0x1);
+#endif
+}
+#endif
+
 int fsl_initdram(void)
 {
 #if defined(CONFIG_SPL) && !defined(CONFIG_SPL_BUILD)
@@ -128,7 +270,8 @@ int fsl_initdram(void)
 #ifndef CONFIG_DDR_BOOT
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	puts("Initializing DDR....using fixed timing\n");
-
+	compute_phy_config_regs(0, NULL, NULL);
+	ddr_cntlr_fixed_settings();
 	gd->ram_size = CONFIG_SYS_SDRAM_SIZE;
 #else
 	puts("Initializing DDR....using SPD\n");

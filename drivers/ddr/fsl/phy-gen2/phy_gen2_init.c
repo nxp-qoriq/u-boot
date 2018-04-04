@@ -24,7 +24,11 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 
 	input->basic.dram_type = dimm->dramtype;
 	input->basic.dimm_type = dimm->dimmtype;
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	input->basic.num_dbyte = 0x9;
+#else
 	input->basic.num_dbyte = dimm->primary_sdram_width / 8;
+#endif
 	/* FIXME, is this right? */
 	input->basic.num_rank_dfi0 = dimm->n_ranks;
 	input->basic.frequency = freq;
@@ -35,12 +39,24 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 	input->basic.hard_macro_ver	= 3;
 	input->basic.num_pstates	= 1;
 	input->basic.dfi_freq_ratio	= 1;
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	input->basic.read_dbienable	= 0;
+#else
 	input->basic.read_dbienable	= 1;
+#endif
 	input->basic.num_active_dbyte_dfi0 = input->basic.num_dbyte;
 	/* FIXME */
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	input->basic.num_anib		= 0xc;
+#else
 	input->basic.num_anib		= 0xa;
+#endif
 	/* FIXME */
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	input->basic.train2d		= 0;
+#else
 	input->basic.train2d		= 1;
+#endif
 	/* FIXME: always enable 1D and 2D? */
 
 	input->adv.dram_byte_swap		= 0;
@@ -497,8 +513,13 @@ static int map_odtstren_p(int strength, int hard_macro_ver)
 	return val;
 }
 
+#ifdef CONFIG_ARCH_LX2160A_PXP
 void prog_tx_odt_drv_stren(const unsigned int ctrl_num,
 			   const struct input *input)
+#else
+static void prog_tx_odt_drv_stren(const unsigned int ctrl_num,
+			   const struct input *input)
+#endif
 {
 	int lane, byte, b_addr, c_addr;
 	int tx_odt_drv_stren;
@@ -518,7 +539,11 @@ void prog_tx_odt_drv_stren(const unsigned int ctrl_num,
 			b_addr = lane << 8;
 			addr = t_dbyte | c_addr | b_addr |
 				csr_tx_odt_drv_stren_addr;
+#ifdef CONFIG_ARCH_LX2160A_PXP
+			phy_io_write16_debug(ctrl_num, addr, 0);
+#else
 			phy_io_write16(ctrl_num, addr, tx_odt_drv_stren);
+#endif
 		}
 	}
 }

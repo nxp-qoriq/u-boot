@@ -156,8 +156,10 @@ void g_exec_fw(const unsigned int ctrl_num);
 void h_readmsgblock(const unsigned int ctrl_num);
 void i_load_pie(const unsigned int ctrl_num, const struct input *input,
 		const void *msg);
+#ifdef CONFIG_ARCH_LX2160A_PXP
 void prog_tx_odt_drv_stren(const unsigned int ctrl_num,
 			   const struct input *input);
+#endif
 
 
 #endif
