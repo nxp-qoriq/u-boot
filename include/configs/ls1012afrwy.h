@@ -50,6 +50,12 @@
 #define CONFIG_SYS_FSL_MMC_HAS_CAPBLT_VS33
 #endif
 
+#define CONFIG_PCIE1		/* PCIE controller 1 */
+
+#define CONFIG_NET_MULTI
+#define CONFIG_PCI_SCAN_SHOW
+#define CONFIG_CMD_PCI
+
 #undef CONFIG_EXTRA_ENV_SETTINGS
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	"verify=no\0"				\
