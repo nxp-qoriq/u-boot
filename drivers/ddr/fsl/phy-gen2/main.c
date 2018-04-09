@@ -150,6 +150,12 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 	void *msg_1d, *msg_2d;
 	size_t len;
 
+#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
+	printf("PHY_GEN2 FW Version: A2017.11\n");
+#else
+	printf("PHY_GEN2 FW Version: A2017.05\n");
+#endif
+
 	dimm = calloc(1, sizeof(struct dimm));
 	if (!dimm)
 		return -ENOMEM;

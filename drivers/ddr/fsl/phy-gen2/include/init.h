@@ -78,6 +78,9 @@
 #define csr_acsm_playback0x0_addr	0x80
 #define csr_acsm_playback1x0_addr	0x81
 #define csr_cal_rate_addr		0x88
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+#define csr_cal_zap_addr		0x89
+#endif
 #define csr_micro_reset_addr		0x99
 #define csr_dfi_rd_data_cs_dest_map_addr	0xb0
 #define csr_vref_in_global_addr		0xb2
@@ -109,6 +112,9 @@
 #define csr_cal_drv_str_pu50_lsb		4
 #define csr_cal_once_lsb			5
 #define csr_cal_interval_lsb		0
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+#define csr_cal_run_lsb			4
+#endif
 #define csr_global_vref_in_dac_lsb		3
 #define csr_gain_curr_adj_lsb		7
 #define csr_major_mode_dbyte_lsb		4
@@ -123,6 +129,9 @@
 #define csr_power_down_rcvr_lsb		0
 #define csr_power_down_rcvr_dqs_lsb	9
 #define csr_rx_pad_standby_en_lsb		10
+#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
+#define csr_rx_pad_standby_en_mask	0x400
+#endif
 #define csr_x4tg_lsb			0
 #define csr_reset_to_micro_mask		0x8
 #define csr_protect_mem_reset_mask	0x2
@@ -138,6 +147,9 @@
 #define csr_dfi_wr_destm1_lsb		2
 #define csr_dfi_wr_destm2_lsb		4
 #define csr_dfi_wr_destm3_lsb		6
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+#define csr_acsm_2t_mode_mask 0x40
+#endif
 
 struct impedance_mapping {
 	int ohm;
@@ -161,5 +173,9 @@ void prog_tx_odt_drv_stren(const unsigned int ctrl_num,
 			   const struct input *input);
 #endif
 
+#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
+void prog_seq0bdly0(const unsigned int ctrl_num,
+			   const struct input *input);
+#endif
 
 #endif

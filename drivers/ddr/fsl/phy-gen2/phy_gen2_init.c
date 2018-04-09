@@ -39,10 +39,12 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 	input->basic.hard_macro_ver	= 3;
 	input->basic.num_pstates	= 1;
 	input->basic.dfi_freq_ratio	= 1;
+#if !defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	input->basic.read_dbienable	= 0;
 #else
 	input->basic.read_dbienable	= 1;
+#endif
 #endif
 	input->basic.num_active_dbyte_dfi0 = input->basic.num_dbyte;
 	/* FIXME */
@@ -148,7 +150,12 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	msg_blk->acsm_odt_ctrl1		= WRODTPAT_RANK1 | RDODTPAT_RANK1;
 	msg_blk->acsm_odt_ctrl2		= WRODTPAT_RANK2 | RDODTPAT_RANK2;
 	msg_blk->acsm_odt_ctrl3		= WRODTPAT_RANK3 | RDODTPAT_RANK3;
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	msg_blk->enabled_dqs = (input->basic.num_active_dbyte_dfi0 +
+			input->basic.num_active_dbyte_dfi1) * 8;
+#else
 	msg_blk->enabled_dqs		= 0;	/* FIXME: 0? */
+#endif
 	msg_blk->phy_cfg			= input->adv.is2ttiming;
 	msg_blk->x16present		= input->basic.dram_data_width == 0x10
 						? msg_blk->cs_present : 0;
@@ -784,13 +791,28 @@ static void prog_cal_rate(const unsigned int ctrl_num,
 	phy_io_write16(ctrl_num, addr, cal_rate);
 }
 
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+static void prog_vref_in_global(const unsigned int ctrl_num,
+				const struct input *input,
+				const struct ddr4u1d *msg)
+#else
 static void prog_vref_in_global(const unsigned int ctrl_num,
 				const struct input *input)
+#endif
 {
 	int vref_in_global;
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	int global_vref_in_dac = 0;
+#else
 	int global_vref_in_dac = 81;	/* 0.75 * vddq */
+#endif
 	int global_vref_in_sel = 0;
 	uint32_t addr;
+
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	float phy_vref_prcnt = msg->phy_vref / 128.0;
+	global_vref_in_dac = (phy_vref_prcnt - 0.345) / 0.005;
+#endif
 
 	vref_in_global = global_vref_in_dac << csr_global_vref_in_dac_lsb |
 		       global_vref_in_sel;
@@ -908,23 +930,54 @@ static void prog_dfi_xlat(const unsigned int ctrl_num,
 	}
 }
 
+#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
+void prog_seq0bdly0(const unsigned int ctrl_num,
+			   const struct input *input)
+#else
 static void prog_seq0bdly0(const unsigned int ctrl_num,
 			   const struct input *input)
+#endif
 {
 	int ps_count[4];
+#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
+	double frq;
+#else
 	int frq;
+#endif
 	uint32_t addr;
+#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
+	int lower_freq_opt = 0;
+#endif
 
 	frq = input->basic.frequency >> 1;
+#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
+	ps_count[0] = (int)(0.5 * 0.25 * frq);
+	if (input->basic.frequency < 400)
+		lower_freq_opt = 3;
+	else if (input->basic.frequency < 533)
+		lower_freq_opt = 11;
+
+	ps_count[1] = (int)(1.0 * 0.25 * frq) - lower_freq_opt;
+	ps_count[2] = (int) (10.0 * 0.25 * frq);
+
+	if (frq > 266.5)
+		ps_count[3] = 44;
+	else if (frq > 200)
+		ps_count[3] = 33;
+	else
+		ps_count[3] = 16;
+#else
 	ps_count[0] = (frq >> 3) + 1;
 	ps_count[1] = (frq >> 2) + 1;
 	ps_count[2] = input->basic.frequency + (frq >> 1) + 1;
+
 	if (frq > 267)
 		ps_count[3] = 44;
 	else if (frq > 200)
 		ps_count[3] = 33;
 	else
 		ps_count[3] = 16;
+#endif
 	addr = t_master | csr_seq0bdly0_addr;
 	phy_io_write16(ctrl_num, addr, ps_count[0]);
 	addr = t_master | csr_seq0bdly1_addr;
@@ -935,11 +988,20 @@ static void prog_seq0bdly0(const unsigned int ctrl_num,
 	phy_io_write16(ctrl_num, addr, ps_count[3]);
 }
 
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+static void prog_dbyte_misc_mode(const unsigned int ctrl_num,
+				 const struct input *input,
+				 const struct ddr4u1d *msg)
+#else
 static void prog_dbyte_misc_mode(const unsigned int ctrl_num,
 				 const struct input *input)
+#endif
 {
 	int dbyte_misc_mode;
 	int dq_dqs_rcv_cntrl1;
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	int dq_dqs_rcv_cntrl1_1;
+#endif
 	int byte, c_addr;
 	uint32_t addr;
 
@@ -947,7 +1009,27 @@ static void prog_dbyte_misc_mode(const unsigned int ctrl_num,
 	dq_dqs_rcv_cntrl1 = 0x1ff << csr_power_down_rcvr_lsb		|
 			 0x1 << csr_power_down_rcvr_dqs_lsb	|
 			 0x1 << csr_rx_pad_standby_en_lsb;
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	dq_dqs_rcv_cntrl1_1 = (0x100 << csr_power_down_rcvr_lsb |
+			csr_rx_pad_standby_en_mask) ;
+#endif
 	for (byte = 0; byte < input->basic.num_dbyte; byte++) {
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+		c_addr = byte << 12;
+		if (byte <= input->basic.num_active_dbyte_dfi0 - 1) {
+			/* disable RDBI lane if not used. */
+			if ((input->basic.dram_data_width != 4) &&
+				(((msg->mr5 >> 12) & 0x1) == 0)) {
+				addr = t_dbyte | c_addr | csr_dq_dqs_rcv_cntrl1_addr;
+				phy_io_write16(ctrl_num, addr, dq_dqs_rcv_cntrl1_1);
+			}
+		} else {
+			addr = t_dbyte | c_addr | csr_dbyte_misc_mode_addr;
+			phy_io_write16(ctrl_num, addr, dbyte_misc_mode);
+			addr = t_dbyte | c_addr | csr_dq_dqs_rcv_cntrl1_addr;
+			phy_io_write16(ctrl_num, addr, dq_dqs_rcv_cntrl1);
+		}
+#else
 		if (byte <= input->basic.num_active_dbyte_dfi0 - 1)
 			continue;
 		c_addr = byte << 12;
@@ -955,6 +1037,7 @@ static void prog_dbyte_misc_mode(const unsigned int ctrl_num,
 		phy_io_write16(ctrl_num, addr, dbyte_misc_mode);
 		addr = t_dbyte | c_addr | csr_dq_dqs_rcv_cntrl1_addr;
 		phy_io_write16(ctrl_num, addr, dq_dqs_rcv_cntrl1);
+#endif
 	}
 }
 
@@ -970,13 +1053,23 @@ static void prog_master_x4config(const unsigned int ctrl_num,
 	phy_io_write16(ctrl_num, addr, master_x4config);
 }
 
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+static void prog_dmipin_present(const unsigned int ctrl_num,
+				const struct input *input,
+				const struct ddr4u1d *msg)
+#else
 static void prog_dmipin_present(const unsigned int ctrl_num,
 				const struct input *input)
+#endif
 {
 	int dmipin_present;
 	uint32_t addr = t_master | csr_dmipin_present_addr;
 
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	dmipin_present = (msg->mr5 >> 12) & 0x1;
+#else
 	dmipin_present = input->basic.read_dbienable;
+#endif
 	phy_io_write16(ctrl_num, addr, dmipin_present);
 }
 
@@ -999,16 +1092,30 @@ int c_init_phy_config(const unsigned int ctrl_num, struct input *input,
 	prog_cal_drv_str0(ctrl_num, input);
 	prog_cal_uclk_info(ctrl_num, input);
 	prog_cal_rate(ctrl_num, input);
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	prog_vref_in_global(ctrl_num, input, msg);
+#else
 	prog_vref_in_global(ctrl_num, input);
+#endif
 	prog_dq_dqs_rcv_cntrl(ctrl_num, input);
 	prog_mem_alert_control(ctrl_num, input);
 	prog_dfi_freq_ratio(ctrl_num, input);
 	prog_tristate_mode_ca(ctrl_num, input);
 	prog_dfi_xlat(ctrl_num, input);
+#if !defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
 	prog_seq0bdly0(ctrl_num, input);
+#endif
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	prog_dbyte_misc_mode(ctrl_num, input, msg);
+#else
 	prog_dbyte_misc_mode(ctrl_num, input);
+#endif
 	prog_master_x4config(ctrl_num, input);
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	prog_dmipin_present(ctrl_num, input, msg);
+#else
 	prog_dmipin_present(ctrl_num, input);
+#endif
 
 	return 0;
 }

@@ -11,7 +11,11 @@
 #include "include/init.h"
 
 /* FIXME: Replace with timer */
+#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
+#define TIMEOUTDEFAULT 100
+#else
 #define TIMEOUTDEFAULT 10
+#endif
 
 static int wait_fw_done(const unsigned int ctrl_num)
 {

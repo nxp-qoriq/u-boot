@@ -85,9 +85,34 @@ static void prog_acsm_ctr(const unsigned int ctrl_num,
 
 	phy_io_write16(ctrl_num, t_acsm | csr_acsm_ctrl13_addr, 0xf <<
 				csr_acsm_cke_enb_lsb);
+
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	phy_io_write16(ctrl_num, t_acsm | csr_acsm_ctrl0_addr,
+		       csr_acsm_par_mode_mask | csr_acsm_2t_mode_mask);
+#else
 	phy_io_write16(ctrl_num, t_acsm | csr_acsm_ctrl0_addr,
 		       csr_acsm_par_mode_mask);
+#endif
 }
+
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+static void prog_cal_rate(const unsigned int ctrl_num,
+			  const struct input *input)
+{
+	int cal_rate;
+	int cal_interval;
+	int cal_once;
+	uint32_t addr;
+
+	cal_interval = input->adv.cal_interval;
+	cal_once = input->adv.cal_once;
+	cal_rate = 0x1 << csr_cal_run_lsb 		|
+		  cal_once << csr_cal_once_lsb		|
+		  cal_interval << csr_cal_interval_lsb;
+	addr = t_master | csr_cal_rate_addr;
+	phy_io_write16(ctrl_num, addr, cal_rate);
+}
+#endif
 
 /* Only RDIMM requires msg_blk */
 void i_load_pie(const unsigned int ctrl_num, const struct input *input,
@@ -117,8 +142,15 @@ void i_load_pie(const unsigned int ctrl_num, const struct input *input,
 		       0x6152);
 	prog_acsm_playback(ctrl_num, input, msg);		/* rdimm */
 	prog_acsm_ctr(ctrl_num, input);				/* rdimm */
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	prog_seq0bdly0(ctrl_num, input);
+
+	phy_io_write16(ctrl_num, t_master | csr_cal_zap_addr, 0x1);
+	prog_cal_rate(ctrl_num, input);
+#endif
 	phy_io_write16(ctrl_num, t_drtub | csr_ucclk_hclk_enables_addr,
 		       input->basic.dimm_type == RDIMM ? 0x2 : 0);
 
 	phy_io_write16(ctrl_num, t_apbonly | csr_micro_cont_mux_sel_addr, 1);
+
 }
