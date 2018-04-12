@@ -172,7 +172,7 @@ config ARCH_LX2160A
 	select SYS_FSL_DDR_VER_50
 	select SYS_FSL_EC1 if !ARCH_LX2160A_EMU_COMMON
 	select SYS_FSL_EC2 if !ARCH_LX2160A_EMU_COMMON
-	select SYS_FSL_HAS_RGMII if !ARCH_LX2160A_EMU_COMMON
+	select SYS_FSL_HAS_RGMII if !ARCH_LX2160A_EMU_COMMON && !SYS_PEB_BOOT
 	select SYS_FSL_HAS_CCN508
 	select SYS_FSL_HAS_SEC if !ARCH_LX2160A_EMU_COMMON
 	select SYS_FSL_HAS_DDR4
@@ -219,6 +219,7 @@ config FSL_LSCH3_2
 config FSL_MC_ENET
 	bool "Management Complex network"
 	depends on ARCH_LS2080A || ARCH_LS1088A || ARCH_LX2160A
+	depends on !SYS_PEB_BOOT
 	default y
 	select RESV_RAM
 	help
@@ -251,7 +252,7 @@ config HAS_FEATURE_ENHANCED_MSI
 menu "Layerscape PPA"
 config FSL_LS_PPA
 	bool "FSL Layerscape PPA firmware support"
-	depends on !ARMV8_PSCI
+	depends on !ARMV8_PSCI || !SYS_PEB_BOOT
 	select ARMV8_SEC_FIRMWARE_SUPPORT
 	select SEC_FIRMWARE_ARMV8_PSCI
 	select ARMV8_SEC_FIRMWARE_ERET_ADDR_REVERT if FSL_LSCH2
@@ -410,6 +411,24 @@ config SYS_FSL_HAS_CCN504
 
 config SYS_FSL_HAS_CCN508
 	bool
+
+config SYS_PEB_BOOT
+	bool "Packet Express Buffer boot"
+	help
+		Enable u-boot booting from inside PEB by
+		relocating it from NOR to PEB.
+
+config SYS_PEB_BASE
+	hex
+	default 0x1c00000000 if ARCH_LX2160A
+
+config SYS_PEB_SIZE
+	hex
+	default 0x000200000 if ARCH_LX2160A
+
+config SYS_PEB_PHYS_MEM_BLK_SIZE
+	hex
+	default 0x040000000 if ARCH_LX2160A
 
 config SYS_FSL_HAS_DP_DDR
 	bool

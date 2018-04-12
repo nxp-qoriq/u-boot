@@ -1,5 +1,6 @@
 /*
  * Copyright 2015, Freescale Semiconductor
+ * Copyright 2018 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -16,7 +17,9 @@
  * Reserve secure memory
  * To be aligned with MMU block size
  */
+#ifndef CONFIG_SYS_PEB_BOOT
 #define CONFIG_SYS_MEM_RESERVE_SECURE	(66 * 1024 * 1024)	/* 66MB */
+#endif
 #define SPL_TLB_SETBACK	0x1000000	/* 16MB under effective memory top */
 
 #ifdef CONFIG_ARCH_LS2080A
