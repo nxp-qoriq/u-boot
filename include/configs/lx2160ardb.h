@@ -73,6 +73,11 @@
 #endif
 #endif
 
+/*  MMC  */
+#ifdef CONFIG_MMC
+#define CONFIG_FSL_ESDHC
+#endif
+
 #include <asm/fsl_secure_boot.h>
 
 #endif /* __LX2_RDB_H */

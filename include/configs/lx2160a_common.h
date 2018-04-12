@@ -117,6 +117,9 @@
 #define CONFIG_SYS_SPL_MALLOC_SIZE	0x00100000
 #define CONFIG_SYS_SPL_MALLOC_START	0x80200000
 #define CONFIG_SYS_MONITOR_LEN		(640 * 1024)
+#ifdef CONFIG_MMC
+#define CONFIG_SYS_FSL_MMC_HAS_CAPBLT_VS33
+#endif
 #endif
 
 /* Generic Timer Definitions */
