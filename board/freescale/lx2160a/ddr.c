@@ -264,6 +264,7 @@ static void ddr_cntlr_fixed_settings(void)
 
 int fsl_initdram(void)
 {
+#ifndef CONFIG_SYS_PEB_BOOT
 #if defined(CONFIG_SPL) && !defined(CONFIG_SPL_BUILD)
 	gd->ram_size = fsl_ddr_sdram_size();
 #else
@@ -283,6 +284,10 @@ int fsl_initdram(void)
 	gd->ram_size = CONFIG_SYS_SDRAM_SIZE;
 	puts("Limiting dram_size to SDRAM_SIZE.\n");
 #endif
+#endif
+#else
+	gd->ram_size = (phys_size_t)CONFIG_SYS_PEB_SIZE;
+	puts("Limiting dram size to PEB memsize\n");
 #endif
 
 	return 0;

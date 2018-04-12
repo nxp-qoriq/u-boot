@@ -153,7 +153,8 @@ static int show_dram_config(void)
 {
 	unsigned long long size;
 
-#if !defined(CONFIG_DDR_BOOT) && \
+#if (!defined(CONFIG_DDR_BOOT) && \
+		!defined(CONFIG_SYS_PEB_BOOT)) && \
 		defined(CONFIG_NR_DRAM_BANKS)
 	int i;
 
@@ -182,7 +183,9 @@ static int show_dram_config(void)
 
 __weak int dram_init_banksize(void)
 {
-#if defined(CONFIG_NR_DRAM_BANKS) && defined(CONFIG_SYS_SDRAM_BASE)
+#if !defined(CONFIG_SYS_PEB_BOOT) && \
+	defined(CONFIG_NR_DRAM_BANKS) && \
+	defined(CONFIG_SYS_SDRAM_BASE)
 	gd->bd->bi_dram[0].start = CONFIG_SYS_SDRAM_BASE;
 	gd->bd->bi_dram[0].size = get_effective_memsize();
 #endif

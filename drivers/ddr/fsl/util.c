@@ -330,7 +330,9 @@ void __weak detail_board_ddr_info(void)
 
 void board_add_ram_info(int use_default)
 {
+#ifndef CONFIG_SYS_PEB_BOOT
 	detail_board_ddr_info();
+#endif
 }
 
 #ifdef CONFIG_FSL_DDR_SYNC_REFRESH
