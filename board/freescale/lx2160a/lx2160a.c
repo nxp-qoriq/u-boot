@@ -28,6 +28,13 @@
 #include "../common/qixis.h"
 #endif
 
+#if defined (CONFIG_TARGET_LX2160AQDS)
+#define CFG_MUX_I2C_SDHC(reg, value)	((reg & 0x3f) | value)
+#define SET_CFG_MUX1_SDHC1_SDHC(reg) (reg & 0x3f)
+#define SET_CFG_MUX2_SDHC1_SPI(reg, value) ((reg & 0xcf) | value)
+#define SET_CFG_MUX3_SDHC1_SPI(reg, value) ((reg & 0xf8) | value)
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 int board_early_init_f(void)
@@ -73,10 +80,19 @@ int checkboard(void)
 	char buf[64];
 #ifdef CONFIG_FSL_QIXIS
 	u8 sw;
+	int clock;
+	static const char *const freq[] = {"100", "125", "156.25",
+					   "161.13", "322.26","" ,"" ,"" ,
+					    "" ,"" ,"" ,"" ,"","" ,"" ,
+					    "100 separate SSCG"};
 #endif
 
 	cpu_name(buf);
+#if defined (CONFIG_TARGET_LX2160AQDS)
+	printf("Board: %s-QDS, ", buf);
+#else
 	printf("Board: %s-RDB, ", buf);
+#endif
 
 #ifdef CONFIG_FSL_QIXIS
 	sw = QIXIS_READ(arch);
@@ -102,19 +118,138 @@ int checkboard(void)
 	}
 	printf("FPGA: v%d.%d\n", QIXIS_READ(scver), QIXIS_READ(tagdata));
 #endif
+
+#if defined (CONFIG_TARGET_LX2160AQDS) && defined (CONFIG_FSL_QIXIS)
+	printf("FPGA: v%d (%s), build %d",
+	       (int)QIXIS_READ(scver), qixis_read_tag(buf),
+	       (int)qixis_read_minor());
+	/* the timestamp string contains "\n" at the end */
+	printf(" on %s", qixis_read_time(buf));
+
+	puts("SERDES1 Reference : ");
+	sw = QIXIS_READ(brdcfg[2]);
+	clock = sw >> 4;
+	printf("Clock1 = %sMHz ", freq[clock]);
+	clock = sw & 0x0f;
+	printf("Clock2 = %sMHz", freq[clock]);
+
+	sw = QIXIS_READ(brdcfg[3]);
+	puts("\nSERDES2 Reference : ");
+	clock = sw >> 4;
+	printf("Clock1 = %sMHz ", freq[clock]);
+	clock = sw & 0x0f;
+	printf("Clock2 = %sMHz", freq[clock]);
+
+	sw = QIXIS_READ(brdcfg[12]);
+	puts("\nSERDES3 Reference : ");
+	clock = sw >> 4;
+	printf("Clock1 = %sMHz Clock2 = %sMHz\n", freq[clock], freq[clock]);
+#else
 	puts("SERDES1 Reference: Clock1 = 161.13MHz Clock2 = 161.13MHz\n");
 	puts("SERDES2 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
 	puts("SERDES3 Reference: Clock1 = 100MHz Clock2 = 100Hz\n");
+#endif
 	return 0;
 }
 
+#if defined (CONFIG_TARGET_LX2160AQDS)
+/*
+ * implementation of CONFIG_ESDHC_DETECT_QUIRK Macro.
+ */
+u8 qixis_esdhc_detect_quirk(void)
+{
+	/*for LX2160AQDS res1[1] @ offset 0x1A is SDHC1 Control/Status (SDHC1)
+	* SDHC1 Card ID:
+	* Specifies the type of card installed in the SDHC1 adapter slot.
+	* 000= (reserved)
+	* 001= eMMC V4.5 adapter is installed.
+	* 010= SD/MMC 3.3V adapter is installed.
+	* 011= eMMC V4.4 adapter is installed.
+	* 100= eMMC V5.0 adapter is installed.
+	* 101= MMC card/Legacy (3.3V) adapter is installed.
+	* 110= SDCard V2/V3 adapter installed.
+	* 111= no adapter is installed.
+	*/
+	return ((QIXIS_READ(res1[1]) & QIXIS_SDID_MASK) != QIXIS_ESDHC_NO_ADAPTER);
+}
+
+int config_board_mux(void)
+{
+	u8 reg11, reg5;
+
+	/* - Routes {I2C2_SCL, I2C2_SDA} to SDHC1 as {SDHC1_CD_B, SDHC1_WP}.
+	 * - Routes {I2C3_SCL, I2C3_SDA} to CAN transceiver as {CAN1_TX,CAN1_RX}.
+	 * - Routes {I2C4_SCL, I2C4_SDA} to CAN transceiver as {CAN2_TX,CAN2_RX}.
+	 * - Qixis and remote systems are isolated from the I2C1 bus.
+	 *   Processor connections are still available.
+	 * - SPI2 CS2_B controls EN25S64 SPI memory device.
+	 * - SPI3 CS2_B controls EN25S64 SPI memory device.
+	 * - EC2 connects to PHY #2 using RGMII protocol.
+	 * - CLK_OUT connects to FPGA for clock measurement.
+	 */
+	reg5 = QIXIS_READ(brdcfg[5]);
+	reg5 = CFG_MUX_I2C_SDHC(reg5, 0x40);
+	QIXIS_WRITE(brdcfg[5], reg5);
+
+	/* - Routes {SDHC1_CMD, SDHC1_CLK } to SDHC1 adapter slot.
+	 *          {SDHC1_DAT3, SDHC1_DAT2} to SDHC1 adapter slot.
+	 *          {SDHC1_DAT1, SDHC1_DAT0} to SDHC1 adapter slot.
+	 */
+	reg11 = QIXIS_READ(brdcfg[11]);
+	reg11 = SET_CFG_MUX1_SDHC1_SDHC(reg11);
+	QIXIS_WRITE(brdcfg[11], reg11);
+
+	/* - Routes {SDHC1_DAT4} to SPI3 devices as {SPI3_M_CS0_B}. */
+	reg11 = QIXIS_READ(brdcfg[11]);
+	reg11 = SET_CFG_MUX2_SDHC1_SPI(reg11, 0x10);
+	QIXIS_WRITE(brdcfg[11], reg11);
+
+	/* - Routes {SDHC1_DAT5, SDHC1_DAT6} nowhere.
+	 * {SDHC1_DAT7, SDHC1_DS } to SPI3 devices as {nothing, SPI3_M0_CLK }.
+	 * {I2C5_SCL, I2C5_SDA } to SPI3 devices as {SPI3_M0_MOSI, SPI3_M0_MISO}.
+	 */
+	reg11 = QIXIS_READ(brdcfg[11]);
+	reg11 = SET_CFG_MUX3_SDHC1_SPI(reg11, 0x01);
+	QIXIS_WRITE(brdcfg[11], reg11);
+
+	return 0;
+}
+#endif
+
 unsigned long get_board_sys_clk(void)
 {
+#if defined (CONFIG_TARGET_LX2160AQDS) && !defined(CONFIG_ARCH_LX2160A_SIMU)
+	u8 sysclk_conf = QIXIS_READ(brdcfg[1]);
+
+	switch (sysclk_conf & 0x03) {
+	case QIXIS_SYSCLK_100:
+		return 100000000;
+	case QIXIS_SYSCLK_125:
+		return 125000000;
+	case QIXIS_SYSCLK_133:
+		return 133333333;
+	}
 	return 100000000;
+#else
+	return 100000000;
+#endif
 }
 
 unsigned long get_board_ddr_clk(void)
 {
+#if defined (CONFIG_TARGET_LX2160AQDS) && !defined(CONFIG_ARCH_LX2160A_SIMU)
+	u8 ddrclk_conf = QIXIS_READ(brdcfg[1]);
+
+	switch ((ddrclk_conf & 0x30) >> 4) {
+	case QIXIS_DDRCLK_100:
+		return 100000000;
+	case QIXIS_DDRCLK_125:
+		return 125000000;
+	case QIXIS_DDRCLK_133:
+		return 133333333;
+	}
+	return 100000000;
+#else
 	/*
 	 *The value returned here depends on
 	 *clock of reference platform.
@@ -124,6 +259,7 @@ unsigned long get_board_ddr_clk(void)
 	 *TODO: Add code changes for RDB, QDS.
 	 */
 	return 133333333;
+#endif
 }
 
 int board_init(void)
@@ -169,6 +305,10 @@ void detail_board_ddr_info(void)
 #if defined(CONFIG_ARCH_MISC_INIT)
 int arch_misc_init(void)
 {
+#if defined (CONFIG_TARGET_LX2160AQDS)
+	config_board_mux();
+#endif
+
 	return 0;
 }
 #endif

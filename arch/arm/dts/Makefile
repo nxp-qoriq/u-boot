@@ -190,6 +190,7 @@ dtb-$(CONFIG_FSL_LSCH3) += fsl-ls2080a-qds.dtb \
 	fsl-ls1088a-rdb.dtb \
 	fsl-ls1088a-qds.dtb \
 	fsl-lx2160a-rdb.dtb \
+	fsl-lx2160a-qds.dtb \
 	fsl-lx2160a-interposer-qds.dtb \
 	fsl-lx2160a-interposer-rdb.dtb
 dtb-$(CONFIG_FSL_LSCH2) += fsl-ls1043a-qds-duart.dtb \
