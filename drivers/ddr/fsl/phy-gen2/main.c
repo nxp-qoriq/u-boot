@@ -103,6 +103,12 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 {
 	printf("DDR PHY Debug Path\n");
 
+#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
+	printf("PHY_GEN2 FW Version: A2017.11\n");
+#else
+	printf("PHY_GEN2 FW Version: A2017.05\n");
+#endif
+
 	/* configure phy register */
 	load_image(ctrl_num, CSR);
 
