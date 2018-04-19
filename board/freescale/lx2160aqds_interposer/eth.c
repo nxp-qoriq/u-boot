@@ -475,6 +475,9 @@ int board_eth_init(bd_t *bis)
 		}
 	}
 
+	wriop_set_phy_address(WRIOP1_DPMAC17, RGMII_PHY_ADDR1);
+	wriop_set_phy_address(WRIOP1_DPMAC18, RGMII_PHY_ADDR2);
+
 	/*Set MDIO bus 1 muxing front-ends for RGMII interfaces*/
 	for (ioslot = EMI1_RGMII1; ioslot <= EMI1_RGMII2; ioslot++) {
 		i = (ioslot - EMI1_RGMII1) + 1;

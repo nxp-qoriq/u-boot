@@ -184,7 +184,7 @@ u8 qixis_esdhc_detect_quirk(void);
 #define CORTINA_NO_FW_UPLOAD
 #define CORTINA_PHY_ADDR1	0x0
 
-#define CONFIG_PHY_ATHEROS
+#define CONFIG_PHY_REALTEK
 #define RGMII_PHY_ADDR1		0x01
 #define RGMII_PHY_ADDR2		0x02
 
