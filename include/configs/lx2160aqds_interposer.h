@@ -126,8 +126,6 @@ u8 qixis_esdhc_detect_quirk(void);
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS 3
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 5
 
-#define CONFIG_FSL_MEMAC
-
 #define BOOT_TARGET_DEVICES(func) \
 	func(USB, usb, 0) \
 	func(MMC, mmc, 0) \
@@ -169,6 +167,7 @@ u8 qixis_esdhc_detect_quirk(void);
 			   " && bootm $kernel_start"
 
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)
+#define CONFIG_FSL_MEMAC
 #define CONFIG_PHYLIB
 #define CONFIG_PHYLIB_10G
 #define CONFIG_MII
@@ -183,7 +182,6 @@ u8 qixis_esdhc_detect_quirk(void);
 
 #define CONFIG_PHY_CORTINA
 #define CORTINA_NO_FW_UPLOAD
-#define CORTINA_FW_IN_EEPROM
 #define CORTINA_PHY_ADDR1	0x0
 
 #define CONFIG_PHY_ATHEROS

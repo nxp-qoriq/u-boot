@@ -29,9 +29,6 @@
 #endif
 #include "../common/vid.h"
 
-#define PIN_MUX2_SDHC1		0x30
-#define SCFG_QSPICLKCTRL_DIV_20	(5 << 27)
-
 #define CFG_MUX_I2C_SDHC(reg, value)	((reg & 0x3f) | value)
 #define SET_CFG_MUX1_SDHC1_SDHC(reg) (reg & 0x3f)
 #define SET_CFG_MUX2_SDHC1_SPI(reg, value) ((reg & 0xcf) | value)
