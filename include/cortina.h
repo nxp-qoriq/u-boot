@@ -68,6 +68,10 @@
 #define mseq_edc_bist_done (0x1<<0)
 #define mseq_edc_bist_fail (0x1<<8)
 
+/* Cortina CS4223 */
+#define CS4223_EEPROM_STATUS  0x5001
+#define CS4223_EEPROM_FIRMWARE_LOADDONE  0x1
+
 struct cortina_reg_config {
 	unsigned short reg_addr;
 	unsigned short reg_value;

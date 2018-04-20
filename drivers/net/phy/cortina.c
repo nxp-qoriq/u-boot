@@ -286,6 +286,39 @@ int cs4340_startup(struct phy_device *phydev)
 	return 0;
 }
 
+int cs4223_phy_init(struct phy_device *phydev)
+{
+	int reg_value;
+
+	reg_value = phy_read(phydev, 0x00, CS4223_EEPROM_STATUS);
+	if (!(reg_value & CS4223_EEPROM_FIRMWARE_LOADDONE)) {
+		printf("%s CS4223 Firmware not present in EERPOM\n", __func__);
+		return -1;
+	}
+
+	return 0;
+}
+
+int cs4223_config(struct phy_device *phydev)
+{
+	return cs4223_phy_init(phydev);
+}
+
+int cs4223_probe(struct phy_device *phydev)
+{
+	phydev->flags = PHY_FLAG_BROKEN_RESET;
+	return 0;
+}
+
+int cs4223_startup(struct phy_device *phydev)
+{
+	phydev->link = 1;
+	/* For now just lie and say it's 10G all the time */
+	phydev->speed = SPEED_10000;
+	phydev->duplex = DUPLEX_FULL;
+	return 0;
+}
+
 struct phy_driver cs4340_driver = {
 	.name = "Cortina CS4315/CS4340",
 	.uid = PHY_UID_CS4340,
@@ -300,9 +333,23 @@ struct phy_driver cs4340_driver = {
 	.shutdown = &gen10g_shutdown,
 };
 
+struct phy_driver cs4223_driver = {
+	.name = "Cortina CS4223",
+	.uid = PHY_UID_CS4223,
+	.mask = 0x0ffff00f,
+	.features = PHY_10G_FEATURES,
+	.mmds = (MDIO_DEVS_PMAPMD | MDIO_DEVS_PCS |
+		 MDIO_DEVS_AN),
+	.config = &cs4223_config,
+	.probe	= &cs4223_probe,
+	.startup = &cs4223_startup,
+	.shutdown = &gen10g_shutdown,
+};
+
 int phy_cortina_init(void)
 {
 	phy_register(&cs4340_driver);
+	phy_register(&cs4223_driver);
 	return 0;
 }
 
@@ -321,7 +368,7 @@ int get_phy_id(struct mii_dev *bus, int addr, int devad, u32 *phy_id)
 		return -EIO;
 	*phy_id |= (phy_reg & 0xffff);
 
-	if (*phy_id == PHY_UID_CS4340)
+	if ((*phy_id == PHY_UID_CS4340) || (*phy_id == PHY_UID_CS4223))
 		return 0;
 
 	/*
