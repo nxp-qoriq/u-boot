@@ -153,7 +153,8 @@ static int show_dram_config(void)
 {
 	unsigned long long size;
 
-#if (!defined(CONFIG_DDR_BOOT) && \
+#if (!defined(CONFIG_ARCH_LX2160A_PXP) && \
+		!defined(CONFIG_DDR_BOOT) && \
 		!defined(CONFIG_SYS_PEB_BOOT)) && \
 		defined(CONFIG_NR_DRAM_BANKS)
 	int i;
@@ -173,7 +174,7 @@ static int show_dram_config(void)
 #endif
 
 	print_size(size, "");
-#ifndef CONFIG_DDR_BOOT
+#if !defined(CONFIG_ARCH_LX2160A_PXP) && !defined(CONFIG_DDR_BOOT)
 	board_add_ram_info(0);
 #endif
 	putc('\n');

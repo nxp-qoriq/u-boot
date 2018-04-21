@@ -949,13 +949,11 @@ void update_early_mmu_table(void)
 __weak int dram_init(void)
 {
 	fsl_initdram();
-#ifndef CONFIG_ARCH_LX2160A_PXP
 #ifndef CONFIG_SYS_DCACHE_OFF
 #if !defined(CONFIG_SPL) || defined(CONFIG_SPL_BUILD)
 	/* This will break-before-make MMU for DDR */
 #ifndef CONFIG_DDR_BOOT
 	update_early_mmu_table();
-#endif
 #endif
 #endif
 #endif
