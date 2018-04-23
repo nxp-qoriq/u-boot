@@ -163,7 +163,7 @@ u8 qixis_esdhc_detect_quirk(void);
 	" 0x20e00000 \0"                       \
 
 #undef CONFIG_BOOTCOMMAND
-#define CONFIG_BOOTCOMMAND "run mcinitcmd && fsl_mc lazyapply dpl 0x20d00000" \
+#define CONFIG_BOOTCOMMAND "run mcinitcmd && fsl_mc apply dpl 0x20d00000" \
 			   " && bootm $kernel_start"
 
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)

@@ -181,7 +181,7 @@ unsigned long get_board_ddr_clk(void);
 				" hugepagesz=2m hugepages=256"
 
 #undef CONFIG_BOOTCOMMAND
-#define CONFIG_BOOTCOMMAND "run mcinitcmd && fsl_mc lazyapply dpl 0x20d00000" \
+#define CONFIG_BOOTCOMMAND "run mcinitcmd && fsl_mc apply dpl 0x20d00000" \
 			   " && bootm $kernel_start"
 
 /* MAC/PHY configuration */
