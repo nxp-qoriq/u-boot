@@ -289,6 +289,7 @@ static void initialize_dpmac_to_slot(void)
 		lane_to_slot_fsm1[5] = IO_SLOT_3;
 		lane_to_slot_fsm1[6] = IO_SLOT_3;
 		lane_to_slot_fsm1[7] = IO_SLOT_3;
+		break;
 	case 0x4B:
 		lane_to_slot_fsm1[0] = IO_SLOT_1;
 		lane_to_slot_fsm1[1] = IO_SLOT_1;
