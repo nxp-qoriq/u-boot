@@ -189,8 +189,13 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 		msg_blk->phy_odt_impedance = 0;
 		msg_blk->phy_drv_impedance = 0;
 	} else {
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+		msg_blk->phy_odt_impedance = 0;
+		msg_blk->phy_drv_impedance = 0;
+#else
 		msg_blk->phy_odt_impedance = input->adv.odtimpedance;
 		msg_blk->phy_drv_impedance = input->adv.tx_impedance;
+#endif
 	}
 	msg_blk->bpznres_val		= input->adv.ext_cal_res_val;
 	msg_blk->enabled_dqs		= input->basic.num_active_dbyte_dfi0 *
