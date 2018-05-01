@@ -2370,7 +2370,7 @@ compute_fsl_memctl_config_regs(const unsigned int ctrl_num,
 
 	set_ddr_sdram_cfg(ddr, popts, common_dimm);
 	ip_rev = fsl_ddr_get_version(ctrl_num);
-	if (ip_rev > 0x40400)
+	if (ip_rev > 0x40400 && ip_rev < 0x50500)
 		unq_mrs_en = 1;
 
 	if ((ip_rev > 0x40700) && (popts->cswl_override != 0))
