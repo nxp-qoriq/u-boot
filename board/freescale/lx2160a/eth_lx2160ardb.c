@@ -4,8 +4,6 @@
  * SPDX-License-Identifier:     GPL-2.0+
  */
 
-/*TODO: Add complete support of ethernet
- */
 #include <common.h>
 #include <command.h>
 #include <netdev.h>
@@ -28,6 +26,16 @@ int board_eth_init(bd_t *bis)
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)
 	struct memac_mdio_info mdio_info;
 	struct memac_mdio_controller *reg;
+#ifndef CONFIG_ARCH_LX2160A_SIMU
+	int i, interface;
+	struct mii_dev *dev;
+	struct ccsr_gur *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
+	u32 srds_s1;
+
+	srds_s1 = in_le32(&gur->rcwsr[28]) &
+				FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_MASK;
+	srds_s1 >>= FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_SHIFT;
+#endif
 
 	reg = (struct memac_mdio_controller *)CONFIG_SYS_FSL_WRIOP1_MDIO1;
 	mdio_info.regs = reg;
@@ -43,8 +51,47 @@ int board_eth_init(bd_t *bis)
 	/* Register the EMI 2 */
 	fm_memac_mdio_init(bis, &mdio_info);
 
+#ifndef CONFIG_ARCH_LX2160A_SIMU
+	switch (srds_s1) {
+	case 0x2A:
+		wriop_set_phy_address(WRIOP1_DPMAC2, CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC3, AQR107_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC4, AQR107_PHY_ADDR2);
+		wriop_set_phy_address(WRIOP1_DPMAC5, INPHI_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC6, INPHI_PHY_ADDR1);
+		break;
+
+	default:
+		printf("SerDes1 protocol 0x%x is not supported on LS2080aRDB\n",
+		       srds_s1);
+		goto next;
+		break;
+	}
+
+	for (i = WRIOP1_DPMAC2; i <= WRIOP1_DPMAC6; i++) {
+		interface = wriop_get_enet_if(i);
+		switch (interface) {
+		case PHY_INTERFACE_MODE_XGMII:
+			dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO1_NAME);
+			wriop_set_mdio(i, dev);
+			break;
+		case PHY_INTERFACE_MODE_25G_AUI:
+			dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO2_NAME);
+			wriop_set_mdio(i, dev);
+			break;
+		case PHY_INTERFACE_MODE_XLAUI:
+			dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO1_NAME);
+			wriop_set_mdio(i, dev);
+			break;
+		default:
+			break;
+		}
+	}
+
+#endif
+next:
 	cpu_eth_init(bis);
-#endif /* CONFIG_FMAN_ENET */
+#endif /* CONFIG_FSL_MC_ENET */
 
 #ifdef CONFIG_PHY_AQUANTIA
 	/*
