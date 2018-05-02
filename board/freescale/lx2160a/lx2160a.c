@@ -250,15 +250,11 @@ unsigned long get_board_ddr_clk(void)
 	}
 	return 100000000;
 #else
-	/*
-	 *The value returned here depends on
-	 *clock of reference platform.
-	 *As per LX2160A RDB schematics, this is 100MHz.
-	 *For QDS, it dependes on FPGA.
-	 *For Simulator, 133MHz is tested to be working fine.
-	 *TODO: Add code changes for RDB, QDS.
-	 */
+#if defined CONFIG_ARCH_LX2160A_SIMU
 	return 133333333;
+#else
+	return 100000000;
+#endif
 #endif
 }
 
