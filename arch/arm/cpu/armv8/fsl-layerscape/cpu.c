@@ -162,6 +162,7 @@ static inline void final_mmu_setup(void)
 
 	mem_map = final_map;
 
+#ifndef CONFIG_SYS_PEB_BOOT
 #ifndef CONFIG_DDR_BOOT
 	/* Update mapping for DDR to actual size */
 	for (index = 0; index < ARRAY_SIZE(final_map) - 2; index++) {
@@ -226,6 +227,7 @@ static inline void final_mmu_setup(void)
 			gd->arch.tlb_addr = tlb_addr_save;
 		}
 	}
+#endif
 #endif
 
 	/* Reset the fill ptr */
@@ -293,7 +295,9 @@ void enable_caches(void)
 	mmu_setup();
 	__asm_invalidate_tlb_all();
 	icache_enable();
+#ifndef CONFIG_SYS_PEB_BOOT
 	dcache_enable();
+#endif
 }
 #endif
 
@@ -952,7 +956,7 @@ __weak int dram_init(void)
 #ifndef CONFIG_SYS_DCACHE_OFF
 #if !defined(CONFIG_SPL) || defined(CONFIG_SPL_BUILD)
 	/* This will break-before-make MMU for DDR */
-#ifndef CONFIG_DDR_BOOT
+#if !defined(CONFIG_DDR_BOOT) && !defined(CONFIG_SYS_PEB_BOOT)
 	update_early_mmu_table();
 #endif
 #endif
