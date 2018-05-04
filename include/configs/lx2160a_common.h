@@ -28,11 +28,15 @@
 #define CONFIG_SYS_TEXT_BASE		0x20100000
 #define CONFIG_ENV_IS_NOWHERE
 #else
+#ifdef CONFIG_SPL
+#define CONFIG_SYS_TEXT_BASE		0x80400000
+#else
 #define CONFIG_SYS_TEXT_BASE		0x20100000
 #ifndef CONFIG_SYS_PEB_BOOT
 #define CONFIG_ENV_IS_IN_SPI_FLASH
 #else
 #define CONFIG_ENV_IS_NOWHERE
+#endif
 #endif
 #endif
 #define CONFIG_SUPPORT_RAW_INITRD
@@ -88,6 +92,33 @@
 /* SMP Definitinos  */
 #define CPU_RELEASE_ADDR		secondary_boot_func
 
+/* SPL build */
+#ifdef CONFIG_SPL_BUILD
+#define SPL_NO_BOARDINFO
+#define SPL_NO_QIXIS
+#define SPL_NO_PCI
+#define SPL_NO_ENV
+#define SPL_NO_RTC
+#define SPL_NO_USB
+#define SPL_NO_SATA
+#define SPL_NO_QSPI
+#undef CONFIG_DISPLAY_CPUINFO
+#endif
+
+#ifdef CONFIG_SPL
+#define CONFIG_SPL_BSS_START_ADDR	0x80100000
+#define CONFIG_SPL_BSS_MAX_SIZE		0x00100000
+#define CONFIG_SPL_FRAMEWORK
+#define CONFIG_SPL_LDSCRIPT		"arch/arm/cpu/armv8/u-boot-spl.lds"
+#define CONFIG_SPL_MAX_SIZE		0x20000
+#define CONFIG_SPL_STACK		(CONFIG_SYS_FSL_OCRAM_BASE + 0x9ff0)
+#define CONFIG_SPL_TARGET		"u-boot-with-spl.bin"
+#define CONFIG_SPL_TEXT_BASE		0x1800A000
+#define CONFIG_SYS_SPL_MALLOC_SIZE	0x00100000
+#define CONFIG_SYS_SPL_MALLOC_START	0x80200000
+#define CONFIG_SYS_MONITOR_LEN		(640 * 1024)
+#endif
+
 /* Generic Timer Definitions */
 /*
  * This is not an accurate number. It is used in start.S. The frequency
@@ -105,7 +136,11 @@
 
 /* Serial Port */
 #define CONFIG_CONS_INDEX		0
+#ifdef CONFIG_DM_SERIAL
 #define CONFIG_PL01X_SERIAL
+#else
+#define CONFIG_PL011_SERIAL
+#endif
 #define CONFIG_PL011_CLOCK		(get_bus_freq(0) / 4)
 #define CONFIG_SYS_SERIAL0		0x21c0000
 #define CONFIG_SYS_SERIAL1		0x21d0000
@@ -218,11 +253,18 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_HWCONFIG
 #define HWCONFIG_BUFFER_SIZE		128
 
+#ifdef CONFIG_SD_BOOT
+#define CONFIG_SYS_MMC_ENV_DEV          0
+#define CONFIG_ENV_IS_IN_MMC
+#define CONFIG_ENV_OFFSET               0x200000
+#define CONFIG_ENV_SIZE                 0x20000
+#else
 #define CONFIG_ENV_SIZE			0x2000          /* 8KB */
 #define CONFIG_ENV_SECT_SIZE		0x20000
 #define CONFIG_ENV_OFFSET		0x300000        /* 3MB */
 #define CONFIG_ENV_ADDR			(CONFIG_SYS_FLASH_BASE + \
 					 CONFIG_ENV_OFFSET)
+#endif
 
 /* Allow to overwrite serial and ethaddr */
 #define CONFIG_ENV_OVERWRITE
