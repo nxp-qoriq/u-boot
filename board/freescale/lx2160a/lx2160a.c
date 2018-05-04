@@ -80,11 +80,13 @@ int checkboard(void)
 	char buf[64];
 #ifdef CONFIG_FSL_QIXIS
 	u8 sw;
+#ifdef CONFIG_TARGET_LX2160AQDS
 	int clock;
 	static const char *const freq[] = {"100", "125", "156.25",
 					   "161.13", "322.26","" ,"" ,"" ,
 					    "" ,"" ,"" ,"" ,"","" ,"" ,
 					    "100 separate SSCG"};
+#endif
 #endif
 
 	cpu_name(buf);
