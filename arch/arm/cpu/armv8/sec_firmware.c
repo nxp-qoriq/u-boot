@@ -30,7 +30,7 @@ phys_addr_t sec_firmware_addr;
 #define SEC_FIRMWARE_FIT_IMAGE		"firmware"
 #endif
 #ifndef SEC_FIRMEWARE_FIT_CNF_NAME
-#define SEC_FIRMEWARE_FIT_CNF_NAME	"config@1"
+#define SEC_FIRMEWARE_FIT_CNF_NAME        "config-1"
 #endif
 #ifndef SEC_FIRMWARE_TARGET_EL
 #define SEC_FIRMWARE_TARGET_EL		2
@@ -49,7 +49,12 @@ static int sec_firmware_get_data(const void *sec_firmware_img,
 	conf_node_off = fit_conf_get_node(sec_firmware_img, conf_node_name);
 	if (conf_node_off < 0) {
 		printf("SEC Firmware: %s: no such config\n", conf_node_name);
-		return -ENOENT;
+              conf_node_off = fit_conf_get_node(sec_firmware_img, "config@1");
+              if (conf_node_off < 0) {
+                     printf("SEC Firmware: : no such config config@1 \n");
+                     return -ENOENT;
+              }
+
 	}
 
 	fw_node_off = fit_conf_get_prop_node(sec_firmware_img, conf_node_off,
