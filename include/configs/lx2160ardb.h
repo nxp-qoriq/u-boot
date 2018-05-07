@@ -78,6 +78,16 @@
 #define CONFIG_FSL_ESDHC
 #endif
 
+/* EEPROM */
+#define CONFIG_ID_EEPROM
+#define CONFIG_SYS_I2C_EEPROM_NXID
+#define CONFIG_SYS_EEPROM_BUS_NUM	           0
+#define CONFIG_SYS_I2C_EEPROM_ADDR	           0x57
+#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN	    1
+#define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS     3
+#define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 5
+
+
 #include <asm/fsl_secure_boot.h>
 
 #endif /* __LX2_RDB_H */
