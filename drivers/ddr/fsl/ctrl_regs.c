@@ -1141,7 +1141,7 @@ static void set_ddr_sdram_mode_9(fsl_ddr_cfg_regs_t *ddr,
 	int i;
 	unsigned short esdmode4 = 0;	/* Extended SDRAM mode 4 */
 	unsigned short esdmode5;	/* Extended SDRAM mode 5 */
-	int rtt_park = 0;
+	int rtt_park_all = 0;
 	bool four_cs = false;
 	const unsigned int mclk_ps = get_memory_clk_period_ps(0);
 
@@ -1154,7 +1154,7 @@ static void set_ddr_sdram_mode_9(fsl_ddr_cfg_regs_t *ddr,
 #endif
 	if (ddr->cs[0].config & SDRAM_CS_CONFIG_EN) {
 		esdmode5 = 0x00000500;	/* Data mask enable, RTT_PARK CS0 */
-		rtt_park = four_cs ? 0 : 1;
+		rtt_park_all = four_cs ? 0 : 1;
 	} else {
 		esdmode5 = 0x00000400;	/* Data mask enabled */
 	}
@@ -1185,10 +1185,10 @@ static void set_ddr_sdram_mode_9(fsl_ddr_cfg_regs_t *ddr,
 	debug("FSLDDR: ddr_sdram_mode_9) = 0x%08x\n", ddr->ddr_sdram_mode_9);
 	if (unq_mrs_en) {	/* unique mode registers are supported */
 		for (i = 1; i < CONFIG_CHIP_SELECTS_PER_CTRL; i++) {
-			if (!rtt_park &&
+			if (!rtt_park_all &&
 			    (ddr->cs[i].config & SDRAM_CS_CONFIG_EN)) {
 				esdmode5 |= 0x00000500;	/* RTT_PARK */
-				rtt_park = four_cs ? 0 : 1;
+				rtt_park_all = four_cs ? 0 : 1;
 			} else {
 				esdmode5 = 0x00000400;
 			}
