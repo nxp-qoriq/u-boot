@@ -399,6 +399,7 @@ typedef struct memctl_options_s {
 	unsigned int rtt_override;		/* rtt_override enable */
 	unsigned int rtt_override_value;	/* that is Rtt_Nom for DDR3 */
 	unsigned int rtt_wr_override_value;	/* this is Rtt_WR for DDR3 */
+	unsigned int rtt_park;			/* RTT park for DDR4 */
 
 	/* Automatic self refresh */
 	unsigned int auto_self_refresh_en;
