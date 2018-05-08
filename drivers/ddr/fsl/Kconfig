@@ -159,6 +159,7 @@ config FSL_PHY_GEN2_DDR_IMG_ADDR
 config FSL_PHY_GEN2_PHY_A2017_11
 	depends on SYS_PHY_GEN2_DDR_PHY
 	bool "PHY_GEN2 PHY version A2017.11 Support"
+	default y
 
 endmenu
 
