@@ -194,7 +194,7 @@ static const struct pie image_udimm[] = {
 	{0x0d00e7,0x400},
 	{0x090017,0x0},
 	{0x090026,0x2b},
-#ifdef DEBUG
+#if defined(CONFIG_ARCH_LX2160A_PXP) && defined(CONFIG_DDR_FIXED_SETTINGS)
 	{0x02000b,0x64},
 	{0x02000c,0xc8},
 	{0x02000d,0x7d0},
@@ -210,8 +210,24 @@ static const struct pie image_udimm[] = {
 	{0x020089,0x1},
 	{0x020088,0x19},
 	{0x0c0080,0x0},
-#endif
-#else
+#elif defined(CONFIG_DDR_FIXED_SETTINGS) /* !(CONFIG_ARCH_LX2160A_PXP && CONFIG_DDR_FIXED_SETTINGS) */
+	{0x02000b,0x32},
+	{0x02000c,0x64},
+	{0x02000d,0x3e8},
+	{0x02000e,0x2c},
+	{0x09000c,0x0},
+	{0x09000d,0x173},
+	{0x09000e,0x60},
+	{0x09000f,0x6110},
+	{0x090010,0x2152},
+	{0x090011,0xdfbd},
+	{0x090012,0xffff},
+	{0x090013,0x6152},
+	{0x020089,0x1},
+	{0x020088,0x19},
+	{0x0c0080,0x0},
+#endif /* !(CONFIG_ARCH_LX2160A_PXP && CONFIG_DDR_FIXED_SETTINGS) */
+#else /* !CONFIG_FSL_PHY_GEN2_PHY_A2017_11 */
 	{0x90000, 0x10},
 	{0x90001, 0x400},
 	{0x90002, 0x10e},
@@ -392,7 +408,7 @@ static const struct pie image_udimm[] = {
 	{0xd00e7, 0x400},
 	{0x90017, 0x0},
 	{0x90026, 0x2c},
-#ifdef DEBUG
+#ifdef CONFIG_DDR_FIXED_SETTINGS
 	{0x09000c,0x0},
 	{0x09000d,0x173},
 	{0x09000e,0x60},
@@ -403,7 +419,7 @@ static const struct pie image_udimm[] = {
 	{0x090013,0x6152},
 	{0x0c0080,0x0},
 #endif
-#endif
+#endif /* !CONFIG_FSL_PHY_GEN2_PHY_A2017_11 */
 };
 
 static const struct pie image_rdimm[] = {

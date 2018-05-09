@@ -141,6 +141,10 @@ config SYS_FSL_DDR_PHY
 config SYS_PHY_GEN2_DDR_PHY
 	bool "Gen2 DDR PHY"
 
+config DDR_FIXED_SETTINGS
+       depends on SYS_PHY_GEN2_DDR_PHY
+       bool "DDR Hardcoded settings"
+
 config FSL_PHY_GEN2_DDR_PHY_IMEM_ADDR
 	depends on SYS_PHY_GEN2_DDR_PHY
 	hex "Address of Gen2' phy imem"

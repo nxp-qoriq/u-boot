@@ -15,16 +15,20 @@
 #include "include/init.h"
 #include "include/dimm.h"
 #include "include/phy_gen2_fit.h"
-#ifdef CONFIG_ARCH_LX2160A_PXP
+
+#if defined(CONFIG_ARCH_LX2160A_PXP) || defined(CONFIG_DDR_FIXED_SETTINGS)
 #include "include/io.h"
 #endif
 
-/* #define DEBUG */
 
-#ifdef DEBUG
+#ifdef CONFIG_DDR_FIXED_SETTINGS
 #include "include/csr.h"
 #include "include/imem.h"
 #include "include/dmem.h"
+#ifndef CONFIG_ARCH_LX2160A_PXP
+#include "include/imem_2d.h"
+#include "include/dmem_2d.h"
+#endif
 #include "include/pie.h"
 #include "include/overrides.h"
 
@@ -32,6 +36,10 @@ enum image_types {
 	CSR,
 	IMEM,
 	DMEM,
+#ifndef CONFIG_ARCH_LX2160A_PXP
+	IMEM_2D,
+	DMEM_2D,
+#endif
 	PIE,
 	OVERRIDES
 };
@@ -44,6 +52,10 @@ void load_image(const unsigned int ctrl_num, enum image_types image_type)
 	const struct csr *csr_image = NULL;
 	const struct imem *imem_image = NULL;
 	const struct dmem *dmem_image = NULL;
+#ifndef CONFIG_ARCH_LX2160A_PXP
+	const struct imem_2d *imem_image_2d = NULL;
+	const struct dmem_2d *dmem_image_2d = NULL;
+#endif
 	const struct pie *pie_image = NULL;
 	const struct overrides *overrides_image = NULL;
 
@@ -73,6 +85,24 @@ void load_image(const unsigned int ctrl_num, enum image_types image_type)
 				phy_io_write16(ctrl_num, dmem_image[i].addr, dmem_image[i].data);
 		}
 		break;
+#ifndef CONFIG_ARCH_LX2160A_PXP
+	case IMEM_2D:
+		imem_image_2d = image_imem_2d;
+		size = ARRAY_SIZE(image_imem_2d);
+		if (imem_image_2d) {
+			for (i = 0; i < size; i++)
+				phy_io_write16(ctrl_num, imem_image_2d[i].addr, imem_image_2d[i].data);
+		}
+		break;
+	case DMEM_2D:
+		dmem_image_2d = image_dmem_2d;
+		size = ARRAY_SIZE(image_dmem_2d);
+		if (dmem_image_2d) {
+			for (i = 0; i < size; i++)
+				phy_io_write16(ctrl_num, dmem_image_2d[i].addr, dmem_image_2d[i].data);
+		}
+		break;
+#endif
 	case PIE:
 		pie_image = image_udimm;
 		size = ARRAY_SIZE(image_udimm);
@@ -125,12 +155,25 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 	/* Execute training firmware and Wait for training to complete */
 	g_exec_fw(ctrl_num);
 
+#ifndef CONFIG_ARCH_LX2160A_PXP
+	phy_io_write16(ctrl_num, 0x0d0000, 0x0);
+
+	/* Load 2D IMEM image */
+	load_image(ctrl_num, IMEM_2D);
+
+	 /* Load 2D DMEM image into memory */
+	load_image(ctrl_num, DMEM_2D);
+
+	/* Execute training firmware and Wait for training to complete */
+	g_exec_fw(ctrl_num);
+#endif
+
 	/* Load Phy Init Engine image */
 	phy_io_write16(ctrl_num, 0x0d0000, 0x0);
 	load_image(ctrl_num, PIE);
 	phy_io_write16(ctrl_num, 0x0d0000, 0x1);
 
-#ifdef CONFIG_ARCH_LX2160A_PXP
+#if defined(CONFIG_ARCH_LX2160A_PXP) || defined(CONFIG_DDR_FIXED_SETTINGS)
 	phy_io_write16(ctrl_num, 0x0d0000, 0);
 	load_image(ctrl_num, OVERRIDES);
 	phy_io_write16(ctrl_num, 0x0d0000, 1);

@@ -9,7 +9,7 @@
 #include <fsl_ddr_dimm_params.h>
 #include <asm/arch/soc.h>
 #include <asm/arch/clock.h>
-#ifdef CONFIG_ARCH_LX2160A_PXP
+#if defined(CONFIG_ARCH_LX2160A_PXP) || defined(CONFIG_DDR_FIXED_SETTINGS)
 #include <asm/io.h>
 #include <fsl_ddr.h>
 #endif
@@ -124,6 +124,7 @@ found:
 	}
 }
 
+#if defined(CONFIG_ARCH_LX2160A_PXP) || defined(CONFIG_DDR_FIXED_SETTINGS)
 #ifdef CONFIG_ARCH_LX2160A_PXP
 static void ddr_cntlr_fixed_settings(void)
 {
@@ -260,6 +261,39 @@ static void ddr_cntlr_fixed_settings(void)
 	out_le32(0x01130008,0x1);
 #endif
 }
+#else
+static void ddr_cntlr_fixed_settings(void)
+{
+	puts("Setting Hardcoded values for DDRC for 1600 frequency\n");
+	out_le32(0x01080000,0x000000ff);	/* CS0_BNDS */
+	out_le32(0x01080008,0x010001ff);	/* CS1_BNDS */
+	out_le32(0x01080010,0x00000000);	/* CS2_BNDS */
+	out_le32(0x01080018,0x00000000);	/* CS3_BNDS */
+	out_le32(0x01080080,0x80020322);	/* CS0_CONFIG */
+	out_le32(0x01080084,0x80020322);	/* CS1_CONFIG */
+	out_le32(0x01080088,0x00000000);	/* CS2_CONFIG */
+	out_le32(0x0108008C,0x00000000);	/* CS3_CONFIG */
+	out_le32(0x01080100,0x010c1000);	/* TIMING_CFG_3 */
+	out_le32(0x01080104,0xfa550018);	/* TIMING_CFG_0 */
+	out_le32(0x01080108,0xbab48c42);	/* TIMING_CFG_1 */
+	out_le32(0x0108010C,0x0058c111);	/* TIMING_CFG_2 */
+	out_le32(0x01080110,0xe5040001);	/* DDR_SDRAM_CFG */
+	out_le32(0x01080114,0x00401101);	/* DDR_SDRAM_CFG_2 */
+	out_le32(0x01080124,0x18600100);	/* DDR_SDRAM_INTERVAL */
+	out_le32(0x01080160,0x00000002);	/* TIMING_CFG_4 */
+	out_le32(0x01080164,0x03401400);	/* TIMING_CFG_5 */
+	out_le32(0x01080168,0x00000000);	/* TIMING_CFG_6 */
+	out_le32(0x0108016C,0x13300000);	/* TIMING_CFG_7 */
+	out_le32(0x01080170,0x8a090705);	/* DDR_ZQ_CNTL */
+	out_le32(0x01080250,0x00004600);	/* TIMING_CFG_8 */
+	out_le32(0x01080254,0x00000000);	/* TIMING_CFG_9 */
+	out_le32(0x01080260,0x00000001);	/* DDR_SDRAM_CFG_3 */
+	out_le32(0x01080400,0x32C57554);	/* DQ_MAPPING_0 */
+	out_le32(0x01080404,0xD4BB0BD4);	/* DQ_MAPPING_1 */
+	out_le32(0x01080408,0x2EC2F554);	/* DQ_MAPPING_2 */
+	out_le32(0x0108040C,0xD95D4001);	/* DQ_MAPPING_3 */
+}
+#endif
 #endif
 
 int fsl_initdram(void)
@@ -269,7 +303,7 @@ int fsl_initdram(void)
 	gd->ram_size = fsl_ddr_sdram_size();
 #else
 #ifndef CONFIG_DDR_BOOT
-#ifdef CONFIG_ARCH_LX2160A_PXP
+#if defined(CONFIG_ARCH_LX2160A_PXP) || defined(CONFIG_DDR_FIXED_SETTINGS)
 	puts("Initializing DDR....using fixed timing\n");
 	compute_phy_config_regs(0, NULL, NULL);
 	ddr_cntlr_fixed_settings();

@@ -15,6 +15,7 @@ struct overrides {
 };
 
 static const struct overrides image_overrides[] = {
+#ifdef CONFIG_ARCH_LX2160A_PXP
 	{0x01004d,0x0},
 	{0x01014d,0x0},
 	{0x01104d,0x0},
@@ -33,5 +34,11 @@ static const struct overrides image_overrides[] = {
 	{0x01714d,0x0},
 	{0x01804d,0x0},
 	{0x01814d,0x0}
+#else /* !CONFIG_ARCH_LX2160A_PXP */
+	{0x0200b0,0x0},
+	{0x1200b0,0x0},
+	{0x2200b0,0x0},
+	{0x3200b0,0x0},
+#endif /* !CONFIG_ARCH_LX2160A_PXP */
 };
 #endif
