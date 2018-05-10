@@ -153,6 +153,10 @@ void i_load_pie(const unsigned int ctrl_num, const struct input *input,
 	phy_io_write16(ctrl_num, t_drtub | csr_ucclk_hclk_enables_addr,
 		       input->basic.dimm_type == RDIMM ? 0x2 : 0x3);
 
+#ifdef CONFIG_SYS_FSL_ERRATUM_DDR_A011396
+	phy_io_write16(ctrl_num, t_master | csr_dfi_rd_data_cs_dest_map_addr,
+		       0);
+#endif
 	phy_io_write16(ctrl_num, t_apbonly | csr_micro_cont_mux_sel_addr, 1);
 
 	phy_io_write16(ctrl_num, t_drtub | csr_ucclk_hclk_enables_addr,
