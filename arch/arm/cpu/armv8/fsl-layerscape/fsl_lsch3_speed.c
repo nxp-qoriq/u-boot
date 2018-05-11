@@ -209,6 +209,8 @@ unsigned int mxc_get_clock(enum mxc_clock clk)
 		return get_i2c_freq(0);
 	case MXC_DSPI_CLK:
 		return get_dspi_freq(0);
+       case MXC_ESDHC_CLK:
+              return gd->arch.sdhc_clk;
 	default:
 		printf("Unsupported clock\n");
 	}
