@@ -1186,7 +1186,7 @@ static void set_ddr_sdram_mode_9(fsl_ddr_cfg_regs_t *ddr,
 
 	esdmode5 = 0x00000400;	/* Data mask enabled */
 	if (ddr->cs[0].config & SDRAM_CS_CONFIG_EN) {
-		esdmode5 |= rtt_park;
+		esdmode5 |= rtt_park << 6;
 		rtt_park_all = four_cs ? 0 : 1;
 	}
 
@@ -1213,7 +1213,7 @@ static void set_ddr_sdram_mode_9(fsl_ddr_cfg_regs_t *ddr,
 	 * need 0x500 to park.
 	 */
 
-	debug("FSLDDR: ddr_sdram_mode_9) = 0x%08x\n", ddr->ddr_sdram_mode_9);
+	debug("FSLDDR: ddr_sdram_mode_9 = 0x%08x\n", ddr->ddr_sdram_mode_9);
 	if (unq_mrs_en) {	/* unique mode registers are supported */
 		for (i = 1; i < CONFIG_CHIP_SELECTS_PER_CTRL; i++) {
 			esdmode5 = 0x00000400;
@@ -1278,6 +1278,7 @@ static void set_ddr_sdram_mode_10(const unsigned int ctrl_num,
 	unsigned short esdmode7 = 0;	/* Extended SDRAM mode 7 */
 	unsigned int tccdl_min = picos_to_mclk(ctrl_num, common_dimm->tccdl_ps);
 
+	tccdl_min = max(5U, tccdl_min);
 	esdmode6 = ((tccdl_min - 4) & 0x7) << 10;
 
 	if (popts->ddr_cdr2 & DDR_CDR2_VREF_RANGE_2)
@@ -1287,7 +1288,7 @@ static void set_ddr_sdram_mode_10(const unsigned int ctrl_num,
 				 | ((esdmode6 & 0xffff) << 16)
 				 | ((esdmode7 & 0xffff) << 0)
 				);
-	debug("FSLDDR: ddr_sdram_mode_10) = 0x%08x\n", ddr->ddr_sdram_mode_10);
+	debug("FSLDDR: ddr_sdram_mode_10 = 0x%08x\n", ddr->ddr_sdram_mode_10);
 	if (unq_mrs_en) {	/* unique mode registers are supported */
 		for (i = 1; i < CONFIG_CHIP_SELECTS_PER_CTRL; i++) {
 			switch (i) {
@@ -2010,6 +2011,7 @@ static void set_timing_cfg_8(const unsigned int ctrl_num,
 	unsigned int wr_lat = ((ddr->timing_cfg_2 & 0x00780000) >> 19) +
 			      ((ddr->timing_cfg_2 & 0x00040000) >> 14);
 
+	tccdl = max(5U, tccdl);
 	rwt_bg = cas_latency + 2 + 4 - wr_lat;
 	if (rwt_bg < tccdl)
 		rwt_bg = tccdl - rwt_bg;
