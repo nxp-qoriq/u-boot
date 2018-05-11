@@ -61,6 +61,9 @@ u8 qixis_esdhc_detect_quirk(void);
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS 3
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 5
 
+#define CONFIG_SYS_RTC_BUS_NUM		0
+#define I2C_MUX_CH_RTC			0xB
+
 /* MAC/PHY configuration */
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)
 #define CONFIG_PHYLIB_10G
