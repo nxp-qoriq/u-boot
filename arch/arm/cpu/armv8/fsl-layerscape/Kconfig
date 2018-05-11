@@ -501,6 +501,7 @@ config SYS_FSL_DSPI_CLK_DIV
 config SYS_FSL_DUART_CLK_DIV
 	int "DUART clock divider"
 	default 1 if ARCH_LS1043A
+	default 4 if ARCH_LX2160A
 	default 2
 	help
 	  This is the divider that is used to derive DUART clock from Platform
