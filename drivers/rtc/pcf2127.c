@@ -71,7 +71,9 @@ fail:
 	ret = i2c_set_bus_num(bus);
 	if (ret != 0)
 		return ret;
+#ifdef I2C_MUX_CH_RTC
 	ret = select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
+#endif
 #endif
 	return ret;
 }
@@ -127,7 +129,9 @@ fail:
 	ret = i2c_set_bus_num(bus);
 	if (ret != 0)
 		return ret;
+#ifdef I2C_MUX_CH_RTC
 	ret = select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
+#endif
 #endif
 	return ret;
 }
