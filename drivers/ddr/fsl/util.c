@@ -401,13 +401,23 @@ void remove_unused_controllers(fsl_ddr_info_t *info)
 
 	for (i = 0; i < 8; i++) {
 		nodeid = in_le64(hnf_sam_ctrl) & CCN_HN_F_SAM_NODEID_MASK;
-		if (nodeid == CCN_HN_F_SAM_NODEID_DDR0) {
+		switch (nodeid) {
+		case CCN_HN_F_SAM_NODEID_DDR0:
+#ifdef CCN_HN_F_SAM_NODEID2_DDR0
+		case CCN_HN_F_SAM_NODEID2_DDR0:
+#endif
 			ddr0_used = true;
-		} else if (nodeid == CCN_HN_F_SAM_NODEID_DDR1) {
+			break;
+		case CCN_HN_F_SAM_NODEID_DDR1:
+#ifdef CCN_HN_F_SAM_NODEID2_DDR1
+		case CCN_HN_F_SAM_NODEID2_DDR1:
+#endif
 			ddr1_used = true;
-		} else {
+			break;
+		default:
 			printf("Unknown nodeid in HN-F SAM control: 0x%llx\n",
 			       nodeid);
+			break;
 		}
 		hnf_sam_ctrl += (CCI_HN_F_1_BASE - CCI_HN_F_0_BASE);
 	}
