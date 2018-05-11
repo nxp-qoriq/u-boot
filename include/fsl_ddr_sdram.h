@@ -418,6 +418,9 @@ typedef struct memctl_options_s {
 
 	unsigned int trwt_override;
 	unsigned int trwt;			/* read-to-write turnaround */
+	unsigned int twrt;
+	unsigned int trrt;
+	unsigned int twwt;
 } memctl_options_t;
 
 phys_size_t fsl_ddr_sdram(void);

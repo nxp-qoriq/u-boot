@@ -432,8 +432,15 @@ static void set_timing_cfg_0(const unsigned int ctrl_num,
 	tmrd_mclk = 2;
 #endif
 
-	if (popts->trwt_override)
+	if (popts->trwt_override) {
 		trwt_mclk = popts->trwt;
+		if (popts->twrt)
+			twrt_mclk = popts->twrt;
+		if (popts->trrt)
+			trrt_mclk = popts->trrt;
+		if (popts->twwt)
+			twwt_mclk = popts->twwt;
+	}
 
 	ddr->timing_cfg_0 = (0
 		| ((trwt_mclk & 0x3) << 30)	/* RWT */
