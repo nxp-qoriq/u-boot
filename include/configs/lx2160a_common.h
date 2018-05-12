@@ -221,8 +221,13 @@
 
 /* SATA */
 /*TODO: Add SATA3, SATA4 related configs*/
+#define CONFIG_SCSI
+
 #ifdef CONFIG_SCSI
+#define CONFIG_LIBATA
+#define CONFIG_SCSI_AHCI
 #define CONFIG_SCSI_AHCI_PLAT
+
 #define CONFIG_SYS_SATA1		AHCI_BASE_ADDR1
 #define CONFIG_SYS_SATA2		AHCI_BASE_ADDR2
 
