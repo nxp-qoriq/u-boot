@@ -132,7 +132,7 @@ static void lx_pcie_setup_wins(struct lx_pcie *pcie)
 	int idx = 1;
 
 	/* INBOUND WIN */
-	lx_pcie_inbound_win_set_rc(pcie, 0, IB_TYPE_MEM_NF, 0, 0, SIZE_1T);
+	lx_pcie_inbound_win_set_rc(pcie, 0, IB_TYPE_MEM_F, 0, 0, SIZE_1T);
 
 	/* OUTBOUND WIN 0: CFG */
 	lx_pcie_outbound_win_set(pcie, 0,
