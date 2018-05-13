@@ -211,12 +211,17 @@ ENTRY(lowlevel_init)
 	ldr	x1, =TZPCDECPROT_0_SET_BASE /* Decode Protection-0 Set Reg */
 #ifndef CONFIG_ARCH_LX2160A
 	orr	w0, w0, #1 << 3 /* DCFG_RESET is accessible from NS world */
+	str	w0, [x1]
 #else
 	/* DCFG_RESET and UART_1 are accessible from NS world */
 	orr	w0, w0, #3 << 3
-#endif
 	str	w0, [x1]
 
+	ldr	x2, =TZPCDECPROT_2_SET_BASE
+	mov	w0, #0
+	orr	w0, w0, #0xFE  /* I2C, DSPI and UART2 are accessible from NS world */
+	str	w0, [x2]
+#endif
 	isb
 	dsb	sy
 #endif
