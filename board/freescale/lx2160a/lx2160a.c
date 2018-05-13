@@ -105,14 +105,14 @@ int checkboard(void)
 	switch (sw) {
 	case 0:
 	case 4:
-		puts("QSPI DEV#0\n");
+		puts("FlexSPI DEV#0\n");
 		break;
 	case 1:
-		puts("QSPI DEV#1\n");
+		puts("FlexSPI DEV#1\n");
 		break;
 	case 2:
 	case 3:
-		puts("QSPI EMU\n");
+		puts("FlexSPI EMU\n");
 		break;
 	default:
 		printf("invalid setting of boot location (xmap): %d\n", sw);
