@@ -383,6 +383,9 @@ static void lx_pcie_setup_ep(struct lx_pcie *pcie)
 	val = ccsr_readl(pcie, PAB_AXI_PIO_CTRL(0));
 	val |= APIO_EN | MEM_WIN_EN;
 	ccsr_writel(pcie, PAB_AXI_PIO_CTRL(0), val);
+
+	/* Config ready */
+	ccsr_writel(pcie, GPEX_CFG_READY, 1);
 }
 
 static int lx_pcie_probe(struct udevice *dev)

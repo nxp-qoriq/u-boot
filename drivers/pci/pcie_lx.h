@@ -40,6 +40,7 @@
 #define GPEX_CLASSCODE				0x474
 #define GPEX_CLASSCODE_SHIFT			16
 #define GPEX_CLASSCODE_MASK			0xffff
+#define GPEX_CFG_READY				0x4B0
 
 #define PCI_BAR_ENABLE				0x4D4
 #define PCI_BAR_BAR_SIZE_LDW			0x4D8
