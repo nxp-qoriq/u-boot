@@ -625,7 +625,11 @@ int timer_init(void)
 	/* Enable timebase for all clusters.
 	 * It is safe to do so even some clusters are not enabled.
 	 */
+#ifdef CONFIG_ARCH_LX2160A
+	out_le32(cltbenr, 0xff);
+#else
 	out_le32(cltbenr, 0xf);
+#endif
 #endif
 
 #if defined(CONFIG_ARCH_LS2080A) || defined(CONFIG_ARCH_LS1088A)
