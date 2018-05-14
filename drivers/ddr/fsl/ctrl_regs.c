@@ -1390,8 +1390,9 @@ static void set_ddr_sdram_mode(const unsigned int ctrl_num,
 		0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 6, 6};
 	/* DDR4 support CAS 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24 */
 	static const u8 cas_latency_table[] = {
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 8,
-		9, 9, 10, 10, 11, 11};
+		0, 1, 2, 3, 4, 5, 6, 7, 13, 8,
+		14, 9, 15, 10, 12, 11, 16, 17,
+		18, 19, 20, 21, 22, 23};
 
 	if (popts->rtt_override)
 		rtt = popts->rtt_override_value;
@@ -1441,7 +1442,7 @@ static void set_ddr_sdram_mode(const unsigned int ctrl_num,
 	mode = 0;	/* normal mode */
 
 	/* look up table to get the cas latency bits */
-	if (cas_latency >= 9 && cas_latency <= 24)
+	if (cas_latency >= 9 && cas_latency <= 32)
 		caslat = cas_latency_table[cas_latency - 9];
 	else
 		printf("Error: unsupported cas latency for mode register\n");
@@ -1467,6 +1468,7 @@ static void set_ddr_sdram_mode(const unsigned int ctrl_num,
 	}
 
 	sdmode = (0
+		  | ((caslat & 0x10) << 8)
 		  | ((wr & 0x7) << 9)
 		  | ((dll_rst & 0x1) << 8)
 		  | ((mode & 0x1) << 7)
