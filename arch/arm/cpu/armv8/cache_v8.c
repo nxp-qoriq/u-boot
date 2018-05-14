@@ -432,16 +432,10 @@ void invalidate_dcache_all(void)
 inline void flush_dcache_all(void)
 {
 	int ret;
-       int trycount = 1;
 
-tryonce:
 	__asm_flush_dcache_all();
 	ret = __asm_flush_l3_dcache();
-       if(ret && trycount) {
-               trycount--;
-               goto tryonce;
-       }
-	if (!trycount)
+	if (ret)
 		debug("flushing dcache returns 0x%x\n", ret);
 	else
 		debug("flushing dcache successfully.\n");

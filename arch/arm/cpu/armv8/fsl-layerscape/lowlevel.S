@@ -391,7 +391,7 @@ hnf_pstate_poll:
 	mov	x1, x0
 	mov	x7, #0			/* flag for timeout */
 	mrs	x3, cntpct_el0		/* read timer */
-	add	x3, x3, #1200		/* timeout after 100 microseconds */
+	add	w3, w3, #4000		/* timeout after 333  microseconds */
 	mov	x0, #0x18
 	movk	x0, #0x420, lsl #16	/* HNF0_PSTATE_STATUS */
 	mov	w6, #8			/* HN-F node count */
