@@ -230,8 +230,10 @@ static int lx_pcie_read_config(struct udevice *bus, pci_dev_t bdf,
 
 	address = lx_pcie_conf_address(pcie, bdf, offset);
 
-	if ((offset == PCI_HEADER_TYPE) | (offset == PCI_VENDOR_ID))
+	if ((offset == PCI_HEADER_TYPE) | (offset == PCI_VENDOR_ID)) {
 		lut_writel(pcie, 0x0 << PCIE_LUT_GCR_RRE, PCIE_LUT_GCR);
+		lut_readl(pcie, PCIE_LUT_GCR);
+	}
 
 	switch (size) {
 	case PCI_SIZE_8:
@@ -248,8 +250,10 @@ static int lx_pcie_read_config(struct udevice *bus, pci_dev_t bdf,
 		break;
 	}
 
-	if ((offset == PCI_HEADER_TYPE) | (offset == PCI_VENDOR_ID))
+	if ((offset == PCI_HEADER_TYPE) | (offset == PCI_VENDOR_ID)) {
 		lut_writel(pcie, 0x1 << PCIE_LUT_GCR_RRE, PCIE_LUT_GCR);
+		lut_readl(pcie, PCIE_LUT_GCR);
+	}
 
 	return ret;
 }
