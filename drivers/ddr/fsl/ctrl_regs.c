@@ -969,10 +969,34 @@ static void set_ddr_sdram_mode_2(const unsigned int ctrl_num,
 	unsigned int wr_crc = 0;	/* Disable */
 	unsigned int rtt_wr = 0;	/* Rtt_WR - dynamic ODT off */
 	unsigned int srt = 0;	/* self-refresh temerature, normal range */
-	unsigned int cwl = compute_cas_write_latency(ctrl_num) - 9;
+	unsigned int cwl = compute_cas_write_latency(ctrl_num);
 	unsigned int mpr = 0;	/* serial */
 	unsigned int wc_lat;
 	const unsigned int mclk_ps = get_memory_clk_period_ps(ctrl_num);
+
+	switch(cwl) {
+	case 9:
+	case 10:
+	case 11:
+	case 12:
+		cwl -= 9;
+		break;
+	case 14:
+		cwl -= 10;
+		break;
+	case 16:
+		cwl -= 11;
+		break;
+	case 18:
+		cwl -= 12;
+		break;
+	case 20:
+		cwl -= 13;
+		break;
+	default:
+		printf("Error CWL\n");
+		break;
+	}
 
 	if (popts->rtt_override)
 		rtt_wr = popts->rtt_wr_override_value;
