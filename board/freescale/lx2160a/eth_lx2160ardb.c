@@ -53,7 +53,7 @@ int board_eth_init(bd_t *bis)
 
 #ifndef CONFIG_ARCH_LX2160A_SIMU
 	switch (srds_s1) {
-	case 0x2A:
+	case 19:
 		wriop_set_phy_address(WRIOP1_DPMAC2, CORTINA_PHY_ADDR1);
 		wriop_set_phy_address(WRIOP1_DPMAC3, AQR107_PHY_ADDR1);
 		wriop_set_phy_address(WRIOP1_DPMAC4, AQR107_PHY_ADDR2);
