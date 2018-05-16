@@ -10,6 +10,115 @@
 #include <fsl_ddr.h>
 
 #if defined(CONFIG_SYS_FSL_DDR3) || defined(CONFIG_SYS_FSL_DDR4)
+#ifdef CONFIG_SYS_FSL_DDR4
+static unsigned int get_speed_bin_caslat(unsigned int tckmin_ps,
+					 unsigned int taamin_ps,
+					 unsigned int mclk_ps)
+{
+	int i, j, k;
+	struct cas {
+		const unsigned tckmin_ps;
+		const unsigned caslat[4];
+	};
+	struct speed {
+		const struct cas *cl;
+		const unsigned taamin_ps[4];
+	};
+	const struct cas const cl_3200[] = {
+		{625,	{0x1500000, 0x1400000, 0x1000000,} },
+		{750,	{ 0x1c0000,  0x180000,  0x100000,} },
+		{833,	{  0x70000,   0x60000,   0x40000,} },
+		{937,	{  0x18000,   0x18000,   0x10000,} },
+		{1071,	{   0x6000,    0x6000,    0x4000,} },
+		{1250,	{   0x1800,    0x1800,    0x1000,} },
+		{1500,	{    0x600,         0,     0x400,} },
+	};
+	const struct cas const cl_2933[] = {
+		{682,	{0x780000, 0x700000, 0x600000, 0x400000} },
+		{750,	{0x1c0000, 0x180000, 0x180000, 0x100000} },
+		{833,	{ 0x70000,  0x60000,  0x60000,  0x40000} },
+		{937,	{ 0x18000,  0x18000,  0x18000,  0x10000} },
+		{1071,	{  0x6000,   0x6000,   0x6000,   0x4000} },
+		{1250,	{  0x1800,   0x1800,   0x1800,   0x1000} },
+		{1500,	{   0x600,    0x400,    0x400,    0x400} },
+	};
+	const struct cas const cl_2666[] = {
+		{750,	{0x1e0000, 0x1c0000, 0x180000, 0x100000} },
+		{833,	{ 0x70000,  0x60000,  0x60000,  0x40000} },
+		{937,	{ 0x18000,  0x18000,  0x18000,  0x10000} },
+		{1071,	{  0x6000,   0x6000,   0x6000,   0x4000} },
+		{1250,	{  0x1800,   0x1800,   0x1800,   0x1000} },
+		{1500,	{   0x600,    0x600,    0x400,    0x400} },
+	};
+	const struct cas const cl_2400[] = {
+		{833,	{ 0x78000,  0x70000,  0x60000,  0x40000} },
+		{937,	{ 0x10000,  0x18000,  0x18000,  0x10000} },
+		{1071,	{  0x4000,   0x6000,   0x6000,   0x4000} },
+		{1250,	{  0x1000,   0x1800,   0x1800,   0x1000} },
+		{1500,	{   0x600,    0x200,    0x400,    0x400} },
+	};
+	const struct cas const cl_2133[] = {
+		{937,	{ 0x1c000,  0x18000,  0x10000,} },
+		{1071,	{  0x4000,   0x6000,   0x4000,} },
+		{1250,	{  0x1000,   0x1800,   0x1000,} },
+		{1500,	{   0x600,    0x200,    0x400,} },
+	};
+	const struct cas const cl_1866[] = {
+		{1071,	{  0x7000,   0x6000,   0x4000,} },
+		{1250,	{  0x1000,   0x1800,   0x1000,} },
+		{1500,	{   0x600,    0x200,    0x400,} },
+	};
+	const struct cas const cl_1600[] = {
+		{1250,	{  0x1c00,   0x1800,   0x1000,} },
+		{1500,	{   0x600,    0x200,    0x400,} },
+	};
+	const struct speed bin[] = {
+		{cl_3200, {12500, 13750, 15000,} },
+		{cl_2933, {12960, 13640, 13750, 15000,} },
+		{cl_2666, {12750, 13500, 13750, 15000,} },
+		{cl_2400, {12500, 13320, 13750, 15000,} },
+		{cl_2133, {13130, 13500, 15000,} },
+		{cl_1866, {12850, 13500, 15000,} },
+		{cl_1600, {12500, 13500, 15000,} }
+	};
+
+	if (mclk_ps < 625 || mclk_ps > 1600) {
+		printf("Error: mclk invalid\n");
+		return 0;
+	}
+	if (taamin_ps > 18000) {
+		printf("Error: taamin_ps invalid\n");
+		return 0;
+	}
+
+	for (i = 0; bin[i].cl[0].tckmin_ps < tckmin_ps && i < 7; i++)
+		;
+	if (bin[i].cl[0].tckmin_ps > tckmin_ps && i > 0)
+		i--;
+
+	for (j = 0; bin[i].taamin_ps[j] < taamin_ps &&
+		    bin[i].taamin_ps[j] > 0 && j < 4; j++)
+		;
+	if (j > 4) {
+		printf("Error finding taamin_ps %d in table\n", taamin_ps);
+		return 0;
+	}
+	if ((bin[i].taamin_ps[j] == 0) ||
+	    (bin[i].taamin_ps[j] > taamin_ps && j > 0))
+		j--;
+
+	for (k = 0; bin[i].cl[k].tckmin_ps < mclk_ps &&
+		    bin[i].cl[k].tckmin_ps < 1500; k++)
+		;
+	if (bin[i].cl[k].tckmin_ps > mclk_ps && k > 0)
+		k--;
+
+	debug("Valid CL mask for this speed 0x%x\n", bin[i].cl[k].caslat[j]);
+
+	return bin[i].cl[k].caslat[j];
+}
+#endif
+
 static unsigned int
 compute_cas_latency(const unsigned int ctrl_num,
 		    const dimm_params_t *dimm_params,
@@ -33,8 +142,15 @@ compute_cas_latency(const unsigned int ctrl_num,
 		if (dimm_params[i].n_ranks)
 			tmp &= dimm_params[i].caslat_x;
 	}
+#ifdef CONFIG_SYS_FSL_DDR4
+	/* remove unsupported caslat from speed bin tables */
+	common_caslat = tmp &
+			get_speed_bin_caslat(outpdimm->tckmin_x_ps,
+					     outpdimm->taamin_ps,
+					     mclk_ps);
+#else
 	common_caslat = tmp;
-
+#endif
 	/* validate if the memory clk is in the range of dimms */
 	if (mclk_ps < outpdimm->tckmin_x_ps) {
 		printf("DDR clock (MCLK cycle %u ps) is faster than "
@@ -64,7 +180,7 @@ compute_cas_latency(const unsigned int ctrl_num,
 		       caslat_actual);
 	}
 	outpdimm->lowest_common_spd_caslat = caslat_actual;
-	debug("lowest_common_spd_caslat is 0x%x\n", caslat_actual);
+	debug("lowest_common_spd_caslat is %u\n", caslat_actual);
 
 	return 0;
 }
