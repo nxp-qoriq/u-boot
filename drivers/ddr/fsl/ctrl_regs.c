@@ -95,7 +95,7 @@ static inline unsigned int compute_cas_write_latency(
 		cwl = 12;
 	else if (mclk_ps >= 750)
 		cwl = 14;
-	else if (mclk_ps >= 681)
+	else if (mclk_ps >= 625)
 		cwl = 16;
 	else
 		cwl = 18;
