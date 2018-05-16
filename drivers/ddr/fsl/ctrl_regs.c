@@ -499,7 +499,7 @@ static void set_timing_cfg_3(const unsigned int ctrl_num,
 		| ((ext_pretoact & 0x1) << 28)
 		| ((ext_acttopre & 0x3) << 24)
 		| ((ext_acttorw & 0x1) << 22)
-		| ((ext_refrec & 0x1F) << 16)
+		| ((ext_refrec & 0x3F) << 16)
 		| ((ext_caslat & 0x3) << 12)
 		| ((ext_add_lat & 0x1) << 10)
 		| ((ext_wrrec & 0x1) << 8)
