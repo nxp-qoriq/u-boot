@@ -663,10 +663,16 @@ void __efi_runtime reset_cpu(ulong addr)
 {
 	u32 val;
 
+#ifdef CONFIG_ARCH_LX2160A
+       val = in_le32(rstcr); 
+       val |= 0x01;
+       out_le32(rstcr, val);
+#else
 	/* Raise RESET_REQ_B */
 	val = scfg_in32(rstcr);
 	val |= 0x02;
 	scfg_out32(rstcr, val);
+#endif
 }
 
 #ifdef CONFIG_EFI_LOADER
