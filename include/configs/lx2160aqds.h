@@ -91,26 +91,28 @@ u8 qixis_esdhc_detect_quirk(void);
 
 /* MAC/PHY configuration */
 #if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_SPL_BUILD)
-#define CONFIG_PHYLIB_10G
 #define CONFIG_MII
 #define CONFIG_ETHPRIME		"DPMAC1@xgmii"
 
-#define CONFIG_PHY_AQUANTIA
 #define AQ_PHY_ADDR1		0x00
 #define AQ_PHY_ADDR2		0x01
 #define AQ_PHY_ADDR3		0x02
 #define AQ_PHY_ADDR4		0x03
 #define AQR405_IRQ_MASK		0x36
 
-#define CONFIG_PHY_CORTINA
 #define CORTINA_NO_FW_UPLOAD
 #define CORTINA_PHY_ADDR1	0x0
 
-#define CONFIG_PHY_REALTEK
 #define RGMII_PHY_ADDR1		0x01
 #define RGMII_PHY_ADDR2		0x02
 
 #define INPHI_PHY_ADDR1		0x0
+#ifdef CONFIG_SD_BOOT
+#define IN112525_FW_ADDR	0x980000
+#else
+#define IN112525_FW_ADDR	0x20980000
+#endif
+#define IN112525_FW_LENGTH	0x40000
 
 #define SGMII_CARD_PORT1_PHY_ADDR 0x1C
 #define SGMII_CARD_PORT2_PHY_ADDR 0x1D
