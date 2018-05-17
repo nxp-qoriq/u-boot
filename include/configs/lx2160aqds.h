@@ -77,6 +77,12 @@ u8 qixis_esdhc_detect_quirk(void);
 #define CONFIG_ESDHC_DETECT_QUIRK  qixis_esdhc_detect_quirk()
 #endif
 
+/* DSPI */
+#ifdef CONFIG_FSL_DSPI
+#define CONFIG_SPI_FLASH_SST
+#define CONFIG_SPI_FLASH_EON
+#endif
+
 /* EEPROM */
 #define CONFIG_ID_EEPROM
 #define CONFIG_SYS_I2C_EEPROM_NXID
