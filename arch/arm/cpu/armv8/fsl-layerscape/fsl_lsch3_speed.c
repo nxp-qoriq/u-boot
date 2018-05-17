@@ -91,6 +91,12 @@ void get_sys_info(struct sys_info *sys_info)
 	sys_info->freq_ddrbus *= (gur_in32(&gur->rcwsr[0]) >>
 			FSL_CHASSIS3_RCWSR0_MEM_PLL_RAT_SHIFT) &
 			FSL_CHASSIS3_RCWSR0_MEM_PLL_RAT_MASK;
+#ifdef CONFIG_SYS_PHY_GEN2_DDR_PHY
+	sys_info->freq_ddrbus *= CONFIG_PHY_GEN2_DDR_PHY_MULTIPLIER /
+			(((gur_in32(&gur->rcwsr[0]) >>
+			FSL_CHASSIS3_RCWSR0_MEM_PLL_CFG_SHIFT) &
+			FSL_CHASSIS3_RCWSR0_MEM_PLL_CFG_MASK) + 1);
+#endif
 #ifdef CONFIG_SYS_FSL_HAS_DP_DDR
 	if (soc_has_dp_ddr()) {
 		sys_info->freq_ddrbus2 *= (gur_in32(&gur->rcwsr[0]) >>

@@ -150,6 +150,11 @@ config FSL_PHY_GEN2_DDR_PHY_IMEM_ADDR
 	hex "Address of Gen2' phy imem"
 	default 0x50000
 
+config PHY_GEN2_DDR_PHY_MULTIPLIER
+	depends on SYS_PHY_GEN2_DDR_PHY
+	hex "Internal PLL Mutiplier"
+	default 4
+
 config FSL_PHY_GEN2_DDR_PHY_DMEM_ADDR
 	depends on SYS_PHY_GEN2_DDR_PHY
 	hex "Address of Gen2' phy dmem"
