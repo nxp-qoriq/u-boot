@@ -53,6 +53,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define SEQID_BE_4K		8
 #define SEQID_RDFSR		9
 #define SEQID_ENTR4BYTE		10
+#define SEQID_OCTAL_READ	11
 
 /* FSPI CMD */
 #define FSPI_CMD_PP		0x02	/* Page program (up to 256 bytes) */
@@ -71,8 +72,19 @@ DECLARE_GLOBAL_DATA_PTR;
 
 /* 4-byte address QSPI CMD - used on Spansion and some Macronix flashes */
 #define FSPI_CMD_FAST_READ_4B	0x0c    /* Read data bytes (high frequency) */
+#define FSPI_CMD_OCTAL_READ_4B	0x7c	/* Octal Read (CMD-ADDR-DATA : 1-1-8) */
 #define FSPI_CMD_PP_4B		0x12    /* Page program (up to 256 bytes) */
 #define FSPI_CMD_SE_4B		0xdc    /* Sector erase (usually 64KiB) */
+
+/* Number of SPI lines supported for Rx and Tx lines */
+#define FSPI_SINGLE_MODE	0x1
+#define FSPI_DUAL_MODE		0x2
+#define FSPI_QUAD_MODE		0x4
+#define FSPI_OCTAL_MODE		0x8
+
+/* Default SPI Rx bus width and SPI Tx bus width */
+#define NXP_FSPI_DEFAULT_SPI_RX_BUS_WIDTH	FSPI_SINGLE_MODE
+#define NXP_FSPI_DEFAULT_SPI_TX_BUS_WIDTH	FSPI_SINGLE_MODE
 
 #ifdef CONFIG_DM_SPI
 
@@ -87,6 +99,8 @@ DECLARE_GLOBAL_DATA_PTR;
  * @memmap_phy: Physical base address of FSPI memory mapping
  * @flash_num: Number of active slave devices
  * @num_chipselect: Number of FSPI chipselect signals
+ * @spi_rx_bus_width: Number of SPI lines the flash supports for Rx
+ * @spi_tx_bus_width: Number of SPI lines the flash supports for Tx
  */
 struct nxp_fspi_platdata {
 	u32 flags; /*future use*/
@@ -97,6 +111,8 @@ struct nxp_fspi_platdata {
 	fdt_size_t memmap_phy;
 	u32 flash_num;
 	u32 num_chipselect;
+	u32 spi_rx_bus_width;
+	u32 spi_tx_bus_width;
 };
 
 /**
@@ -114,6 +130,8 @@ struct nxp_fspi_platdata {
  * @num_chipselect: Number of FSPI chipselect signals
  * @memmap_phy: Physical base address of FSPI memory mapping
  * @regs: Point to FSPI register structure for I/O access
+ * @spi_rx_bus_width: Number of SPI lines the flash supports for Rx
+ * @spi_tx_bus_width: Number of SPI lines the flash supports for Tx
  */
 struct nxp_fspi_priv {
 	u32 flags; /*future use*/
@@ -127,6 +145,8 @@ struct nxp_fspi_priv {
 	u32 flash_num;
 	u32 num_chipselect;
 	u32 memmap_phy;
+	u32 spi_rx_bus_width;
+	u32 spi_tx_bus_width;
 	struct nxp_fspi_regs *regs;
 };
 
@@ -269,6 +289,19 @@ static void fspi_set_lut(struct nxp_fspi_priv *priv)
 	fspi_write32(priv->flags, &regs->lut[lut_base + 2], 0);
 	fspi_write32(priv->flags, &regs->lut[lut_base + 3], 0);
 
+	/* 8-Bit Read */
+	lut_base = SEQID_OCTAL_READ * 4;
+	fspi_write32(priv->flags, &regs->lut[lut_base],
+		     OPRND0(FSPI_CMD_OCTAL_READ_4B) |
+		     PAD0(LUT_PAD1) | INSTR0(LUT_CMD) |
+		     OPRND1(ADDR32BIT) | PAD1(LUT_PAD1) |
+		     INSTR1(LUT_ADDR));
+	fspi_write32(priv->flags, &regs->lut[lut_base + 1],
+		     OPRND0(8) | PAD0(LUT_PAD8) | INSTR0(LUT_DUMMY) |
+		     OPRND1(0) | PAD1(LUT_PAD8) |
+		     INSTR1(LUT_READ));
+	fspi_write32(priv->flags, &regs->lut[lut_base + 2], 0);
+	fspi_write32(priv->flags, &regs->lut[lut_base + 3], 0);
 
 	/* Lock the LUT */
 	fspi_lut_lock(priv, 1);
@@ -394,7 +427,14 @@ static void fspi_init_ahb_read(struct nxp_fspi_priv *priv)
 	 * Set default lut sequence for AHB Read, bit[4-0] in flsha1cr2 reg.
 	 * Parallel mode is disabled.
 	 */
-	fspi_write32(priv->flags, &regs->flsha1cr2, SEQID_FAST_READ);
+
+	if (priv->spi_rx_bus_width == FSPI_OCTAL_MODE) {
+		/* Flash supports octal read */
+		fspi_write32(priv->flags, &regs->flsha1cr2, SEQID_OCTAL_READ);
+	} else {
+		/* Flash supports single bit read */
+		fspi_write32(priv->flags, &regs->flsha1cr2, SEQID_FAST_READ);
+	}
 }
 #endif
 
@@ -471,9 +511,17 @@ static void fspi_op_read(struct nxp_fspi_priv *priv, u32 *rxbuf, u32 len)
 
 		rx_size = (len > RX_IPBUF_SIZE) ? RX_IPBUF_SIZE : len;
 
-		fspi_write32(priv->flags, &regs->ipcr1,
-			     (SEQID_FAST_READ << FSPI_IPCR1_ISEQID_SHIFT) |
-			     (u16)rx_size);
+		if (priv->spi_rx_bus_width == FSPI_OCTAL_MODE) {
+			/* Flash supports octal read */
+			fspi_write32(priv->flags, &regs->ipcr1,
+				     (SEQID_OCTAL_READ <<
+				      FSPI_IPCR1_ISEQID_SHIFT) | (u16)rx_size);
+		} else {
+			/* Flash supports single bit read */
+			fspi_write32(priv->flags, &regs->ipcr1,
+				     (SEQID_FAST_READ <<
+				      FSPI_IPCR1_ISEQID_SHIFT) | (u16)rx_size);
+		}
 
 		to_or_from += rx_size;
 		len -= rx_size;
@@ -793,6 +841,8 @@ static int nxp_fspi_probe(struct udevice *bus)
 	priv->memmap_phy = plat->memmap_phy;
 	priv->flash_num = plat->flash_num;
 	priv->num_chipselect = plat->num_chipselect;
+	priv->spi_rx_bus_width = plat->spi_rx_bus_width;
+	priv->spi_tx_bus_width = plat->spi_tx_bus_width;
 
 	debug("%s: regs=<0x%llx> <0x%llx, 0x%llx>\n",
 	      __func__,
@@ -800,9 +850,11 @@ static int nxp_fspi_probe(struct udevice *bus)
 	      (u64)priv->amba_base[0],
 	      (u64)priv->amba_total_size);
 
-	debug("max-frequency=%d,flags=0x%x\n",
+	debug("max-frequency=%d, flags=0x%x, rx_width=0x%x, tx_width=0x%x\n",
 	      priv->speed_hz,
-	      plat->flags);
+	      plat->flags,
+	      priv->spi_rx_bus_width,
+	      priv->spi_tx_bus_width);
 
 	/*Send Software Reset to controller*/
 	fspi_write32(priv->flags, &priv->regs->mcr0,
@@ -893,19 +945,33 @@ static int nxp_fspi_ofdata_to_platdata(struct udevice *bus)
 		return -ENOMEM;
 	}
 
+	plat->num_chipselect = fdtdec_get_int(blob, node, "num-cs",
+					      NXP_FSPI_MAX_CHIPSELECT_NUM);
+
 	/* Count flash numbers */
-	fdt_for_each_subnode(subnode, blob, node)
+	fdt_for_each_subnode(subnode, blob, node) {
+		plat->speed_hz = fdtdec_get_int(blob, subnode,
+						"spi-max-frequency",
+						NXP_FSPI_DEFAULT_SCK_FREQ);
+		/*
+		 * MCR2[SAMEDEVICEEN] is enabled.
+		 * TODO: Add code to set individual flash settings to
+		 * different flashes if SAMEDEVICEEN bit is disabled.
+		 */
+		plat->spi_rx_bus_width = fdtdec_get_int(blob, subnode,
+							"spi-rx-bus-width",
+					NXP_FSPI_DEFAULT_SPI_RX_BUS_WIDTH);
+		plat->spi_tx_bus_width = fdtdec_get_int(blob, subnode,
+							"spi-tx-bus-width",
+					NXP_FSPI_DEFAULT_SPI_TX_BUS_WIDTH);
 		++flash_num;
+	}
 
 	if (flash_num == 0) {
 		debug("Error: Missing flashes!\n");
 		return -ENODEV;
 	}
 
-	plat->speed_hz = fdtdec_get_int(blob, node, "spi-max-frequency",
-					NXP_FSPI_DEFAULT_SCK_FREQ);
-	plat->num_chipselect = fdtdec_get_int(blob, node, "num-cs",
-					      NXP_FSPI_MAX_CHIPSELECT_NUM);
 
 	plat->reg_base = res_regs.start;
 	plat->amba_base = 0;

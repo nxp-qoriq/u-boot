@@ -135,15 +135,17 @@
 		compatible = "spi-flash";
 		spi-max-frequency = <20000000>; /* TODO Need to ck*/
 		reg = <0>;
+		/* The following setting enables 1-1-1 (CMD-ADDR-DATA) mode */
+		spi-rx-bus-width = <1>; /* 1 SPI Rx lines */
+		spi-tx-bus-width = <1>; /* 1 SPI Tx line */
 	};
 
-	qflash1: mt35xu512g@1 {
-		#address-cells = <1>;
-		#size-cells = <1>;
-		compatible = "spi-flash";
-		spi-max-frequency = <20000000>; /* TODO Need to ck*/
-		reg = <1>;
-	};
+	/*
+	 * MCR2[SAMEDEVICEEN] bit is enabled in FlexSPI controller for
+	 * LX2160ARDB and LX2160AQDS board. Both these has same type of flash
+	 * slave devices connected on both A0 and A1.
+	 * No need to provide node info for second flash device.
+	 */
 };
 
 &esdhc0 {
