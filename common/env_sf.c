@@ -336,7 +336,8 @@ out:
 
 int env_init(void)
 {
-#if defined(CONFIG_FSL_QSPI) & defined(CONFIG_ENV_ADDR)
+#if (defined(CONFIG_FSL_QSPI) || CONFIG_NXP_FSPI) & \
+	defined(CONFIG_ENV_ADDR)
 	env_t *env_ptr = (env_t *)(CONFIG_ENV_ADDR);
 
 	if (crc32(0, env_ptr->data, ENV_SIZE) == env_ptr->crc) {
