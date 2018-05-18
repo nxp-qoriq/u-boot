@@ -2137,6 +2137,211 @@ static void set_ddr_dq_mapping(fsl_ddr_cfg_regs_t *ddr,
 	debug("FSLDDR: dq_map_2 = 0x%08x\n", ddr->dq_map_2);
 	debug("FSLDDR: dq_map_3 = 0x%08x\n", ddr->dq_map_3);
 }
+
+static void set_ddr_addr_dec(fsl_ddr_cfg_regs_t *ddr)
+{
+#ifdef CONFIG_SYS_DDR_ADDR_DEC
+	const unsigned int cs0_config = ddr->cs[0].config;
+	const int cacheline = __ilog2(CONFIG_SYS_CACHELINE_SIZE);
+	unsigned int ba_bits;
+	unsigned int bg_bits;
+	unsigned int row_bits;
+	unsigned int col_bits;
+	unsigned int cs;
+	unsigned int map_row[18];
+	unsigned int map_col[11];
+	unsigned int map_ba[2];
+	unsigned int map_cid[2] = {0x3F, 0x3F};
+	unsigned int map_bg[2] = {0x3F, 0x3F};
+	unsigned int map_cs[2] = {0x3F, 0x3F};
+	unsigned int dbw;
+	unsigned int ba_intlv;
+	int placement;
+	int intlv;
+	int abort = 0;
+	int i;
+	int j;
+	char p;
+
+	col_bits = (cs0_config >> 0) & 0x7;
+	if (col_bits < 4)
+		col_bits += 8;
+	else if (col_bits < 7)
+		printf("Error %s col_bits = %d\n", __func__, col_bits);
+	row_bits = ((cs0_config >> 8) & 0x7) + 12;
+	ba_bits = ((cs0_config >> 14) & 0x3) + 2;
+	bg_bits = ((cs0_config >> 4) & 0x3) + 0;
+	intlv = (cs0_config >> 24) & 0xf;
+	ba_intlv = (ddr->ddr_sdram_cfg >> 8 ) & 0x7f;
+	switch (ba_intlv) {
+	case FSL_DDR_CS0_CS1:
+		cs = 1;
+		break;
+	case FSL_DDR_CS0_CS1_CS2_CS3:
+		cs = 2;
+		break;
+	default:
+		printf("Error %s ba_intlv 0x%x\n", __func__, ba_intlv);
+		return;
+	}
+	debug("col %d, row %d, ba %d, bg %d, intlv %d\n", col_bits, row_bits, ba_bits, bg_bits, intlv);
+	/*
+	 * Example mapping of 15x2x2x10
+	 * ---- --rr rrrr rrrr rrrr rCBB Gccc cccI cGcc cbbb
+	 */
+	dbw = (ddr->ddr_sdram_cfg >> 19) & 0x3;
+	switch (dbw) {
+	case 0:	/* 64-bit */
+		placement = 3;
+		break;
+	case 1:	/* 32-bit */
+		placement = 2;
+		break;
+	default:
+		printf("Error %s dbw = %d\n", __func__, dbw);
+		return;
+	}
+	debug("cacheline size %d\n", cacheline);
+	for (i = 0; placement < cacheline; i++)
+		map_col[i] = placement++;
+	map_bg[0] = placement++;
+	for ( ; i < col_bits; i++) {
+		map_col[i] = placement++;
+		if (placement == intlv)
+			placement++;
+	}
+	for ( ; i < 12; i++)
+		map_col[i] = 0x3F;	/* unused col bits */
+
+	if (bg_bits >= 2)
+		map_bg[1] = placement++;
+	map_ba[0] = placement++;
+	map_ba[1] = placement++;
+	if (cs) {
+		map_cs[0] = placement++;
+		if (cs == 2)
+			map_cs[1] = placement++;
+	}
+	for (i = 0; i < row_bits; i++)
+		map_row[i] = placement++;
+	for ( ; i < 18; i++)
+		map_row[i] = 0x3F;	/* unused row bits */
+	for (i = 39; i >= 0 ; i--) {
+		if (i == intlv) {
+			placement = 8;
+			p = 'I';
+		} else if (i < 3) {
+			p = 'b';
+			placement = 0;
+		} else {
+			placement = 0;
+			p = '-';
+		}
+		for (j = 0; j < 18; j++) {
+			if (map_row[j] != i)
+				continue;
+			if (placement) {
+				abort = 1;
+				printf("Error %s wrong address bit %d\n",
+				       __func__, i);
+			}
+			placement = i;
+			p = 'r';
+		}
+		for (j = 0; j < 11; j++) {
+			if (map_col[j] != i)
+				continue;
+			if (placement) {
+				abort = 1;
+				printf("Error %s wrong address bit %d\n",
+				       __func__, i);
+			}
+			placement = i;
+			p = 'c';
+		}
+		for (j = 0; j < 2; j++) {
+			if (map_ba[j] != i)
+				continue;
+			if (placement) {
+				abort = 1;
+				printf("Error %s wrong address bit %d\n",
+				       __func__, i);
+			}
+			placement = i;
+			p = 'B';
+		}
+		for (j = 0; j < 2; j++) {
+			if (map_bg[j] != i)
+				continue;
+			if (placement) {
+				abort = 1;
+				printf("Error %s wrong address bit %d\n",
+				       __func__, i);
+			}
+			placement = i;
+			p = 'G';
+		}
+		for (j = 0; j < 2; j++) {
+			if (map_cs[j] != i)
+				continue;
+			if (placement) {
+				abort = 1;
+				printf("Error %s wrong address bit %d\n",
+				       __func__, i);
+			}
+			placement = i;
+			p = 'C';
+		}
+		debug("%c", p);
+		if (!(i % 4))
+			debug(" ");
+	}
+	debug("\n");
+
+	if (abort)
+		return;
+
+	ddr->dec[0] = map_row[17] << 26		|
+		      map_row[16] << 18		|
+		      map_row[15] << 10		|
+		      map_row[14] << 2;
+	ddr->dec[1] = map_row[13] << 26		|
+		      map_row[12] << 18		|
+		      map_row[11] << 10		|
+		      map_row[10] << 2;
+	ddr->dec[2] = map_row[9] << 26		|
+		      map_row[8] << 18		|
+		      map_row[7] << 10		|
+		      map_row[6] << 2;
+	ddr->dec[3] = map_row[5] << 26		|
+		      map_row[4] << 18		|
+		      map_row[3] << 10		|
+		      map_row[2] << 2;
+	ddr->dec[4] = map_row[1] << 26		|
+		      map_row[0] << 18		|
+		      map_col[10] << 10		|
+		      map_col[9] << 2;
+	ddr->dec[5] = map_col[8] << 26		|
+		      map_col[7] << 18		|
+		      map_col[6] << 10		|
+		      map_col[5] << 2;
+	ddr->dec[6] = map_col[4] << 26		|
+		      map_col[3] << 18		|
+		      map_col[2] << 10		|
+		      map_col[1] << 2;
+	ddr->dec[7] = map_col[0] << 26		|
+		      map_ba[1] << 18		|
+		      map_ba[0] << 10		|
+		      map_cid[1] << 2;
+	ddr->dec[8] = map_cid[1] << 26		|
+		      map_cs[1] << 18		|
+		      map_cs[0] << 10		|
+		      map_bg[1] << 2;
+	ddr->dec[9] = map_bg[0] << 26		|
+		      1;
+#endif
+}
+
 static void set_ddr_sdram_cfg_3(fsl_ddr_cfg_regs_t *ddr,
 			       const memctl_options_t *popts)
 {
@@ -2461,6 +2666,9 @@ compute_fsl_memctl_config_regs(const unsigned int ctrl_num,
 	set_timing_cfg_9(ddr);
 	set_ddr_dq_mapping(ddr, dimm_params);
 #endif
+
+	if (ip_rev >= 0x50500 && popts->addr_dec)
+		set_ddr_addr_dec(ddr);
 
 	set_ddr_zq_cntl(ddr, zq_en);
 

@@ -901,6 +901,10 @@ unsigned int populate_memctl_options(const common_timing_params_t *common_dimm,
 	} else
 		popts->ecc_mode = 1;
 #endif
+#ifdef CONFIG_SYS_DDR_ADDR_DEC
+	if (hwconfig_sub_f("fsl_ddr", "dec", buf))
+		popts->addr_dec = 1;
+#endif
 	/* 1 = use memory controler to init data */
 	popts->ecc_init_using_memctl = popts->ecc_mode ? 1 : 0;
 

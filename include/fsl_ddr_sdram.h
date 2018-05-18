@@ -245,6 +245,7 @@ typedef struct fsl_ddr_cfg_regs_s {
 		unsigned int config;
 		unsigned int config_2;
 	} cs[CONFIG_CHIP_SELECTS_PER_CTRL];
+	unsigned int dec[10];
 	unsigned int timing_cfg_3;
 	unsigned int timing_cfg_0;
 	unsigned int timing_cfg_1;
@@ -349,6 +350,8 @@ typedef struct memctl_options_s {
 	unsigned int ba_intlv_ctl;
 	unsigned int addr_hash;
 
+	/* Address decode */
+	unsigned int addr_dec;
 	/* Operational mode parameters */
 	unsigned int ecc_mode;	 /* Use ECC? */
 	/* Initialize ECC using memory controller? */

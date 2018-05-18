@@ -64,9 +64,12 @@ void fsl_ddr_set_memctl_regs(const fsl_ddr_cfg_regs_t *regs,
 #ifdef CONFIG_FSL_DDR_BIST
 	u32 mtcr, err_detect, err_sbe;
 	u32 cs0_bnds, cs1_bnds, cs2_bnds, cs3_bnds, cs0_config;
-#endif
-#ifdef CONFIG_FSL_DDR_BIST
 	char buffer[CONFIG_SYS_CBSIZE];
+#ifdef CONFIG_SYS_DDR_ADDR_DEC
+	u32 dec_9, map, shift, highest;
+	u32 pos = 0;
+	u32 map_save = 0;
+#endif
 #endif
 	switch (ctrl_num) {
 	case 0:
@@ -224,6 +227,12 @@ void fsl_ddr_set_memctl_regs(const fsl_ddr_cfg_regs_t *regs,
 			ddr_out32(&ddr->debug[i], regs->debug[i]);
 		}
 	}
+#ifdef CONFIG_SYS_DDR_ADDR_DEC
+	if (regs->dec[9] & 1) {
+		for (i = 0; i < 10; i++)
+			ddr_out32(&ddr->dec[i], regs->dec[i]);
+	}
+#endif
 
 #ifdef CONFIG_SYS_FSL_ERRATUM_A008511
 	/* Part 1 of 2 */
@@ -485,6 +494,9 @@ step2:
 		cs1_bnds = ddr_in32(&ddr->cs1_bnds);
 		cs2_bnds = ddr_in32(&ddr->cs2_bnds);
 		cs3_bnds = ddr_in32(&ddr->cs3_bnds);
+#ifdef CONFIG_SYS_DDR_ADDR_DEC
+		dec_9 = ddr_in32(&ddr->dec[9]);
+#endif
 		if (cs0_config & CTLR_INTLV_MASK) {
 			/* set bnds to non-interleaving */
 			ddr_out32(&ddr->cs0_bnds, (cs0_bnds & 0xfffefffe) >> 1);
@@ -492,6 +504,32 @@ step2:
 			ddr_out32(&ddr->cs2_bnds, (cs2_bnds & 0xfffefffe) >> 1);
 			ddr_out32(&ddr->cs3_bnds, (cs3_bnds & 0xfffefffe) >> 1);
 			ddr_out32(&ddr->cs0_config, cs0_config & ~CTLR_INTLV_MASK);
+#ifdef CONFIG_SYS_DDR_ADDR_DEC
+			if (dec_9 & 0x1) {
+				highest = (dec_9 >> 26) == 0x3F ?
+					  0 : dec_9 >> 26;
+				pos = 37;
+				for (i = 0; i < 36; i++) {	/* Go through all 37 */
+					if (!(i % 4))
+						temp32 = ddr_in32(&ddr->dec[i >> 2]);
+					shift = (3 - i % 4) * 8 + 2;
+					map = (temp32 >> shift) & 0x3F;
+					if (map > highest && map != 0x3F) {
+						highest = map;
+						pos = i;
+					}
+				}
+				debug("\nFound highest position %d, mapping to %d, ",
+				      pos, highest);
+				map_save = ddr_in32(&ddr->dec[pos >> 2]);
+				shift = (3 - pos % 4) * 8 + 2;
+				debug("in dec[%d], bit %d (0x%x)\n",
+				      pos >> 2, shift, map_save);
+				temp32 = map_save & ~(0x3F << shift);
+				temp32 |= 8 << shift;
+				ddr_out32(&ddr->dec[pos >> 2], temp32);
+			}
+#endif
 		}
 		ddr_out32(&ddr->mtp1, BIST_PATTERN1);
 		ddr_out32(&ddr->mtp2, BIST_PATTERN2);
@@ -533,6 +571,10 @@ step2:
 			ddr_out32(&ddr->cs2_bnds, cs2_bnds);
 			ddr_out32(&ddr->cs3_bnds, cs3_bnds);
 			ddr_out32(&ddr->cs0_config, cs0_config);
+#ifdef CONFIG_SYS_DDR_ADDR_DEC
+			if (dec_9 & 0x1)
+				ddr_out32(&ddr->dec[pos >> 2], map_save);
+#endif
 		}
 	}
 #endif

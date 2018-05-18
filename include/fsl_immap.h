@@ -20,7 +20,9 @@ struct ccsr_ddr {
 	u32	cs2_bnds;		/* Chip Select 2 Memory Bounds */
 	u8	res_14[4];
 	u32	cs3_bnds;		/* Chip Select 3 Memory Bounds */
-	u8	res_1c[100];
+	u8	res_1c[0x40-0x1c];
+	u32	dec[10];
+	u8	res_68[0x80-0x68];
 	u32	cs0_config;		/* Chip Select Configuration */
 	u32	cs1_config;		/* Chip Select Configuration */
 	u32	cs2_config;		/* Chip Select Configuration */

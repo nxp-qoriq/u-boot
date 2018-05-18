@@ -62,6 +62,11 @@ config SYS_FSL_DDRC_GEN1
 	help
 	  Enable Freescale DDR controller.
 
+config SYS_DDR_ADDR_DEC
+	bool
+	help
+	  Enable DDR address decoding for v5.05 and later
+
 config SYS_FSL_DDRC_GEN2
 	bool
 	depends on !MPC86xx
