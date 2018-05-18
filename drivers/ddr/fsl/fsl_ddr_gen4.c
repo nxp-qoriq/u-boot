@@ -463,7 +463,16 @@ step2:
 #ifdef CONFIG_FSL_DDR_BIST
 #define BIST_PATTERN1	0xFFFFFFFF
 #define BIST_PATTERN2	0x0
-#define BIST_CR		0x80010000
+#define BIST_PATTERN3	0xAAAAAAAA
+#define BIST_PATTERN4	0x55555555
+#define BIST_PATTERN5	0xCCCCCCCC
+#define BIST_PATTERN6	0x33333333
+#define BIST_PATTERN7	0x12345678
+#define BIST_PATTERN8	0xABCDEF01
+#define BIST_PATTERN9	0xAA55AA55
+#define BIST_PATTERN10	0x55AA55AA
+
+#define BIST_CR		0x80060000
 #define BIST_CR_EN	0x80000000
 #define BIST_CR_STAT	0x00000001
 #define CTLR_INTLV_MASK	0x20000000
@@ -482,17 +491,18 @@ step2:
 			ddr_out32(&ddr->cs1_bnds, (cs1_bnds & 0xfffefffe) >> 1);
 			ddr_out32(&ddr->cs2_bnds, (cs2_bnds & 0xfffefffe) >> 1);
 			ddr_out32(&ddr->cs3_bnds, (cs3_bnds & 0xfffefffe) >> 1);
+			ddr_out32(&ddr->cs0_config, cs0_config & ~CTLR_INTLV_MASK);
 		}
 		ddr_out32(&ddr->mtp1, BIST_PATTERN1);
-		ddr_out32(&ddr->mtp2, BIST_PATTERN1);
-		ddr_out32(&ddr->mtp3, BIST_PATTERN2);
-		ddr_out32(&ddr->mtp4, BIST_PATTERN2);
-		ddr_out32(&ddr->mtp5, BIST_PATTERN1);
-		ddr_out32(&ddr->mtp6, BIST_PATTERN1);
-		ddr_out32(&ddr->mtp7, BIST_PATTERN2);
-		ddr_out32(&ddr->mtp8, BIST_PATTERN2);
-		ddr_out32(&ddr->mtp9, BIST_PATTERN1);
-		ddr_out32(&ddr->mtp10, BIST_PATTERN2);
+		ddr_out32(&ddr->mtp2, BIST_PATTERN2);
+		ddr_out32(&ddr->mtp3, BIST_PATTERN3);
+		ddr_out32(&ddr->mtp4, BIST_PATTERN4);
+		ddr_out32(&ddr->mtp5, BIST_PATTERN5);
+		ddr_out32(&ddr->mtp6, BIST_PATTERN6);
+		ddr_out32(&ddr->mtp7, BIST_PATTERN7);
+		ddr_out32(&ddr->mtp8, BIST_PATTERN8);
+		ddr_out32(&ddr->mtp9, BIST_PATTERN9);
+		ddr_out32(&ddr->mtp10, BIST_PATTERN10);
 		mtcr = BIST_CR;
 		ddr_out32(&ddr->mtcr, mtcr);
 		timeout = 100;
@@ -522,6 +532,7 @@ step2:
 			ddr_out32(&ddr->cs1_bnds, cs1_bnds);
 			ddr_out32(&ddr->cs2_bnds, cs2_bnds);
 			ddr_out32(&ddr->cs3_bnds, cs3_bnds);
+			ddr_out32(&ddr->cs0_config, cs0_config);
 		}
 	}
 #endif
