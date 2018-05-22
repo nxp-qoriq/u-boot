@@ -153,7 +153,7 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 		msg_blk->sequence_ctrl	= 0x031f;
 #endif
 	msg_blk->phy_config_override	= 0;
-	msg_blk->hdt_ctrl		= 0xff;
+	msg_blk->hdt_ctrl		= 0xc9;
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	msg_blk->msg_misc		= 0x0;
 #else

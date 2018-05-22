@@ -9,6 +9,7 @@
 #include "include/dimm.h"
 #include "include/io.h"
 #include "include/init.h"
+#include "include/messages.h"
 
 /* FIXME: Replace with timer */
 #ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
@@ -17,48 +18,168 @@
 #define TIMEOUTDEFAULT 10
 #endif
 
-static int wait_fw_done(const unsigned int ctrl_num)
+static uint32_t get_mail(const unsigned int ctrl_num, bool stream)
 {
 	int timeout;
-	uint16_t mail = 0;
+	uint32_t mail = 0;
+
+	timeout = TIMEOUTDEFAULT;
+	while (--timeout &&
+	       (phy_io_read16(ctrl_num, t_apbonly | csr_uct_shadow_regs)
+		& uct_write_prot_shadow_mask)) {
+		mdelay(10);
+	}
+	if (!timeout) {
+		printf("Error: timeout getting mail in %s\n", __func__);
+		return 0xFFFF;
+	}
+
+	mail = phy_io_read16(ctrl_num, t_apbonly |
+			     csr_uct_write_only_shadow);
+	if (stream) {
+		mail |= phy_io_read16(ctrl_num, t_apbonly |
+				      csr_uct_dat_write_only_shadow) << 16;
+	}
+
+	/* Ack */
+	phy_io_write16(ctrl_num, t_apbonly | csr_dct_write_prot, 0);
+
+	timeout = TIMEOUTDEFAULT;
+	while (--timeout &&
+	       !(phy_io_read16(ctrl_num, t_apbonly | csr_uct_shadow_regs)
+		 & uct_write_prot_shadow_mask)) {
+		mdelay(1);
+	}
+	if (!timeout)
+		printf("Error: timeout ack mail in %s\n", __func__);
+
+	/* completed */
+	phy_io_write16(ctrl_num, t_apbonly | csr_dct_write_prot, 1);
+
+	return mail;
+}
+
+#ifdef DEBUG
+static const char * lookup_msg(uint32_t index)
+{
+	int i;
+	const char *ptr = NULL;
+
+	for (i = 0; i < ARRAY_SIZE(messages); i++) {
+		if (messages[i].index == index) {
+			ptr = messages[i].msg;
+			break;
+		}
+	}
+
+	return ptr;
+}
+#endif
+
+static void decode_stream_message(const unsigned int ctrl_num)
+{
+#ifdef DEBUG
+	uint32_t index;
+	const char *format;
+	uint32_t args[12];
+	int i;
+
+	index = get_mail(ctrl_num, 1);
+	format = lookup_msg(index);
+	if ((index & 0xffff) > 12)	/* up to 12 args so far */
+		printf("Program error in %s\n", __func__);
+	for (i = 0; i < (index & 0xffff) && i < 12; i++)
+		args[i] = get_mail(ctrl_num, 1);
+	if (format) {
+		printf("0x%08x: ", index);
+		printf(format, args[0], args[1], args[2], args[3], args[4],
+		       args[5], args[6], args[7], args[8], args[9], args[10],
+		       args[11]);
+	}
+#endif
+}
+
+static int wait_fw_done(const unsigned int ctrl_num)
+{
+	uint32_t mail = 0;
 
 	while (mail == 0x0) {
-		timeout = TIMEOUTDEFAULT;
-		while (--timeout &&
-		       (phy_io_read16(ctrl_num, t_apbonly | csr_uct_shadow_regs)
-			& uct_write_prot_shadow_mask)) {
-			mdelay(10);
+		mail = get_mail(ctrl_num, 0);
+		switch (mail) {
+		case 0x7:
+			debug("Training completed\n");
+			break;
+		case 0xff:
+			debug("Training failure\n");
+			break;
+		case 0x0:
+			debug("End of initialization\n");
+			mail = 0;
+			break;
+		case 0x1:
+			debug("End of fine write leveling\n");
+			mail = 0;
+			break;
+		case 0x2:
+			debug("End of read enable training\n");
+			mail = 0;
+			break;
+		case 0x3:
+			debug("End of read delay center optimization\n");
+			mail = 0;
+			break;
+		case 0x4:
+			debug("End of write delay center optimization\n");
+			mail = 0;
+			break;
+		case 0x5:
+			debug("End of 2D read delay/voltage center optimization\n");
+			mail = 0;
+			break;
+		case 0x6:
+			debug("End of 2D write delay /voltage center optimization\n");
+			mail = 0;
+			break;
+		case 0x8:
+			decode_stream_message(ctrl_num);
+			mail = 0;
+			break;
+		case 0x9:
+			debug("End of max read latency training\n");
+			mail = 0;
+			break;
+		case 0xa:
+			debug("End of read dq deskew training\n");
+			mail = 0;
+			break;
+		case 0xc:
+			debug("End of LRDIMM Specific training (DWL, MREP, MRD and MWD)\n");
+			mail = 0;
+			break;
+		case 0xd:
+			debug("End of CA training\n");
+			mail = 0;
+			break;
+		case 0xfd:
+			debug("End of MPR read delay center optimization\n");
+			mail = 0;
+			break;
+		case 0xfe:
+			debug("End of Write leveling coarse delay\n");
+			mail = 0;
+			break;
+		default:
+			mail = 0;
+			break;
 		}
-		if (!timeout)
-			return -ETIME;
-
-		mail = phy_io_read16(ctrl_num, t_apbonly |
-				     csr_uct_write_only_shadow);
-
-		debug("PHY_GEN2 FW: mail = 0x%x\n", mail);
-
-		if (!(mail == 0x07 || mail == 0xff))
-			mail = 0x0;
-
-		phy_io_write16(ctrl_num, t_apbonly |
-			       csr_dct_write_prot, 0);	/* Ack */
-
-		timeout = TIMEOUTDEFAULT;
-		while (--timeout &&
-		       !(phy_io_read16(ctrl_num, t_apbonly | csr_uct_shadow_regs)
-			 & uct_write_prot_shadow_mask)) {
-			mdelay(1);
-		}
-		if (!timeout)
-			return -ETIME;
-		phy_io_write16(ctrl_num, t_apbonly |
-			       csr_dct_write_prot, 1);	/* completed */
 	}
 
 	if (mail == 0x7)
 		return 0;
 	else if (mail == 0xff)
 		return -EIO;
+	else if (mail == 0xffff)
+		return -ETIME;
 
 	debug("PHY_GEN2 FW: Unxpected mail = 0x%x\n", mail);
 

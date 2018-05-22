@@ -50,6 +50,7 @@
 #define csr_dct_write_prot		0x31
 #define csr_uct_write_only_shadow		0x32
 #define csr_uct_write_prot		0x33
+#define csr_uct_dat_write_only_shadow	0x34
 #define	csr_dbyte_dll_mode_cntrl_addr	0x3a
 #define csr_atx_impedance_addr		0x43
 #define csr_dq_dqs_rcv_cntrl_addr		0x43
