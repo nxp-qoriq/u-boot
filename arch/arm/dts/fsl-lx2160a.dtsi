@@ -59,7 +59,6 @@
 		compatible = "arm,pl011";
 		reg = <0x0 0x21d0000 0x0 0x1000>;
 		clocks = <&clockgen 4 0>;
-		status = "disabled";
 	};
 
 	uart2: serial@21e0000 {
