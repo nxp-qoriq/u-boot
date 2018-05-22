@@ -159,7 +159,7 @@
 		reg = <0x00 0x03400000 0x0 0x80000   /* PAB registers */
 		       0x00 0x03480000 0x0 0x40000   /* LUT registers */
 		       0x00 0x034c0000 0x0 0x40000   /* PF control registers */
-		       0x80 0x00000000 0x0 0x20000>; /* configuration space */
+		       0x80 0x00000000 0x0 0x1000>; /* configuration space */
 		reg-names = "ccsr", "lut", "pf_ctrl", "config";
 		#address-cells = <3>;
 		#size-cells = <2>;
@@ -174,7 +174,7 @@
 		reg = <0x00 0x03500000 0x0 0x80000   /* PAB registers */
 		       0x00 0x03580000 0x0 0x40000   /* LUT registers */
 		       0x00 0x035c0000 0x0 0x40000   /* PF control registers */
-		       0x88 0x00000000 0x0 0x20000>; /* configuration space */
+		       0x88 0x00000000 0x0 0x1000>; /* configuration space */
 		reg-names = "ccsr", "lut", "pf_ctrl", "config";
 		#address-cells = <3>;
 		#size-cells = <2>;
@@ -190,7 +190,7 @@
 		reg = <0x00 0x03600000 0x0 0x80000   /* PAB registers */
 		       0x00 0x03680000 0x0 0x40000   /* LUT registers */
 		       0x00 0x036c0000 0x0 0x40000   /* PF control registers */
-		       0x90 0x00000000 0x0 0x20000>; /* configuration space */
+		       0x90 0x00000000 0x0 0x1000>; /* configuration space */
 		reg-names = "ccsr", "lut", "pf_ctrl", "config";
 		#address-cells = <3>;
 		#size-cells = <2>;
@@ -205,7 +205,7 @@
 		reg = <0x00 0x03700000 0x0 0x80000   /* PAB registers */
 		       0x00 0x03780000 0x0 0x40000   /* LUT registers */
 		       0x00 0x037c0000 0x0 0x40000   /* PF control registers */
-		       0x98 0x00000000 0x0 0x20000>; /* configuration space */
+		       0x98 0x00000000 0x0 0x1000>; /* configuration space */
 		reg-names = "ccsr", "lut", "pf_ctrl", "config";
 		#address-cells = <3>;
 		#size-cells = <2>;
@@ -220,7 +220,7 @@
 		reg = <0x00 0x03800000 0x0 0x80000   /* PAB registers */
 		       0x00 0x03880000 0x0 0x40000   /* LUT registers */
 		       0x00 0x038c0000 0x0 0x40000   /* PF control registers */
-		       0xa0 0x00000000 0x0 0x20000>; /* configuration space */
+		       0xa0 0x00000000 0x0 0x1000>; /* configuration space */
 		reg-names = "ccsr", "lut", "pf_ctrl", "config";
 		#address-cells = <3>;
 		#size-cells = <2>;
@@ -235,7 +235,7 @@
 		reg = <0x00 0x03900000 0x0 0x80000   /* PAB registers */
 		       0x00 0x03980000 0x0 0x40000   /* LUT registers */
 		       0x00 0x039c0000 0x0 0x40000   /* PF control registers */
-		       0xa8 0x00000000 0x0 0x20000>; /* configuration space */
+		       0xa8 0x00000000 0x0 0x1000>; /* configuration space */
 		reg-names = "ccsr", "lut", "pf_ctrl", "config";
 		#address-cells = <3>;
 		#size-cells = <2>;
