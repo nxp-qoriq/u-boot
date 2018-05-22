@@ -532,6 +532,9 @@ static void fspi_op_read(struct nxp_fspi_priv *priv, u32 *rxbuf, u32 len)
 		/* invalid the RXFIFO */
 		fspi_write32(priv->flags, &regs->iprxfcr,
 			     FSPI_IPRXFCR_CLRIPRXF_MASK);
+		/* move the FIFO pointer */
+		fspi_write32(priv->flags, &regs->intr,
+			     FSPI_INTR_IPRXWA_MASK);
 		fspi_write32(priv->flags, &regs->intr,
 			     FSPI_INTR_IPCMDDONE_MASK);
 	}
