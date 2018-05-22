@@ -186,7 +186,7 @@ static int wait_fw_done(const unsigned int ctrl_num)
 	return -EINVAL;
 }
 
-void g_exec_fw(const unsigned int ctrl_num)
+int g_exec_fw(const unsigned int ctrl_num)
 {
 	int ret;
 
@@ -207,4 +207,6 @@ void g_exec_fw(const unsigned int ctrl_num)
 
 	phy_io_write16(ctrl_num, t_apbonly | csr_micro_reset_addr,
 		       csr_stall_to_micro_mask);
+
+	return ret;
 }

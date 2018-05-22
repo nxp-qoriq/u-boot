@@ -253,10 +253,10 @@ static void parase_odt(const unsigned int val,
 	}
 }
 
-unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
-		const memctl_options_t *popts,
-		const dimm_params_t *dimm_param,
-		fsl_ddr_cfg_regs_t *ddr)
+int compute_phy_config_regs(const unsigned int ctrl_num,
+			    const memctl_options_t *popts,
+			    const dimm_params_t *dimm_param,
+			    fsl_ddr_cfg_regs_t *ddr)
 {
 	int ret;
 	struct dimm *dimm;
@@ -338,12 +338,12 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 
 	/* FIXME: How to determine training firmware is done? */
 	debug("Execute firmware\n");
-	g_exec_fw(ctrl_num);
+	ret = g_exec_fw(ctrl_num);
 	/* FIXME: add 2D training parameter later */
 	debug("Read message block\n");
 	h_readmsgblock(ctrl_num);
 
-	if (input->basic.train2d) {		/* 2D training starts here */
+	if (!ret && input->basic.train2d) {		/* 2D training starts here */
 		debug("Load 2D firmware\n");
 		ret = phy_gen2_dimm_train(ctrl_num, input, 1, msg_2d, len); /* train 2D */
 			if (ret) {
@@ -351,19 +351,22 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 				return ret;
 			}
 		debug("Execute 2D firmware\n");
-		g_exec_fw(ctrl_num);
+		ret = g_exec_fw(ctrl_num);
 		/* FIXME: add 2D training parameter later */
 		debug("Read 2D message block\n");
 		h_readmsgblock(ctrl_num);
 	}
 
-	debug("Load PIE\n");
-	i_load_pie(ctrl_num, input, msg_1d);
+	if (!ret) {
+		debug("Load PIE\n");
+		i_load_pie(ctrl_num, input, msg_1d);
 
-	printf("DDR4(%d) %s with %d-rank %d-bit bus (x%d)\n", ctrl_num,
-	       dimm->dimmtype == RDIMM ? "RDIMM" : dimm->dimmtype == LRDIMM ?
-	       "LRDIMM" : "UDIMM", dimm->n_ranks, dimm->primary_sdram_width,
-	       dimm->data_width);
+		printf("DDR4(%d) %s with %d-rank %d-bit bus (x%d)\n", ctrl_num,
+		       dimm->dimmtype == RDIMM ? "RDIMM" :
+		       dimm->dimmtype == LRDIMM ? "LRDIMM" : "UDIMM",
+		       dimm->n_ranks, dimm->primary_sdram_width,
+		       dimm->data_width);
+	}
 
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	phy_io_write16(ctrl_num, t_apbonly | csr_micro_cont_mux_sel_addr, 0);
@@ -380,6 +383,6 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 	if (dimm)
 		free(dimm);
 
-	return 0;
+	return ret;
 }
 #endif
