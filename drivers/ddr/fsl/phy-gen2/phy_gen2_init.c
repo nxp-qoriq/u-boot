@@ -216,6 +216,12 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	msg_blk->mr5			= input->mr[5];
 	msg_blk->mr6			= input->mr[6];
 #endif
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	if (msg_blk->mr4 & 0x1c0) {
+		printf("Error %s: Setting DRAM CAL mode is not supported\n",
+		       __func__);
+	}
+#endif
 	msg_blk->alt_cas_l		= 0;
 	msg_blk->alt_wcas_l		= 0;
 
@@ -1013,9 +1019,9 @@ static void prog_seq0bdly0(const unsigned int ctrl_num,
 #ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
 	ps_count[0] = (int)(0.5 * 0.25 * frq);
 	if (input->basic.frequency < 400)
-		lower_freq_opt = 3;
+		lower_freq_opt = (input->basic.dimm_type == RDIMM) ? 7 : 3;
 	else if (input->basic.frequency < 533)
-		lower_freq_opt = 11;
+		lower_freq_opt = (input->basic.dimm_type == RDIMM) ? 14 : 11;
 
 	ps_count[1] = (int)(1.0 * 0.25 * frq) - lower_freq_opt;
 	ps_count[2] = (int) (10.0 * 0.25 * frq);
