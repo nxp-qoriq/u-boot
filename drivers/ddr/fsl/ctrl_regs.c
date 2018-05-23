@@ -2070,7 +2070,7 @@ static void set_timing_cfg_8(const unsigned int ctrl_num,
 	int wr_lat = ((ddr->timing_cfg_2 & 0x00780000) >> 19) +
 		      ((ddr->timing_cfg_2 & 0x00040000) >> 14);
 
-	tccdl = max(5U, tccdl);
+	tccdl = max(5, tccdl);
 	rwt_bg = cas_latency + 2 + 4 - wr_lat;
 	if (rwt_bg < tccdl)
 		rwt_bg = tccdl - rwt_bg;
