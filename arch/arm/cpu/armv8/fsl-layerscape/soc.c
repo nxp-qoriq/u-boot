@@ -658,7 +658,7 @@ void ddr_enable_0v9_volt(bool en)
 }
 #endif
 
-#ifdef CONFIG_FSPI_AHB_INIT
+#ifdef CONFIG_FSPI_AHB_EN_4BYTE
 int fspi_ahb_init(void)
 {
 	/* Enable 4bytes address support and fast read */
@@ -748,7 +748,7 @@ int board_late_init(void)
 #ifdef CONFIG_QSPI_AHB_INIT
 	qspi_ahb_init();
 #endif
-#ifdef CONFIG_FSPI_AHB_INIT
+#ifdef CONFIG_FSPI_AHB_EN_4BYTE
 	fspi_ahb_init();
 #endif
 
