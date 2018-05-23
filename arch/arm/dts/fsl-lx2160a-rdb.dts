@@ -29,6 +29,7 @@
 &fspi {
 	bus-num = <0>;
 	status = "okay";
+	fspi-has-second-chip;
 
 	qflash0: mt35xu512g@0 {
 		#address-cells = <1>;

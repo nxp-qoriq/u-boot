@@ -101,6 +101,7 @@ DECLARE_GLOBAL_DATA_PTR;
  * @num_chipselect: Number of FSPI chipselect signals
  * @spi_rx_bus_width: Number of SPI lines the flash supports for Rx
  * @spi_tx_bus_width: Number of SPI lines the flash supports for Tx
+ * @fspi_has_second_chip: Flash device connected on CS1
  */
 struct nxp_fspi_platdata {
 	u32 flags; /*future use*/
@@ -113,6 +114,7 @@ struct nxp_fspi_platdata {
 	u32 num_chipselect;
 	u32 spi_rx_bus_width;
 	u32 spi_tx_bus_width;
+	bool fspi_has_second_chip;
 };
 
 /**
@@ -132,6 +134,7 @@ struct nxp_fspi_platdata {
  * @regs: Point to FSPI register structure for I/O access
  * @spi_rx_bus_width: Number of SPI lines the flash supports for Rx
  * @spi_tx_bus_width: Number of SPI lines the flash supports for Tx
+ * @fspi_has_second_chip: Flash device connected on CS1
  */
 struct nxp_fspi_priv {
 	u32 flags; /*future use*/
@@ -147,6 +150,7 @@ struct nxp_fspi_priv {
 	u32 memmap_phy;
 	u32 spi_rx_bus_width;
 	u32 spi_tx_bus_width;
+	bool fspi_has_second_chip;
 	struct nxp_fspi_regs *regs;
 };
 
@@ -843,6 +847,7 @@ static int nxp_fspi_probe(struct udevice *bus)
 	priv->num_chipselect = plat->num_chipselect;
 	priv->spi_rx_bus_width = plat->spi_rx_bus_width;
 	priv->spi_tx_bus_width = plat->spi_tx_bus_width;
+	priv->fspi_has_second_chip = plat->fspi_has_second_chip;
 
 	debug("%s: regs=<0x%llx> <0x%llx, 0x%llx>\n",
 	      __func__,
@@ -947,6 +952,8 @@ static int nxp_fspi_ofdata_to_platdata(struct udevice *bus)
 
 	plat->num_chipselect = fdtdec_get_int(blob, node, "num-cs",
 					      NXP_FSPI_MAX_CHIPSELECT_NUM);
+	if (fdt_get_property(blob, node, "fspi-has-second-chip", NULL))
+		plat->fspi_has_second_chip = true;
 
 	/* Count flash numbers */
 	fdt_for_each_subnode(subnode, blob, node) {
@@ -999,6 +1006,11 @@ static int nxp_fspi_claim_bus(struct udevice *dev)
 	struct dm_spi_slave_platdata *slave_plat = dev_get_parent_platdata(dev);
 
 	debug("FSPI Bus Claim for CS [%x]\n", slave_plat->cs);
+
+	if ((slave_plat->cs != 0) && (!priv->fspi_has_second_chip)) {
+		printf("FSPI Only CS 0 is supported\n");
+		return -1;
+	}
 
 	priv->cur_amba_base = priv->amba_base[0] +
 			      NXP_FSPI_FLASH_SIZE * slave_plat->cs;
