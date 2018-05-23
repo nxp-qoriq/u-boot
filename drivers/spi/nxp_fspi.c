@@ -361,7 +361,7 @@ static void fspi_op_write_cmd(struct nxp_fspi_priv *priv)
 	fspi_write32(priv->flags, &regs->intr, FSPI_INTR_IPCMDDONE_MASK);
 }
 
-#if defined(CONFIG_SYS_FSL_FSPI_AHB)
+#if defined(CONFIG_SYS_FSPI_AHB_INIT)
 
 /*
  * If we have changed the content of the flash by writing or erasing,
@@ -392,7 +392,8 @@ static inline void fspi_ahb_read(struct nxp_fspi_priv *priv, u8 *rxbuf, int len)
 {
 	void *rx_addr = NULL;
 
-	debug("FSPI AHB Read Invoked\n");
+	debug("FSPI AHB Read Invoked from:[0x%02x] len:[0x%02x]\n",
+	      (priv->memmap_phy + priv->cur_amba_base + priv->sf_addr), len);
 	rx_addr = (void *)(uintptr_t)(priv->memmap_phy +
 			              priv->cur_amba_base +
 				      priv->sf_addr);
@@ -423,9 +424,12 @@ static void fspi_init_ahb_read(struct nxp_fspi_priv *priv)
 	 * performance
 	 */
 	fspi_write32(priv->flags, &regs->ahbrxbuf7cr0,
-		     FSPI_RX_MAX_AHBBUF_SIZE / 8 | FSPI_AHBCR_PREFETCHEN_MASK);
+		     FSPI_RX_MAX_AHBBUF_SIZE / 8 |
+		     FSPI_AHBBUFXCR0_PREFETCHEN_MASK);
 
-	fspi_write32(priv->flags, &regs->ahbcr, FSPI_AHBCR_PREFETCHEN_MASK);
+	fspi_write32(priv->flags, &regs->ahbcr,
+		     FSPI_AHBCR_PREFETCHEN_MASK |
+		     FSPI_AHBCR_READADDROPT_MASK);
 
 	/*
 	 * Set default lut sequence for AHB Read, bit[4-0] in flsha1cr2 reg.
@@ -495,7 +499,7 @@ static void fspi_op_rdxx(struct nxp_fspi_priv *priv, u32 *rxbuf, u32 len)
 	fspi_write32(priv->flags, &regs->intr, FSPI_INTR_IPCMDDONE_MASK);
 }
 
-#ifndef CONFIG_SYS_FSL_FSPI_AHB
+#ifndef CONFIG_SYS_FSPI_AHB_INIT
 /* If AHB read interface not defined, read data from ip interface. */
 static void fspi_op_read(struct nxp_fspi_priv *priv, u32 *rxbuf, u32 len)
 {
@@ -793,7 +797,7 @@ static int fspi_xfer(struct nxp_fspi_priv *priv, unsigned int bitlen,
 		    (priv->cur_seqid == FSPI_CMD_RDFSR))
 			fspi_op_rdxx(priv, din, bytes);
 		else if (priv->cur_seqid == FSPI_CMD_FAST_READ)
-#ifdef CONFIG_SYS_FSL_FSPI_AHB
+#ifdef CONFIG_SYS_FSPI_AHB_INIT
 			fspi_ahb_read(priv, din, bytes);
 #else
 			fspi_op_read(priv, din, bytes);
@@ -803,10 +807,10 @@ static int fspi_xfer(struct nxp_fspi_priv *priv, unsigned int bitlen,
 			      priv->cur_seqid);
 	}
 
-#ifdef CONFIG_SYS_FSL_FSPI_AHB
+#ifdef CONFIG_SYS_FSPI_AHB_INIT
 	if ((priv->cur_seqid == FSPI_CMD_SE) ||
 	    (priv->cur_seqid == FSPI_CMD_PP) ||
-	    (priv->cur_seqid == FSPI_CMD_BE_4K)
+	    (priv->cur_seqid == FSPI_CMD_BE_4K))
 		fspi_ahb_invalid(priv);
 #endif
 
@@ -895,8 +899,12 @@ static int nxp_fspi_probe(struct udevice *bus)
 	fspi_write32(priv->flags, &priv->regs->dllbcr, 0x0100);
 
 	/*
-	 * Need to Reset SAMEDEVICEEN bit in mcr2, when we add support for
-	 * different flashes.
+	 * Supporting same flash device as slaves on different chip-select.
+	 * As SAMEDEVICEEN bit set, by default, in mcr2 reg then need not to
+	 * configure FLSHA2CRx/FLSHB1CRx/FLSHB2CRx register as setting for
+	 * these would be ignored.
+	 * Need to Reset SAMEDEVICEEN bit in mcr2 reg, when require to add
+	 * support for different flashes.
 	 */
 
 	/* Flash Size in KByte */
@@ -916,7 +924,7 @@ static int nxp_fspi_probe(struct udevice *bus)
 
 	fspi_set_lut(priv);
 
-#ifdef CONFIG_SYS_FSL_FSPI_AHB
+#ifdef CONFIG_SYS_FSPI_AHB_INIT
 	fspi_init_ahb_read(priv);
 #endif
 
