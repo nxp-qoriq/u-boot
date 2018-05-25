@@ -2247,6 +2247,7 @@ unsigned long long fsl_ddr_interactive(fsl_ddr_info_t *pinfo, int var_is_set)
 			 */
 			next_step = STEP_GET_SPD;
 			ddrsize = fsl_ddr_compute(pinfo, next_step, 0);
+			next_step = STEP_PROGRAM_REGS;
 			continue;
 		}
 
@@ -2256,6 +2257,7 @@ unsigned long long fsl_ddr_interactive(fsl_ddr_info_t *pinfo, int var_is_set)
 			 * the current next_step/
 			 */
 			ddrsize = fsl_ddr_compute(pinfo, next_step, 0);
+			next_step = STEP_PROGRAM_REGS;
 			continue;
 		}
 
