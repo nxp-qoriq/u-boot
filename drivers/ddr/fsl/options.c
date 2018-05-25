@@ -1036,6 +1036,8 @@ unsigned int populate_memctl_options(const common_timing_params_t *common_dimm,
 			if (popts->registered_dimm_en ||
 			    (CONFIG_FSL_SDRAM_TYPE == SDRAM_TYPE_DDR4))
 				popts->ap_en = 1;
+		} else {
+			popts->ap_en = 0;
 		}
 	}
 
