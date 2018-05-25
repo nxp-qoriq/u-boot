@@ -1238,7 +1238,10 @@ static void set_ddr_sdram_mode_9(fsl_ddr_cfg_regs_t *ddr,
 		break;
 	}
 
-	esdmode5 = 0x00000400;	/* Data mask enabled */
+	if (popts->x4_en)
+		esdmode5 = 0;
+	else
+		esdmode5 = 0x00000400;	/* Data mask enabled */
 	if (ddr->cs[0].config & SDRAM_CS_CONFIG_EN) {
 		esdmode5 |= rtt_park << 6;
 		rtt_park_all = four_cs ? 0 : 1;
@@ -1276,7 +1279,10 @@ static void set_ddr_sdram_mode_9(fsl_ddr_cfg_regs_t *ddr,
 	debug("FSLDDR: ddr_sdram_mode_9 = 0x%08x\n", ddr->ddr_sdram_mode_9);
 	if (unq_mrs_en) {	/* unique mode registers are supported */
 		for (i = 1; i < CONFIG_CHIP_SELECTS_PER_CTRL; i++) {
-			esdmode5 = 0x00000400;
+			if (popts->x4_en)
+				esdmode5 = 0;
+			else
+				esdmode5 = 0x00000400;
 			if (!rtt_park_all &&
 			    (ddr->cs[i].config & SDRAM_CS_CONFIG_EN)) {
 				esdmode5 |= rtt_park;
