@@ -756,6 +756,7 @@ static void set_ddr_sdram_rcw(const unsigned int ctrl_num,
 			rc0f = ddr_freq > 3200 ? 0x3 :
 			       (ddr_freq > 2400 ? 0x2 :
 				(ddr_freq > 2133 ? 0x1 : 0));
+			rc0f = (ddr->ddr_sdram_cfg_2 & (1 << 5)) ? rc0f : 4;
 			ddr->ddr_sdram_rcw_1 =
 				common_dimm->rcw[0] << 28 | \
 				common_dimm->rcw[1] << 24 | \
