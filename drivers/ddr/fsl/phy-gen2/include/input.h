@@ -79,6 +79,8 @@ struct input {
 	unsigned int cs_d0;
 	unsigned int cs_d1;
 	unsigned int odt[4];
+	unsigned int rcw[16];
+	unsigned int rcw3x;
 };
 
 #endif

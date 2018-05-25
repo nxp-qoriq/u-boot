@@ -303,6 +303,29 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 			parase_odt(odt_wr, false, i, dimm->cs_d0, dimm->cs_d1,
 				   dimm->odt);
 		}
+
+		/* Do not set sdram_cfg[RD_EN] or sdram_cfg2[RCW_EN] for RDIMM */
+		if (dimm_param->registered_dimm) {
+			ddr->ddr_sdram_cfg &= ~(1 << 28);
+			ddr->ddr_sdram_cfg_2 &= ~(1 << 2);
+			dimm->rcw[0] = (ddr->ddr_sdram_rcw_1 >> 28) & 0xf;
+			dimm->rcw[1] = (ddr->ddr_sdram_rcw_1 >> 24) & 0xf;
+			dimm->rcw[2] = (ddr->ddr_sdram_rcw_1 >> 20) & 0xf;
+			dimm->rcw[3] = (ddr->ddr_sdram_rcw_1 >> 16) & 0xf;
+			dimm->rcw[4] = (ddr->ddr_sdram_rcw_1 >> 12) & 0xf;
+			dimm->rcw[5] = (ddr->ddr_sdram_rcw_1 >> 8) & 0xf;
+			dimm->rcw[6] = (ddr->ddr_sdram_rcw_1 >> 4) & 0xf;
+			dimm->rcw[7] = (ddr->ddr_sdram_rcw_1 >> 0) & 0xf;
+			dimm->rcw[8] = (ddr->ddr_sdram_rcw_2 >> 28) & 0xf;
+			dimm->rcw[9] = (ddr->ddr_sdram_rcw_2 >> 24) & 0xf;
+			dimm->rcw[10] = (ddr->ddr_sdram_rcw_2 >> 20) & 0xf;
+			dimm->rcw[11] = (ddr->ddr_sdram_rcw_2 >> 16) & 0xf;
+			dimm->rcw[12] = (ddr->ddr_sdram_rcw_2 >> 12) & 0xf;
+			dimm->rcw[13] = (ddr->ddr_sdram_rcw_2 >> 8) & 0xf;
+			dimm->rcw[14] = (ddr->ddr_sdram_rcw_2 >> 4) & 0xf;
+			dimm->rcw[15] = (ddr->ddr_sdram_rcw_2 >> 0) & 0xf;
+			dimm->rcw3x = (ddr->ddr_sdram_rcw_3 >> 8) & 0xff;
+		}
 	} else {
 		printf("Error: empty DIMM parameters.\n");
 		return -EINVAL;

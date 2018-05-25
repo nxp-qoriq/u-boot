@@ -94,6 +94,9 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 		input->odt[i] = dimm->odt[i];
 		debug("odt[%d] = 0x%x\n", i, input->odt[i]);
 	}
+	for (i = 0; i < 16; i++)
+		input->rcw[i] = dimm->rcw[i];
+	input->rcw3x = dimm->rcw3x;
 
 	return input;
 }
@@ -105,10 +108,6 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 		  struct input *input, size_t *len)
 {
-	uint16_t f0rc0d_d0;
-	uint16_t f0rc0d_d1;
-	uint16_t f0rc0a;
-	uint16_t f0rc3x;
 	struct ddr4u1d *msg_blk;
 	struct ddr4u2d *msg_blk_2d = NULL;
 	struct ddr4r1d *msg_blk_r = NULL;
@@ -268,44 +267,53 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	debug("msg_blk->acsm_odt_ctrl3 = 0x%x\n", msg_blk->acsm_odt_ctrl3);
 
 	/* RDIMM only */
-	if (input->basic.dimm_type == RDIMM || input->basic.dimm_type ==
-								LRDIMM) {
+	if (input->basic.dimm_type == RDIMM ||
+	    input->basic.dimm_type == LRDIMM) {
 		msg_blk_r = (struct ddr4r1d *)msg_blk;
-
-		f0rc0d_d0 = input->basic.dimm_type == RDIMM ? 0x4 : 0;
-		f0rc0d_d0 += input->adv.cs_mode;
-		f0rc0d_d0 |= (msg_blk_r->addr_mirror &
-				msg_blk_r->cs_present_d0) ?  0x8 : 0x0;
-		f0rc0d_d0 &= 0xf;
-		f0rc0d_d1 = input->basic.dimm_type == RDIMM ? 0x4 : 0;
-		f0rc0d_d1 += input->adv.cs_mode;
-		f0rc0d_d1 |= (msg_blk_r->addr_mirror &
-				msg_blk_r->cs_present_d1) ?  0x8 : 0x0;
-		f0rc0d_d1 &= 0xf;
-		f0rc0a = input->basic.frequency <= 800 ? 0x0 :
-			 input->basic.frequency <= 933 ? 0x1 :
-			 input->basic.frequency <= 1066 ? 0x2 :
-			 input->basic.frequency <= 1200 ? 0x3 :
-			 input->basic.frequency <= 1333 ? 0x4 :
-			 input->basic.frequency <= 1466 ? 0x5 :
-			 input->basic.frequency <= 1600 ? 0x6 : 0;
-		f0rc0a &= 0xf;
-		f0rc3x = input->basic.frequency < 620 ? 0 :
-			 (input->basic.frequency - 621) / 10;
-
-		msg_blk_r->f0rc0d_d0 = f0rc0d_d0;
-		msg_blk_r->f0rc0d_d1 = f0rc0d_d1;
-		msg_blk_r->f0rc0a_d0 = f0rc0a;
-		msg_blk_r->f0rc0a_d1 = f0rc0a;
-		msg_blk_r->f0rc3x_d0 = f0rc3x;
-		msg_blk_r->f0rc3x_d1 = f0rc3x;
-
+		if (msg_blk_r->cs_present_d0) {
+			msg_blk_r->f0rc00_d0 = input->rcw[0];
+			msg_blk_r->f0rc01_d0 = input->rcw[1];
+			msg_blk_r->f0rc02_d0 = input->rcw[2];
+			msg_blk_r->f0rc03_d0 = input->rcw[3];
+			msg_blk_r->f0rc04_d0 = input->rcw[4];
+			msg_blk_r->f0rc05_d0 = input->rcw[5];
+			msg_blk_r->f0rc06_d0 = input->rcw[6];
+			msg_blk_r->f0rc07_d0 = input->rcw[7];
+			msg_blk_r->f0rc08_d0 = input->rcw[8];
+			msg_blk_r->f0rc09_d0 = input->rcw[9];
+			msg_blk_r->f0rc0a_d0 = input->rcw[10];
+			msg_blk_r->f0rc0b_d0 = input->rcw[11];
+			msg_blk_r->f0rc0c_d0 = input->rcw[12];
+			msg_blk_r->f0rc0d_d0 = input->rcw[13];
+			msg_blk_r->f0rc0e_d0 = input->rcw[14];
+			msg_blk_r->f0rc0f_d0 = input->rcw[15];
+			msg_blk_r->f0rc3x_d0 = input->rcw3x;
+		}
+		if (msg_blk_r->cs_present_d1) {
+			msg_blk_r->f0rc00_d1 = input->rcw[0];
+			msg_blk_r->f0rc01_d1 = input->rcw[1];
+			msg_blk_r->f0rc02_d1 = input->rcw[2];
+			msg_blk_r->f0rc03_d1 = input->rcw[3];
+			msg_blk_r->f0rc04_d1 = input->rcw[4];
+			msg_blk_r->f0rc05_d1 = input->rcw[5];
+			msg_blk_r->f0rc06_d1 = input->rcw[6];
+			msg_blk_r->f0rc07_d1 = input->rcw[7];
+			msg_blk_r->f0rc08_d1 = input->rcw[8];
+			msg_blk_r->f0rc09_d1 = input->rcw[9];
+			msg_blk_r->f0rc0a_d1 = input->rcw[10];
+			msg_blk_r->f0rc0b_d1 = input->rcw[11];
+			msg_blk_r->f0rc0c_d1 = input->rcw[12];
+			msg_blk_r->f0rc0d_d1 = input->rcw[13];
+			msg_blk_r->f0rc0e_d1 = input->rcw[14];
+			msg_blk_r->f0rc0f_d1 = input->rcw[15];
+			msg_blk_r->f0rc3x_d1 = input->rcw3x;
+		}
 		if (input->basic.dimm_type == LRDIMM) {
 			msg_blk_lr = (struct ddr4lr1d *)msg_blk;
-			msg_blk_lr->bc0a_d0 = f0rc0a;
-			msg_blk_lr->bc0a_d1 = f0rc0a;
-			msg_blk_lr->f0bc6x_d0 = f0rc3x;
-			msg_blk_lr->f0bc6x_d1 = f0rc3x;
+			msg_blk_lr->bc0a_d0 = msg_blk_lr->f0rc0a_d0;
+			msg_blk_lr->bc0a_d1 = msg_blk_lr->f0rc0a_d1;
+			msg_blk_lr->f0bc6x_d0 = msg_blk_lr->f0rc3x_d0;
+			msg_blk_lr->f0bc6x_d1 = msg_blk_lr->f0rc3x_d1;
 		}
 	}
 
