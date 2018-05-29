@@ -70,7 +70,7 @@ struct serdes_phy_config {
  * This table has limited serdes protocol entries. It can be expanded as per
  * requirement.
  */
-static struct serdes_phy_config serdes1_phy_config[] = {
+static const struct serdes_phy_config serdes1_phy_config[] = {
 	{3, {{WRIOP1_DPMAC3, AQ_PHY_ADDR1, EMI1, IO_SLOT_1},
 	    {WRIOP1_DPMAC4, AQ_PHY_ADDR2, EMI1, IO_SLOT_1},
 	    {WRIOP1_DPMAC5, AQ_PHY_ADDR3, EMI1, IO_SLOT_1},
@@ -94,18 +94,18 @@ static struct serdes_phy_config serdes1_phy_config[] = {
 	     {WRIOP1_DPMAC6, INPHI_PHY_ADDR1, EMI1, IO_SLOT_6} } }
 };
 
-static struct serdes_phy_config serdes2_phy_config[] = {
+static const struct serdes_phy_config serdes2_phy_config[] = {
 	{2, {} },
 	{3, {} },
 	{5, {} }
 };
 
-static struct serdes_phy_config serdes3_phy_config[] = {
+static const struct serdes_phy_config serdes3_phy_config[] = {
 	{2, {} }
 };
 
-static inline struct phy_config *get_phy_config(u8 serdes,
-						struct serdes_phy_config *table,
+static inline const struct phy_config *get_phy_config(u8 serdes,
+						const struct serdes_phy_config *table,
 						u8 table_size)
 {
 	int i;
@@ -285,7 +285,7 @@ static struct mii_dev *lx2160a_qds_mdio_init(u8 realbusnum, IO_SLOT ioslot)
 	return NULL;
 }
 
-static inline void do_phy_config(struct phy_config *phy_config)
+static inline void do_phy_config(const struct phy_config *phy_config)
 {
 	struct mii_dev *bus;
 	int i;
@@ -366,7 +366,7 @@ int board_eth_init(bd_t *bis)
 	char dpmacid[] = "dpmac00", srds[] = "00_00_00";
 	size_t len;
 	struct mii_dev *bus;
-	struct phy_config *phy_config;
+	const struct phy_config *phy_config;
 	struct ccsr_gur *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
 	u32 srds_s1, srds_s2, srds_s3;
 
