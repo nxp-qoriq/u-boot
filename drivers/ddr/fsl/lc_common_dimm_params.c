@@ -92,13 +92,13 @@ static unsigned int get_speed_bin_caslat(unsigned int tckmin_ps,
 		return 0;
 	}
 
-	for (i = 0; bin[i].cl[0].tckmin_ps < tckmin_ps && i < 7; i++)
+	for (i = 0; i < 7 && bin[i].cl[0].tckmin_ps < tckmin_ps; i++)
 		;
 	if (bin[i].cl[0].tckmin_ps > tckmin_ps && i > 0)
 		i--;
 
-	for (j = 0; bin[i].taamin_ps[j] < taamin_ps &&
-		    bin[i].taamin_ps[j] > 0 && j < 4; j++)
+	for (j = 0; j < 4 && bin[i].taamin_ps[j] < taamin_ps &&
+		    bin[i].taamin_ps[j] > 0; j++)
 		;
 	if (j > 4) {
 		printf("Error finding taamin_ps %d in table\n", taamin_ps);
