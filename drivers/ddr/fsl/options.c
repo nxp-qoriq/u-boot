@@ -1040,6 +1040,9 @@ unsigned int populate_memctl_options(const common_timing_params_t *common_dimm,
 			popts->ap_en = 0;
 		}
 	}
+	/* Disable address parity for this controller */
+	if (fsl_ddr_get_version(ctrl_num) == 0x50500)
+		popts->ap_en = 0;
 
 	/*
 	 * BSTTOPRE precharge interval
