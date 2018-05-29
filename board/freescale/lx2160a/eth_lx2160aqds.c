@@ -42,6 +42,12 @@ typedef enum {
 	IO_SLOT_MAX
 } IO_SLOT;
 
+struct lx2160a_qds_mdio {
+	IO_SLOT ioslot:4;
+	u8 realbusnum:4;
+	struct mii_dev *realbus;
+};
+
 /* structure explaining the phy configuration on 8 lanes of a serdes*/
 struct serdes_phy_config {
 	u8 serdes; /* serdes protocol */
@@ -111,12 +117,6 @@ static inline struct phy_config *get_phy_config(u8 serdes,
 
 	return NULL;
 }
-
-struct lx2160a_qds_mdio {
-	IO_SLOT ioslot:4;
-	u8 realbusnum:4;
-	struct mii_dev *realbus;
-};
 
 /* BRDCFG4 controls EMI routing for the board.
  * Bits    Function
@@ -382,7 +382,7 @@ int board_eth_init(bd_t *bis)
 				FSL_CHASSIS3_RCWSR28_SRDS3_PRTCL_MASK;
 	srds_s3 >>= FSL_CHASSIS3_RCWSR28_SRDS3_PRTCL_SHIFT;
 
-	sprintf(srds, "%02d_%02d_%02d", srds_s1, srds_s2, srds_s3);
+	sprintf(srds, "%d_%d_%d", srds_s1, srds_s2, srds_s3);
 
 	regs = (struct memac_mdio_controller *)CONFIG_SYS_FSL_WRIOP1_MDIO1;
 	mdio_info.regs = regs;
@@ -435,8 +435,7 @@ int board_eth_init(bd_t *bis)
 		}
 	} else {
 		/*Look for phy config for serdes1 in phy config table*/
-		phy_config = get_phy_config(srds_s1,
-					    serdes1_phy_config,
+		phy_config = get_phy_config(srds_s1, serdes1_phy_config,
 					    ARRAY_SIZE(serdes1_phy_config));
 		if (!phy_config) {
 			printf("%s qds: WRIOP: Unsupported SerDes1 Protocol "
@@ -444,8 +443,7 @@ int board_eth_init(bd_t *bis)
 		} else {
 			do_phy_config(phy_config);
 		}
-		phy_config = get_phy_config(srds_s2,
-					    serdes2_phy_config,
+		phy_config = get_phy_config(srds_s2, serdes2_phy_config,
 					    ARRAY_SIZE(serdes2_phy_config));
 		if (!phy_config) {
 			printf("%s qds: WRIOP: Unsupported SerDes2 Protocol "
@@ -453,8 +451,7 @@ int board_eth_init(bd_t *bis)
 		} else {
 			do_phy_config(phy_config);
 		}
-		phy_config = get_phy_config(srds_s3,
-					    serdes3_phy_config,
+		phy_config = get_phy_config(srds_s3, serdes3_phy_config,
 					    ARRAY_SIZE(serdes3_phy_config));
 		if (!phy_config) {
 			printf("%s qds: WRIOP: Unsupported SerDes3 Protocol "
