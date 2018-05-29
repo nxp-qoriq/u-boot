@@ -501,3 +501,191 @@ void reset_phy(void)
 #endif
 }
 #endif /* CONFIG_RESET_PHY_R */
+
+int fdt_fixup_dpmac_phy_handle (void *fdt, int dpmac_id, int node_phandle)
+{
+	int offset;
+	int ret;
+	char dpmac_str[] = "dpmacs@00";
+
+	offset = fdt_path_offset(fdt, "/soc/fsl-mc/dpmacs");
+
+	if (offset < 0)
+		offset = fdt_path_offset(fdt, "/fsl-mc/dpmacs");
+
+	if (offset < 0) {
+		printf ("dpmacs node not found in device tree\n");
+		return offset;
+	}
+
+	sprintf(dpmac_str, "dpmac@%x", dpmac_id);
+	debug ("dpmac_str = %s\n", dpmac_str);
+
+	offset = fdt_subnode_offset(fdt, offset, dpmac_str);
+	if (offset < 0) {
+		printf ("%s node not found in device tree\n", dpmac_str);
+		return offset;
+	}
+
+	ret = fdt_setprop_cell (fdt, offset, "phy-handle", node_phandle);
+	if (ret) {
+		printf("%d@%s %d\n", __LINE__, __func__, ret);
+	}
+
+	return ret;
+}
+
+int fdt_get_ioslot_offset (void *fdt, struct mii_dev *mii_dev, int fpga_offset)
+{
+	char mdio_mux_str[] = "mdio0_mux";
+	char mdio_ioslot_str[] = "mdio0_ioslot1";
+	struct lx2160a_qds_mdio *priv;
+	int real_bus_num, ioslot, offset;
+
+	/*Test if the MDIO bus is real mdio bus or muxing front end ?*/
+	if (strncmp(mii_dev->name, "LX2160A_QDS_MDIO", strlen("LX2160A_QDS_MDIO")))
+		return -1;
+
+	/*Get the real MDIO bus num and ioslot info from bus's priv data*/
+	priv = mii_dev->priv;
+	real_bus_num = priv->realbusnum;
+	ioslot = priv->ioslot;
+
+	debug ("real_bus_num = %d, ioslot = %d\n", real_bus_num, ioslot);
+
+	/* in fdt the EMI numbers are 0 based i.e. EMI1 is 0
+	while in u-boot EMI1 is 1 */
+	sprintf(mdio_mux_str, "mdio%1d_mux", real_bus_num - 1);
+	if (ioslot > IO_SLOT_8)
+		sprintf(mdio_ioslot_str, "mdio0_rgmii%d", ioslot - IO_SLOT_8);
+	else
+		sprintf(mdio_ioslot_str, "mdio%1d_ioslot%1d",
+			real_bus_num - 1, ioslot);
+
+	offset = fdt_subnode_offset(fdt, fpga_offset, mdio_mux_str);
+	if (offset < 0) {
+		printf ("%s node not found in device tree\n", mdio_mux_str);
+		return offset;
+	}
+	offset = fdt_subnode_offset(fdt, offset, mdio_ioslot_str);
+	if (offset < 0) {
+		printf ("%s node not found in device tree\n", mdio_ioslot_str);
+		return offset;
+	}
+
+	return offset;
+}
+
+int fdt_create_phy_node (void *fdt, int offset, u8 phyaddr, int *subnodeoffset,
+			 struct phy_device *phy_dev, int dpmac_id, int phandle)
+{
+	char phy_node_name[] = "phy00@00";
+	char phy_id_compatible_str[] = "ethernet-phy-id0000.0000";
+	int ret;
+
+	sprintf(phy_node_name, "phy%d@%x", dpmac_id, phyaddr);
+	debug ("phy_node_name = %s\n", phy_node_name);
+
+	*subnodeoffset = fdt_add_subnode (fdt, offset, phy_node_name);
+	if (*subnodeoffset <= 0) {
+		printf ("Could not add subnode %s\n", phy_node_name);
+		return *subnodeoffset;
+	}
+
+	sprintf(phy_id_compatible_str, "ethernet-phy-id%04x.%04x",
+		phy_dev->phy_id >> 16, phy_dev->phy_id & 0xFFFF);
+	debug ("phy_id_compatible_str %s\n", phy_id_compatible_str);
+
+	ret = fdt_setprop_string (fdt, *subnodeoffset, "compatible",
+				  phy_id_compatible_str);
+	if (ret) {
+		printf ("%d@%s %d\n", __LINE__, __func__, ret);
+		goto out;
+	}
+	ret = fdt_setprop_cell (fdt, *subnodeoffset, "reg", phyaddr);
+	if (ret) {
+		printf ("%d@%s %d\n", __LINE__, __func__, ret);
+		goto out;
+	}
+	ret = fdt_set_phandle(fdt, *subnodeoffset, phandle);
+	if (ret) {
+		printf ("%d@%s %d\n", __LINE__, __func__, ret);
+		goto out;
+	}
+
+out:
+	if (ret)
+		fdt_del_node (fdt, *subnodeoffset);
+
+	return ret;
+}
+
+int fdt_fixup_board_phy (void *fdt)
+{
+	int fpga_offset, offset, subnodeoffset;
+	struct mii_dev *mii_dev;
+	struct list_head *mii_devs, *entry;
+	int ret, dpmac_id, phandle, i;
+	struct phy_device *phy_dev;
+	char ethname[10];
+
+	ret = 0;
+	/* we know FPGA is connected to i2c0, therfore search path directly,
+	 * instead of compatible property, as it saves time
+	 */
+	fpga_offset = fdt_path_offset(fdt, "/soc/i2c@2000000/fpga");
+
+	if (fpga_offset < 0)
+		fpga_offset = fdt_path_offset(fdt, "/i2c@2000000/fpga");
+
+	if (fpga_offset < 0) {
+		printf ("%s node not found in device tree\n","i2c@2000000/fpga");
+		return fpga_offset;
+	}
+
+	phandle = fdt_alloc_phandle(fdt);
+	mii_devs = mdio_get_list_head ();
+
+	list_for_each (entry, mii_devs) {
+		mii_dev = list_entry (entry, struct mii_dev, link);
+		debug ("mii_dev name : %s\n", mii_dev->name);
+		offset = fdt_get_ioslot_offset (fdt, mii_dev, fpga_offset);
+		if (offset < 0)
+			continue;
+
+		for (i = 0; i < PHY_MAX_ADDR; i++) {
+			phy_dev = mii_dev->phymap[i];
+			if (!phy_dev)
+				continue;
+
+			// TODO: use sscanf instead of loop
+			dpmac_id = WRIOP1_DPMAC1;
+			while (dpmac_id < NUM_WRIOP_PORTS) {
+				sprintf(ethname, "DPMAC%d@%s", dpmac_id,
+					phy_interface_strings[wriop_get_enet_if(dpmac_id)]);
+				if (strcmp(ethname, phy_dev->dev->name) == 0)
+					break;
+				dpmac_id++;
+			}
+			if (dpmac_id == NUM_WRIOP_PORTS)
+				continue;
+
+			ret = fdt_create_phy_node (fdt, offset, i, &subnodeoffset,
+						   phy_dev, dpmac_id, phandle);
+			if (!ret) {
+				ret = fdt_fixup_dpmac_phy_handle (fdt, dpmac_id, phandle);
+				if (ret) {
+					fdt_del_node (fdt, subnodeoffset);
+					break;
+				} else
+					phandle++;
+			} else
+				break;
+		}
+
+		if (ret)
+			break;
+	}
+
+	return ret;
+}

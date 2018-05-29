@@ -30,6 +30,7 @@
 #ifdef CONFIG_EMC2305
 #include "../common/emc2305.h"
 #endif
+#include "lx2160a.h"
 
 #if defined (CONFIG_TARGET_LX2160AQDS)
 #define CFG_MUX_I2C_SDHC(reg, value)	((reg & 0x3f) | value)
@@ -479,9 +480,12 @@ void fdt_fixup_board_enet(void *fdt)
 		return;
 	}
 
-	if ((get_mc_boot_status() == 0) && (get_dpl_apply_status() == 0))
+	if ((get_mc_boot_status() == 0) && (get_dpl_apply_status() == 0)) {
 		fdt_status_okay(fdt, offset);
-	else
+	#ifdef CONFIG_TARGET_LX2160AQDS
+		fdt_fixup_board_phy(fdt);
+	#endif
+	} else
 		fdt_status_fail(fdt, offset);
 }
 
