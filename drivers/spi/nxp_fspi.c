@@ -99,8 +99,8 @@ DECLARE_GLOBAL_DATA_PTR;
  * @memmap_phy: Physical base address of FSPI memory mapping
  * @flash_num: Number of active slave devices
  * @num_chipselect: Number of FSPI chipselect signals
- * @spi_rx_bus_width: Number of SPI lines the flash supports for Rx
- * @spi_tx_bus_width: Number of SPI lines the flash supports for Tx
+ * @fspi_rx_bus_width: Number of SPI lines the flash supports for Rx
+ * @fspi_tx_bus_width: Number of SPI lines the flash supports for Tx
  * @fspi_has_second_chip: Flash device connected on CS1
  */
 struct nxp_fspi_platdata {
@@ -112,8 +112,8 @@ struct nxp_fspi_platdata {
 	fdt_size_t memmap_phy;
 	u32 flash_num;
 	u32 num_chipselect;
-	u32 spi_rx_bus_width;
-	u32 spi_tx_bus_width;
+	u32 fspi_rx_bus_width;
+	u32 fspi_tx_bus_width;
 	bool fspi_has_second_chip;
 };
 
@@ -132,8 +132,8 @@ struct nxp_fspi_platdata {
  * @num_chipselect: Number of FSPI chipselect signals
  * @memmap_phy: Physical base address of FSPI memory mapping
  * @regs: Point to FSPI register structure for I/O access
- * @spi_rx_bus_width: Number of SPI lines the flash supports for Rx
- * @spi_tx_bus_width: Number of SPI lines the flash supports for Tx
+ * @fspi_rx_bus_width: Number of SPI lines the flash supports for Rx
+ * @fspi_tx_bus_width: Number of SPI lines the flash supports for Tx
  * @fspi_has_second_chip: Flash device connected on CS1
  */
 struct nxp_fspi_priv {
@@ -148,8 +148,8 @@ struct nxp_fspi_priv {
 	u32 flash_num;
 	u32 num_chipselect;
 	u32 memmap_phy;
-	u32 spi_rx_bus_width;
-	u32 spi_tx_bus_width;
+	u32 fspi_rx_bus_width;
+	u32 fspi_tx_bus_width;
 	bool fspi_has_second_chip;
 	struct nxp_fspi_regs *regs;
 };
@@ -436,7 +436,7 @@ static void fspi_init_ahb_read(struct nxp_fspi_priv *priv)
 	 * Parallel mode is disabled.
 	 */
 
-	if (priv->spi_rx_bus_width == FSPI_OCTAL_MODE) {
+	if (priv->fspi_rx_bus_width == FSPI_OCTAL_MODE) {
 		/* Flash supports octal read */
 		fspi_write32(priv->flags, &regs->flsha1cr2, SEQID_OCTAL_READ);
 	} else {
@@ -519,7 +519,7 @@ static void fspi_op_read(struct nxp_fspi_priv *priv, u32 *rxbuf, u32 len)
 
 		rx_size = (len > RX_IPBUF_SIZE) ? RX_IPBUF_SIZE : len;
 
-		if (priv->spi_rx_bus_width == FSPI_OCTAL_MODE) {
+		if (priv->fspi_rx_bus_width == FSPI_OCTAL_MODE) {
 			/* Flash supports octal read */
 			fspi_write32(priv->flags, &regs->ipcr1,
 				     (SEQID_OCTAL_READ <<
@@ -849,8 +849,8 @@ static int nxp_fspi_probe(struct udevice *bus)
 	priv->memmap_phy = plat->memmap_phy;
 	priv->flash_num = plat->flash_num;
 	priv->num_chipselect = plat->num_chipselect;
-	priv->spi_rx_bus_width = plat->spi_rx_bus_width;
-	priv->spi_tx_bus_width = plat->spi_tx_bus_width;
+	priv->fspi_rx_bus_width = plat->fspi_rx_bus_width;
+	priv->fspi_tx_bus_width = plat->fspi_tx_bus_width;
 	priv->fspi_has_second_chip = plat->fspi_has_second_chip;
 
 	debug("%s: regs=<0x%llx> <0x%llx, 0x%llx>\n",
@@ -862,8 +862,8 @@ static int nxp_fspi_probe(struct udevice *bus)
 	debug("max-frequency=%d, flags=0x%x, rx_width=0x%x, tx_width=0x%x\n",
 	      priv->speed_hz,
 	      plat->flags,
-	      priv->spi_rx_bus_width,
-	      priv->spi_tx_bus_width);
+	      priv->fspi_rx_bus_width,
+	      priv->fspi_tx_bus_width);
 
 	/*Send Software Reset to controller*/
 	fspi_write32(priv->flags, &priv->regs->mcr0,
@@ -973,11 +973,11 @@ static int nxp_fspi_ofdata_to_platdata(struct udevice *bus)
 		 * TODO: Add code to set individual flash settings to
 		 * different flashes if SAMEDEVICEEN bit is disabled.
 		 */
-		plat->spi_rx_bus_width = fdtdec_get_int(blob, subnode,
-							"spi-rx-bus-width",
+		plat->fspi_rx_bus_width = fdtdec_get_int(blob, subnode,
+							"fspi-rx-bus-width",
 					NXP_FSPI_DEFAULT_SPI_RX_BUS_WIDTH);
-		plat->spi_tx_bus_width = fdtdec_get_int(blob, subnode,
-							"spi-tx-bus-width",
+		plat->fspi_tx_bus_width = fdtdec_get_int(blob, subnode,
+							"fspi-tx-bus-width",
 					NXP_FSPI_DEFAULT_SPI_TX_BUS_WIDTH);
 		++flash_num;
 	}
