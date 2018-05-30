@@ -14,7 +14,8 @@
 #ifdef CONFIG_SYS_FSL_DDR4
 static unsigned int skip_caslat(unsigned int tckmin_ps,
 				unsigned int taamin_ps,
-				unsigned int mclk_ps)
+				unsigned int mclk_ps,
+				unsigned int package_3ds)
 {
 	int i, j, k;
 	struct cas {
@@ -73,7 +74,7 @@ static unsigned int skip_caslat(unsigned int tckmin_ps,
 		{1250,	{       0,    0x400,    0xc00,} },
 		{1500,	{       0,    0x400,    0x200,} },
 	};
-	const struct speed bin[] = {
+	const struct speed bin_0[] = {
 		{cl_3200, {12500, 13750, 15000,} },
 		{cl_2933, {12960, 13640, 13750, 15000,} },
 		{cl_2666, {12750, 13500, 13750, 15000,} },
@@ -82,27 +83,82 @@ static unsigned int skip_caslat(unsigned int tckmin_ps,
 		{cl_1866, {12850, 13500, 15000,} },
 		{cl_1600, {12500, 13500, 15000,} }
 	};
+	const struct cas cl_3200_3ds[] = {
+		{625,	{ 0xa000000, 0xb000000, 0xf000000,} },
+		{750,	{ 0xaa00000, 0xab00000, 0xef00000,} },
+		{833,	{ 0xaac0000, 0xaac0000, 0xebc0000,} },
+		{937,	{ 0xaab0000, 0xaab0000, 0xeaf0000,} },
+		{1071,	{ 0xaaa4000, 0xaaac000, 0xeaec000,} },
+		{1250,	{ 0xaaa0000, 0xaaa2000, 0xeaeb000,} },
+		{1500,	{ 0xaaa1000, 0xaaa3000, 0xeaeb000,} },
+	};
+	const struct cas cl_2666_3ds[] = {
+		{750,	{ 0xa00000, 0xb00000, 0xf00000,} },
+		{833,	{ 0xac0000, 0xac0000, 0xbc0000,} },
+		{937,	{ 0xab0000, 0xab0000, 0xaf0000,} },
+		{1071,	{ 0xaa4000, 0xaac000, 0xaac000,} },
+		{1250,	{ 0xaa0000, 0xaaa000, 0xaaa000,} },
+	};
+	const struct cas cl_2400_3ds[] = {
+		{833,	{ 0xe00000, 0xe40000, 0xec0000, 0xb00000} },
+		{937,	{ 0xe00000, 0xe00000, 0xea0000, 0xae0000} },
+		{1071,	{ 0xe00000, 0xe04000, 0xeac000, 0xaec000} },
+		{1250,	{ 0xe00000, 0xe00000, 0xeaa000, 0xae2000} },
+	};
+	const struct cas cl_2133_3ds[] = {
+		{937,	{  0x90000,  0xb0000,  0xf0000,} },
+		{1071,	{  0x84000,  0xac000,  0xec000,} },
+		{1250,	{  0x80000,  0xa2000,  0xe2000,} },
+	};
+	const struct cas cl_1866_3ds[] = {
+		{1071,	{        0,   0x4000,   0xc000,} },
+		{1250,	{        0,   0x1000,   0x3000,} },
+	};
+	const struct cas cl_1600_3ds[] = {
+		{1250,	{        0,   0x1000,   0x3000,} },
+	};
+	const struct speed bin_3ds[] = {
+		{cl_3200_3ds, {15000, 16250, 17140,} },
+		{cl_2666_3ds, {15000, 16500, 17140,} },
+		{cl_2400_3ds, {15000, 15830, 16670, 17140} },
+		{cl_2133_3ds, {15950, 16880, 17140,} },
+		{cl_1866_3ds, {15000, 16070, 17140,} },
+		{cl_1600_3ds, {15000, 16250, 17500,} },
+	};
+	const struct speed *bin;
+	int size;
 
 	if (mclk_ps < 625 || mclk_ps > 1600) {
-		printf("Error: mclk invalid\n");
+		printf("Error: mclk %u invalid\n", mclk_ps);
 		return 0;
 	}
-	if (taamin_ps > 18000) {
-		printf("Error: taamin_ps invalid\n");
+	if (taamin_ps > (package_3ds ? 21500 : 18000)) {
+		printf("Error: taamin_ps %u invalid\n", taamin_ps);
 		return 0;
+	}
+	if (package_3ds) {
+		bin = bin_3ds;
+		size = ARRAY_SIZE(bin_3ds);
+	} else {
+		bin = bin_0;
+		size = ARRAY_SIZE(bin_0);
 	}
 
-	for (i = 0; i < 7 && bin[i].cl[0].tckmin_ps < tckmin_ps; i++)
-		;
+	for (i = 0; i < size; i++) {
+		if (bin[i].cl[0].tckmin_ps >= tckmin_ps)
+			break;
+	}
+	if (i >= size) {
+		printf("Error: speed bin not found\n");
+		return 0;
+	}
 	if (bin[i].cl[0].tckmin_ps > tckmin_ps && i > 0)
 		i--;
 
-	for (j = 0; j < 4 && bin[i].taamin_ps[j] < taamin_ps &&
-		    bin[i].taamin_ps[j] > 0; j++)
-		;
-	if (j > 4) {
-		printf("Error finding taamin_ps %d in table\n", taamin_ps);
-		return 0;
+	for (j = 0; j < 4; j++) {
+		if (!bin[i].taamin_ps[j] ||
+		    bin[i].taamin_ps[j] >= taamin_ps)
+			break;
 	}
 	if ((bin[i].taamin_ps[j] == 0) ||
 	    (bin[i].taamin_ps[j] > taamin_ps && j > 0))
@@ -148,7 +204,8 @@ compute_cas_latency(const unsigned int ctrl_num,
 	common_caslat = tmp &
 			~skip_caslat(outpdimm->tckmin_x_ps,
 				     outpdimm->taamin_ps,
-				     mclk_ps);
+				     mclk_ps,
+				     dimm_params->package_3ds);
 #else
 	common_caslat = tmp;
 #endif
