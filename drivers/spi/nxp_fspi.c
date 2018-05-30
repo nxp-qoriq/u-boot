@@ -17,8 +17,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define _DEBUG  0 /*TODO Enable for testing, Remove after testing*/
-
 /* default SCK frequency, unit: HZ */
 #define NXP_FSPI_DEFAULT_SCK_FREQ	50000000
 
@@ -381,7 +379,6 @@ static inline void fspi_ahb_invalid(struct nxp_fspi_priv *priv)
 	/*
 	 * The minimum delay : 1 AHB + 2 SFCK clocks.
 	 * Delay 1 us is enough.
-	 * udelay(1); // TODO check delay is required or not.
 	 */
 	while ((fspi_read32(priv->flags, &regs->mcr0) & 1))
 		;
@@ -605,18 +602,6 @@ static void fspi_op_erase(struct nxp_fspi_priv *priv)
 	to_or_from = priv->sf_addr + priv->cur_amba_base;
 	fspi_write32(priv->flags, &regs->ipcr0, to_or_from);
 
-	/*TODO WREN should be diffrent cmd*/
-	fspi_write32(priv->flags, &regs->ipcr1,
-		     (SEQID_WREN << FSPI_IPCR1_ISEQID_SHIFT) | 0);
-	/* Trigger the command */
-	fspi_write32(priv->flags, &regs->ipcmd, FSPI_IPCMD_TRG_MASK);
-
-	while (!(fspi_read32(priv->flags, &regs->intr)
-		 & FSPI_INTR_IPCMDDONE_MASK))
-		;
-
-	fspi_write32(priv->flags, &regs->intr, FSPI_INTEN_IPCMDDONEEN_MASK);
-
 	if (priv->cur_seqid == FSPI_CMD_SE) {
 		fspi_write32(priv->flags, &regs->ipcr1,
 			     (SEQID_SE << FSPI_IPCR1_ISEQID_SHIFT) | 0);
@@ -641,24 +626,6 @@ static void fspi_op_write(struct nxp_fspi_priv *priv, u8 *txbuf, u32 len)
 	int i, j;
 	int size = 0, tx_size = 0, wm_size = 0, temp_size = 0;
 	u32 to_or_from = 0, data = 0;
-
-	/* invalid the TXFIFO first */
-	fspi_write32(priv->flags, &regs->iptxfcr, FSPI_IPTXFCR_CLRIPTXF_MASK);
-
-	fspi_write32(priv->flags, &regs->ipcr0, priv->cur_amba_base);
-	/*TODO: move WREN to new cmd*/
-	fspi_write32(priv->flags, &regs->ipcr1,
-		     (SEQID_WREN << FSPI_IPCR1_ISEQID_SHIFT) | 0);
-
-	/* Trigger the command */
-	fspi_write32(priv->flags, &regs->ipcmd, FSPI_IPCMD_TRG_MASK);
-
-	/* Wait for command done */
-	while (!(fspi_read32(priv->flags, &regs->intr)
-		 & FSPI_INTR_IPCMDDONE_MASK))
-		;
-
-	fspi_write32(priv->flags, &regs->intr, FSPI_INTR_IPCMDDONE_MASK);
 
 	/* invalid the TXFIFO first */
 	fspi_write32(priv->flags, &regs->iptxfcr, FSPI_IPTXFCR_CLRIPTXF_MASK);
@@ -769,7 +736,6 @@ static int fspi_xfer(struct nxp_fspi_priv *priv, unsigned int bitlen,
 		}
 
 		if (flags == SPI_XFER_END) {
-			/*priv->sf_addr = wr_sfaddr;*/
 			debug("sf_addr:[0x%02x]\n", priv->sf_addr);
 			fspi_op_write(priv, (u8 *)dout, bytes);
 			return 0;
@@ -883,9 +849,6 @@ static int nxp_fspi_probe(struct udevice *bus)
 	/*Time out wait cycle for IP command grant*/
 	mcrx |= (NXP_FSPI_MAX_TIMEOUT_IPCMD << FSPI_MCR0_IPGRANTWAIT_SHIFT) &
 						(FSPI_MCR0_IPGRANTWAIT_MASK);
-	/*TODO: for now it is hardcoded val, but we will read this from DT*/
-	mcrx |= (NXP_FSPI_SER_CLK_DIV << FSPI_MCR0_SERCLKDIV_SHIFT) &
-						(FSPI_MCR0_SERCLKDIV_MASK);
 	/* Default set to IP mode */
 	mcrx &= ~FSPI_MCR0_ARDFEN_MASK;
 
@@ -910,9 +873,6 @@ static int nxp_fspi_probe(struct udevice *bus)
 	/* Flash Size in KByte */
 	flash_size = (NXP_FSPI_FLASH_SIZE * NXP_FSPI_FLASH_NUM) / SZ_1K;
 
-
-	/*TODO: for now, we get size form macros. Will evolve this and
-	 * read size of all flash from device-tree*/
 	fspi_write32(priv->flags, &priv->regs->flsha1cr0,
 		     flash_size);
 	fspi_write32(priv->flags, &priv->regs->flsha2cr0,
@@ -970,7 +930,7 @@ static int nxp_fspi_ofdata_to_platdata(struct udevice *bus)
 						NXP_FSPI_DEFAULT_SCK_FREQ);
 		/*
 		 * MCR2[SAMEDEVICEEN] is enabled.
-		 * TODO: Add code to set individual flash settings to
+		 * Add code to set individual flash settings to
 		 * different flashes if SAMEDEVICEEN bit is disabled.
 		 */
 		plat->fspi_rx_bus_width = fdtdec_get_int(blob, subnode,
