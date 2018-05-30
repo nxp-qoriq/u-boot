@@ -36,6 +36,9 @@
 #define SET_CFG_MUX1_SDHC1_SDHC(reg) (reg & 0x3f)
 #define SET_CFG_MUX2_SDHC1_SPI(reg, value) ((reg & 0xcf) | value)
 #define SET_CFG_MUX3_SDHC1_SPI(reg, value) ((reg & 0xf8) | value)
+#define SDHC1_BASE_PMUX_DSPI 2
+#define SDHC2_BASE_PMUX_DSPI 2
+#define IIC5_PMUX_SPI3 3
 #endif
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -64,6 +67,84 @@ int board_early_init_f(void)
        emc2305_init();
 #endif
 	fsl_lsch3_early_init_f();
+	return 0;
+}
+
+#if defined(CONFIG_TARGET_LX2160AQDS)
+void esdhc_dspi_status_fixup(void *blob)
+{
+	const char esdhc0_path[] = "/soc/esdhc@2140000";
+	const char esdhc1_path[] = "/soc/esdhc@2150000";
+	const char dspi0_path[] = "/soc/dspi@2100000";
+	const char dspi1_path[] = "/soc/dspi@2110000";
+	const char dspi2_path[] = "/soc/dspi@2120000";
+
+	struct ccsr_gur __iomem *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
+	u32 sdhc1_base_pmux;
+	u32 sdhc2_base_pmux;
+	u32 iic5_pmux;
+
+	/* Check RCW field sdhc1_base_pmux to enable/disable
+	 * esdhc0/dspi0 DT node
+	 */
+	sdhc1_base_pmux = gur_in32(&gur->rcwsr[FSL_CHASSIS3_RCWSR12_REGSR - 1])
+		& FSL_CHASSIS3_SDHC1_BASE_PMUX_MASK;
+	sdhc1_base_pmux >>= FSL_CHASSIS3_SDHC1_BASE_PMUX_SHIFT;
+
+	if (sdhc1_base_pmux == SDHC1_BASE_PMUX_DSPI) {
+		do_fixup_by_path(blob, dspi0_path, "status", "okay",
+				 sizeof("okay"), 1);
+		do_fixup_by_path(blob, esdhc0_path, "status", "disabled",
+				 sizeof("disabled"), 1);
+	} else {
+		do_fixup_by_path(blob, esdhc0_path, "status", "okay",
+				 sizeof("okay"), 1);
+		do_fixup_by_path(blob, dspi0_path, "status", "disabled",
+				 sizeof("disabled"), 1);
+	}
+
+	/* Check RCW field sdhc2_base_pmux to enable/disable
+	 * esdhc1/dspi1 DT node
+	 */
+	sdhc2_base_pmux = gur_in32(&gur->rcwsr[FSL_CHASSIS3_RCWSR13_REGSR - 1])
+		& FSL_CHASSIS3_SDHC2_BASE_PMUX_MASK;
+	sdhc2_base_pmux >>= FSL_CHASSIS3_SDHC2_BASE_PMUX_SHIFT;
+
+	if (sdhc2_base_pmux == SDHC2_BASE_PMUX_DSPI) {
+		do_fixup_by_path(blob, dspi1_path, "status", "okay",
+				 sizeof("okay"), 1);
+		do_fixup_by_path(blob, esdhc1_path, "status", "disabled",
+				 sizeof("disabled"), 1);
+	} else {
+		do_fixup_by_path(blob, esdhc1_path, "status", "okay",
+				 sizeof("okay"), 1);
+		do_fixup_by_path(blob, dspi1_path, "status", "disabled",
+				 sizeof("disabled"), 1);
+	}
+
+	/* Check RCW field IIC5 to enable dspi2 DT node */
+	iic5_pmux = gur_in32(&gur->rcwsr[FSL_CHASSIS3_RCWSR12_REGSR - 1])
+		& FSL_CHASSIS3_IIC5_PMUX_MASK;
+	iic5_pmux >>= FSL_CHASSIS3_IIC5_PMUX_SHIFT;
+
+	if (iic5_pmux == IIC5_PMUX_SPI3) {
+		do_fixup_by_path(blob, dspi2_path, "status", "okay",
+				 sizeof("okay"), 1);
+	}
+}
+#endif
+
+int esdhc_status_fixup(void *blob, const char *compat)
+{
+#if defined(CONFIG_TARGET_LX2160AQDS)
+	/* Enable esdhc and dspi DT nodes based on RCW fields */
+	esdhc_dspi_status_fixup(blob);
+#else
+	/* Enable both esdhc DT nodes for LX2160ARDB */
+	do_fixup_by_compat(blob, compat, "status", "okay",
+			   sizeof("okay"), 1);
+#endif
+
 	return 0;
 }
 
