@@ -75,8 +75,14 @@ ENTRY(lowlevel_init)
 	switch_el x1, 1f, 100f, 100f	/* skip if not in EL3 */
 1:
 
-#if defined (CONFIG_SYS_FSL_HAS_CCN504)
+#if defined CONFIG_SYS_FSL_HAS_CCN508
+	/*Set Wuo bit for RN-I 17*/
+        ldr     x0, =CCI_AUX_CONTROL_BASE(17)
+        ldr     x1, =0x00000010
+        bl      ccn504_set_aux
+#endif
 
+#if defined (CONFIG_SYS_FSL_HAS_CCN504)
 	/* Set Wuo bit for RN-I 20 */
 #ifdef CONFIG_ARCH_LS2080A
 	ldr	x0, =CCI_AUX_CONTROL_BASE(20)
