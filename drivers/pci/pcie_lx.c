@@ -40,6 +40,11 @@ static int lx_pcie_link_up(struct lx_pcie *pcie)
 	return 1;
 }
 
+static void lx_pcie_ep_enable_cfg(struct lx_pcie *pcie)
+{
+	ccsr_writel(pcie, PCIE_CFG_READY, PCIE_CONFIG_READY);
+}
+
 static void lx_pcie_cfg_set_target(struct lx_pcie *pcie, u32 target)
 {
 	ccsr_writel(pcie, PAB_AXI_AMAP_PEX_WIN_L(0), target);
@@ -121,6 +126,8 @@ static void lx_pcie_dump_wins(struct lx_pcie *pcie, int wins)
 		      (AXI_AMAP_CTRL_SIZE_MASK << AXI_AMAP_CTRL_SIZE_SHIFT));
 		debug("\tEXT_SIZE:	0x%08x\n",
 		      ccsr_readl(pcie, PAB_EXT_AXI_AMAP_SIZE(i)));
+		debug("\tPARAM:		0x%08x\n",
+		      ccsr_readl(pcie, PAB_AXI_AMAP_PCI_HDR_PARAM(i)));
 		debug("\tCTRL:		0x%08x\n",
 		      ccsr_readl(pcie, PAB_AXI_AMAP_CTRL(i)));
 	}
@@ -174,6 +181,9 @@ static void lx_pcie_setup_wins(struct lx_pcie *pcie)
 static int lx_pcie_addr_valid(struct lx_pcie *pcie, pci_dev_t bdf)
 {
 	struct udevice *bus = pcie->bus;
+
+	if (pcie->mode == PCI_HEADER_TYPE_NORMAL)
+		return -ENODEV;
 
 	if (!pcie->enabled)
 		return -ENXIO;
@@ -312,80 +322,102 @@ static void lx_pcie_ep_inbound_win_set(struct lx_pcie *pcie, int func,
 	ccsr_writel(pcie, PAB_PEX_BAR_AMAP(func, bar), lower_32_bits(phys) | 1);
 }
 
-static void lx_pcie_ep_setup_wins(struct lx_pcie *pcie)
+static void lx_pcie_ep_setup_wins(struct lx_pcie *pcie, int pf)
 {
-	u64 phys = CONFIG_SYS_PCI_EP_MEMORY_BASE;
+	u64 phys;
+	int bar, bar_num;
 
-	/* WIN 0 : INBOUND : map BAR0 */
-	lx_pcie_ep_inbound_win_set(pcie, 1, 0, phys);
-	/* WIN 1 : INBOUND : map BAR1 */
-	phys += PCIE_BAR1_SIZE;
-	lx_pcie_ep_inbound_win_set(pcie, 1, 1, phys);
-	/* WIN 2 : INBOUND : map BAR2 */
-	phys += PCIE_BAR2_SIZE;
-	lx_pcie_ep_inbound_win_set(pcie, 1, 2, phys);
-	/* WIN 3 : INBOUND : map BAR4 */
-	phys = CONFIG_SYS_PCI_EP_MEMORY_BASE + PCIE_BAR4_SIZE;
-	lx_pcie_ep_inbound_win_set(pcie, 1, 3, phys);
+	if (pcie->sriov_enabled) {
+		bar_num = 8;
+		if (pf == 1)
+			phys = CONFIG_SYS_PCI_EP_MEMORY_BASE +
+				128 * PCIE_BAR_SIZE;
+		else
+			phys = CONFIG_SYS_PCI_EP_MEMORY_BASE;
+	} else {
+		bar_num = 4;
+		phys = CONFIG_SYS_PCI_EP_MEMORY_BASE;
+	}
+
+	for (bar = 0; bar < bar_num; bar++) {
+		if ((bar != 1) && (bar != 5))
+			lx_pcie_ep_inbound_win_set(pcie, pf, bar, phys);
+		phys += PCIE_BAR_SIZE;
+	}
 
 	/* WIN 0 : OUTBOUND : map MEM */
-	lx_pcie_outbound_win_set(pcie, 0, PAB_AXI_TYPE_MEM, pcie->cfg_res.start,
-				 0, CONFIG_SYS_PCI_MEMORY_SIZE);
+	if (pf == 1) {
+		lx_pcie_outbound_win_set(pcie, 1, PAB_AXI_TYPE_MEM,
+			pcie->cfg_res.start + CONFIG_SYS_PCI_MEMORY_SIZE,
+			0x00000000, CONFIG_SYS_PCI_MEMORY_SIZE);
+		ccsr_writel(pcie, PAB_AXI_AMAP_PCI_HDR_PARAM(1),
+			ccsr_readl(pcie, PAB_AXI_AMAP_PCI_HDR_PARAM(1)) | 1);
+	} else if (pf == 0)
+		lx_pcie_outbound_win_set(pcie, 0, PAB_AXI_TYPE_MEM,
+				pcie->cfg_res.start, 0x00000000,
+				CONFIG_SYS_PCI_MEMORY_SIZE);
+
 }
-static void lx_pcie_ep_setup_bar(struct lx_pcie *pcie, int bar, u64 size)
+
+static void lx_pcie_ep_setup_bar(struct lx_pcie *pcie, int bar)
 {
-	u32 val;
-	u32 size_l = lower_32_bits(~(size - 1));
-	u32 size_h = upper_32_bits(~(size - 1));
+	u32 size_l = lower_32_bits(~(PCIE_BAR_SIZE - 1));
+	u32 size_h = upper_32_bits(~(PCIE_BAR_SIZE - 1));
 
-	if (size < 4 * 1024)
-		return;
-
-	val = ccsr_readl(pcie, PCI_BAR_ENABLE);
-	if ((val & 0x0f) != 0x0f)
-		ccsr_writel(pcie, PCI_BAR_ENABLE, 0x0f);
-
-	switch (bar) {
-	case 0:
-	case 1: /* 32bits BAR */
-		ccsr_writel(pcie, PCI_BAR_SELECT, bar);
-		ccsr_writel(pcie, PCI_BAR_BAR_SIZE_LDW, size_l);
-		break;
-	case 2:
-	case 3: /* 64bits BAR */
-		ccsr_writel(pcie, PCI_BAR_SELECT, bar);
-		ccsr_writel(pcie, PCI_BAR_BAR_SIZE_LDW, size_l);
-		ccsr_writel(pcie, PCI_BAR_BAR_SIZE_UDW, size_h);
-		break;
-	}
+	ccsr_writel(pcie, PCI_BAR_SELECT, bar);
+	ccsr_writel(pcie, PCI_BAR_BAR_SIZE_LDW, size_l);
+	ccsr_writel(pcie, PCI_BAR_BAR_SIZE_UDW, size_h);
 }
 
 static void lx_pcie_ep_setup_bars(struct lx_pcie *pcie)
 {
-	/* BAR0 - 32bit - 4K configuration */
-	lx_pcie_ep_setup_bar(pcie, 0, PCIE_BAR0_SIZE);
-	/* BAR1 - 32bit - 8K MSIX */
-	lx_pcie_ep_setup_bar(pcie, 1, PCIE_BAR1_SIZE);
-	/* BAR2 - 64bit - 4K MEM desciptor */
-	lx_pcie_ep_setup_bar(pcie, 2, PCIE_BAR2_SIZE);
-	/* BAR4 - 64bit - 1M MEM*/
-	lx_pcie_ep_setup_bar(pcie, 3, PCIE_BAR4_SIZE);
+	int bar, bar_num;
+	u32 val;
+
+	if (pcie->sriov_enabled) {
+		bar_num = 16;
+		val = ccsr_readl(pcie, PCI_BAR_ENABLE);
+		if ((val & 0xffff) != 0xffff)
+			ccsr_writel(pcie, PCI_BAR_ENABLE, 0xffff);
+	} else {
+		bar_num = 4;
+		val = ccsr_readl(pcie, PCI_BAR_ENABLE);
+		if ((val & 0x0f) != 0x0f)
+			ccsr_writel(pcie, PCI_BAR_ENABLE, 0x0f);
+
+	}
+
+	for (bar = 0; bar < bar_num; bar++)
+		lx_pcie_ep_setup_bar(pcie, bar);
 }
 
 static void lx_pcie_setup_ep(struct lx_pcie *pcie)
 {
+	u32 pf;
+	u32 sriov;
 	u32 val;
-
-	lx_pcie_ep_setup_bars(pcie);
-	lx_pcie_ep_setup_wins(pcie);
 
 	/* Enable APIO and Memory Win */
 	val = ccsr_readl(pcie, PAB_AXI_PIO_CTRL(0));
 	val |= APIO_EN | MEM_WIN_EN;
 	ccsr_writel(pcie, PAB_AXI_PIO_CTRL(0), val);
 
-	/* Config ready */
-	ccsr_writel(pcie, GPEX_CFG_READY, 1);
+	sriov = ccsr_readl(pcie, PCIE_SRIOV_CAPABILITY);
+	if (PCI_EXT_CAP_ID(sriov) == PCI_EXT_CAP_ID_SRIOV) {
+		pcie->sriov_enabled = 1;
+
+		lx_pcie_ep_setup_bars(pcie);
+		for (pf = 0; pf < PCIE_PF_NUM; pf++)
+			lx_pcie_ep_setup_wins(pcie, pf);
+	} else {
+		pcie->sriov_enabled = 0;
+
+		lx_pcie_ep_setup_bars(pcie);
+		lx_pcie_ep_setup_wins(pcie, 0);
+	}
+
+	lx_pcie_ep_enable_cfg(pcie);
+	lx_pcie_dump_wins(pcie, 2);
 }
 
 static int lx_pcie_probe(struct udevice *dev)
@@ -393,9 +425,7 @@ static int lx_pcie_probe(struct udevice *dev)
 	struct lx_pcie *pcie = dev_get_priv(dev);
 	const void *fdt = gd->fdt_blob;
 	int node = dev_of_offset(dev);
-	u8 header_type;
 	u32 link_ctrl_sta;
-	bool ep_mode;
 	u32 val;
 	int ret;
 
@@ -462,24 +492,24 @@ static int lx_pcie_probe(struct udevice *dev)
 	      dev->name, (unsigned long)pcie->ccsr, (unsigned long)pcie->cfg,
 	      pcie->big_endian);
 
-	header_type = readb(pcie->ccsr + PCI_HEADER_TYPE);
-	ep_mode = (header_type & 0x7f) == PCI_HEADER_TYPE_NORMAL;
-	printf("PCIe%u: %s %s", pcie->idx, dev->name,
-	       ep_mode ? "Endpoint" : "Root Complex");
+	pcie->mode = readb(pcie->ccsr + PCI_HEADER_TYPE) & 0x7f;
 
-	if (ep_mode)
+	if (pcie->mode == PCI_HEADER_TYPE_NORMAL) {
+		printf("PCIe%u: %s %s", pcie->idx, dev->name, "Endpoint");
 		lx_pcie_setup_ep(pcie);
-	else
+	} else {
+		printf("PCIe%u: %s %s", pcie->idx, dev->name, "Root Complex");
 		lx_pcie_setup_ctrl(pcie);
-
-	val = ccsr_readl(pcie, PAB_PEX_PIO_CTRL(0));
-	val |= PPIO_EN;
-	ccsr_writel(pcie, PAB_PEX_PIO_CTRL(0), val);
+	}
 
 	/* Enable Amba & PEX PIO */
 	val = ccsr_readl(pcie, PAB_CTRL);
 	val |= PAB_CTRL_APIO_EN | PAB_CTRL_PPIO_EN;
 	ccsr_writel(pcie, PAB_CTRL, val);
+
+	val = ccsr_readl(pcie, PAB_PEX_PIO_CTRL(0));
+	val |= PPIO_EN;
+	ccsr_writel(pcie, PAB_PEX_PIO_CTRL(0), val);
 
 	if (!lx_pcie_link_up(pcie)) {
 		/* Let the user know there's no PCIe link */

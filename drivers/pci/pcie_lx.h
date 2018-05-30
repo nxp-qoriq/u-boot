@@ -13,19 +13,24 @@
 #include <dm.h>
 
 #ifndef CONFIG_SYS_PCI_MEMORY_SIZE
-#define CONFIG_SYS_PCI_MEMORY_SIZE		(2 * 1024 * 1024 * 1024UL)
+#define CONFIG_SYS_PCI_MEMORY_SIZE		(4 * 1024 * 1024 * 1024ULL)
 #endif
 
 #ifndef CONFIG_SYS_PCI_EP_MEMORY_BASE
 #define CONFIG_SYS_PCI_EP_MEMORY_BASE		CONFIG_SYS_LOAD_ADDR
 #endif
 
-#define PCIE_BAR0_SIZE		(4 * 1024) /* 4K */
-#define PCIE_BAR1_SIZE		(8 * 1024) /* 8K */
-#define PCIE_BAR2_SIZE		(4 * 1024) /* 4K */
-#define PCIE_BAR4_SIZE		(1 * 1024 * 1024) /* 1M */
+#define PCIE_PF_NUM				2
+#define PCIE_VF_NUM				128
+#define PCIE_SRIOV_CAPABILITY			0x2a0
+#define PCIE_CFG_READY				0x4b0
+#define PCIE_CONFIG_READY			(1 << 0)
+#define PCI_EXT_CAP_ID(header)			(header & 0x0000ffff)
+#define PCI_EXT_CAP_ID_SRIOV			0x10
 
-#define SIZE_1T					(1024 * 1024 * 1024 * 1024ULL)
+#define PCIE_BAR_SIZE				(8 * 1024) /* 4K */
+#define SIZE_1T				(1024 * 1024 * 1024 * 1024ULL)
+#define SIZE_1M				(1024 * 1024)
 
 /* LUT registers */
 #define PCIE_LUT_GCR				(0x28)
@@ -40,7 +45,6 @@
 #define GPEX_CLASSCODE				0x474
 #define GPEX_CLASSCODE_SHIFT			16
 #define GPEX_CLASSCODE_MASK			0xffff
-#define GPEX_CFG_READY				0x4B0
 
 #define PCI_BAR_ENABLE				0x4D4
 #define PCI_BAR_BAR_SIZE_LDW			0x4D8
@@ -94,6 +98,7 @@
 #define PAB_EXT_AXI_AMAP_AXI_WIN(idx)		(0x80a0 + 0x4 * idx)
 #define PAB_AXI_AMAP_PEX_WIN_L(idx)		(0xba8 + 0x10 * idx)
 #define PAB_AXI_AMAP_PEX_WIN_H(idx)		(0xbac + 0x10 * idx)
+#define PAB_AXI_AMAP_PCI_HDR_PARAM(idx)         (0x5ba0 + 0x4 * idx)
 
 #define AXI_AMAP_CTRL_EN			(0x1 << 0)
 #define AXI_AMAP_CTRL_TYPE_SHIFT		1
@@ -129,8 +134,8 @@
 #define PEX_AMAP_CTRL_EN_MASK			0x1
 
 /* PPIO WINs EP mode */
-#define PAB_PEX_BAR_AMAP(func, bar)		(0x1ba0 + 0x4 * func * bar)
-#define PAB_EXT_PEX_BAR_AMAP(func, bar)		(0x84a0 + 0x4 * func * bar)
+#define PAB_PEX_BAR_AMAP(func, bar)		(0x1ba0 + 0x20 * func + 4 * bar)
+#define PAB_EXT_PEX_BAR_AMAP(func, bar)		(0x84a0 + 0x20 * func + 4 * bar)
 
 /* CCSR registers */
 #define PCIE_LINK_CTRL_STA			0x5c
@@ -165,6 +170,8 @@ struct lx_pcie {
 	int next_lut_index;
 	struct pci_controller hose;
 	int stream_id_cur;
+	int mode;
+	int sriov_enabled;
 };
 
 extern struct list_head lx_pcie_list;
