@@ -101,10 +101,6 @@ compute_ranksize(const struct ddr4_spd_eeprom_s *spd)
 	if ((spd->organization & 0x7) < 4)
 		nbit_sdram_width = (spd->organization & 0x7) + 2;
 	package_3ds = (spd->package_type & 0x3) == 0x2;
-	if ((spd->package_type & 0x80) && !package_3ds) { /* other than 3DS */
-		printf("Warning: not supported SDRAM package type\n");
-		return 0;
-	}
 	if (package_3ds)
 		die_count = (spd->package_type >> 4) & 0x7;
 
@@ -208,9 +204,10 @@ unsigned int ddr_compute_dimm_parameters(const unsigned int ctrl_num,
 				 (pdimm->package_3ds > 0x1 ? 0x1 :
 				  (pdimm->package_3ds > 0 ? 0x2 : 0x3)));
 		if (pdimm->package_3ds || pdimm->n_ranks != 4)
-			pdimm->rcw[13] = 0xc;
+			pdimm->rcw[13] = 0x4;
 		else
-			pdimm->rcw[13] = 0xd;	/* Fix encoded by board */
+			pdimm->rcw[13] = 0x5;	/* Fix encoded by board */
+		pdimm->rcw[13] |= pdimm->mirrored_dimm ? 0x8 : 0;
 
 		break;
 
