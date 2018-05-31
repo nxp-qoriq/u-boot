@@ -27,6 +27,9 @@
 #ifdef CONFIG_FSL_QIXIS
 #include "../common/qixis.h"
 #endif
+#ifdef CONFIG_EMC2305
+#include "../common/emc2305.h"
+#endif
 
 #if defined (CONFIG_TARGET_LX2160AQDS)
 #define CFG_MUX_I2C_SDHC(reg, value)	((reg & 0x3f) | value)
@@ -36,15 +39,6 @@
 #endif
 
 DECLARE_GLOBAL_DATA_PTR;
-
-int board_early_init_f(void)
-{
-#ifdef CONFIG_SYS_I2C_EARLY_INIT
-	i2c_early_init_f();
-#endif
-	fsl_lsch3_early_init_f();
-	return 0;
-}
 
 int select_i2c_ch_pca9547(u8 ch)
 {
@@ -56,6 +50,20 @@ int select_i2c_ch_pca9547(u8 ch)
 		return ret;
 	}
 
+	return 0;
+}
+
+int board_early_init_f(void)
+{
+#ifdef CONFIG_SYS_I2C_EARLY_INIT
+	i2c_early_init_f();
+#endif
+
+#ifdef CONFIG_EMC2305
+       select_i2c_ch_pca9547(CONFIG_I2C_MUX_CH_EMC2305);
+       emc2305_init();
+#endif
+	fsl_lsch3_early_init_f();
 	return 0;
 }
 

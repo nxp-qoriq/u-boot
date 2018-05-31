@@ -380,6 +380,28 @@ config MAX_CPUS
 	  cores, count the reserved ports. This will allocate enough memory
 	  in spin table to properly handle all cores.
 
+config EMC2305
+	bool "Fan controller"
+	help
+	 Enable the EMC2305 fan controller for configuration of fan
+	 speed.
+
+config I2C_MUX_CH_EMC2305
+	hex "I2C channel where EMC2305 is connected"
+	default 0x9 if ARCH_LX2160A
+
+config I2C_EMC2305_ADDR
+	hex "I2C channel where EMC2305 is connected"
+	default 0x4D if ARCH_LX2160A
+
+config I2C_EMC2305_CMD
+	hex "EMC2305 made I2C complient"
+	default 0x40 if ARCH_LX2160A
+
+config I2C_EMC2305_PWM
+	hex "Speed settings for Fan controller"
+	default 0x80 if ARCH_LX2160A
+
 config SECURE_BOOT
 	bool "Secure Boot"
 	help
