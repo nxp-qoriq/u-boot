@@ -36,6 +36,8 @@
 #define SET_CFG_MUX1_SDHC1_SDHC(reg) (reg & 0x3f)
 #define SET_CFG_MUX2_SDHC1_SPI(reg, value) ((reg & 0xcf) | value)
 #define SET_CFG_MUX3_SDHC1_SPI(reg, value) ((reg & 0xf8) | value)
+#define SET_CFG_MUX_SDHC2_DSPI(reg, value) ((reg & 0xf8) | value)
+#define SET_CFG_MUX1_SDHC1_DSPI(reg, value) ((reg & 0x3f) | value)
 #define SDHC1_BASE_PMUX_DSPI 2
 #define SDHC2_BASE_PMUX_DSPI 2
 #define IIC5_PMUX_SPI3 3
@@ -268,7 +270,11 @@ u8 qixis_esdhc_detect_quirk(void)
 
 int config_board_mux(void)
 {
-	u8 reg11, reg5;
+	u8 reg11, reg5, reg13;
+	struct ccsr_gur __iomem *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
+	u32 sdhc1_base_pmux;
+	u32 sdhc2_base_pmux;
+	u32 iic5_pmux;
 
 	/* - Routes {I2C2_SCL, I2C2_SDA} to SDHC1 as {SDHC1_CD_B, SDHC1_WP}.
 	 * - Routes {I2C3_SCL, I2C3_SDA} to CAN transceiver as {CAN1_TX,CAN1_RX}.
@@ -280,30 +286,85 @@ int config_board_mux(void)
 	 * - EC2 connects to PHY #2 using RGMII protocol.
 	 * - CLK_OUT connects to FPGA for clock measurement.
 	 */
+
 	reg5 = QIXIS_READ(brdcfg[5]);
 	reg5 = CFG_MUX_I2C_SDHC(reg5, 0x40);
 	QIXIS_WRITE(brdcfg[5], reg5);
 
-	/* - Routes {SDHC1_CMD, SDHC1_CLK } to SDHC1 adapter slot.
-	 *          {SDHC1_DAT3, SDHC1_DAT2} to SDHC1 adapter slot.
-	 *          {SDHC1_DAT1, SDHC1_DAT0} to SDHC1 adapter slot.
+	/* Check RCW field sdhc1_base_pmux
+	 * esdhc0 : sdhc1_base_pmux = 0
+	 * dspi0  : sdhc1_base_pmux = 2
 	 */
-	reg11 = QIXIS_READ(brdcfg[11]);
-	reg11 = SET_CFG_MUX1_SDHC1_SDHC(reg11);
-	QIXIS_WRITE(brdcfg[11], reg11);
+	sdhc1_base_pmux = gur_in32(&gur->rcwsr[FSL_CHASSIS3_RCWSR12_REGSR - 1])
+		& FSL_CHASSIS3_SDHC1_BASE_PMUX_MASK;
+	sdhc1_base_pmux >>= FSL_CHASSIS3_SDHC1_BASE_PMUX_SHIFT;
 
-	/* - Routes {SDHC1_DAT4} to SPI3 devices as {SPI3_M_CS0_B}. */
-	reg11 = QIXIS_READ(brdcfg[11]);
-	reg11 = SET_CFG_MUX2_SDHC1_SPI(reg11, 0x10);
-	QIXIS_WRITE(brdcfg[11], reg11);
+	if (sdhc1_base_pmux == SDHC1_BASE_PMUX_DSPI) {
+		reg11 = QIXIS_READ(brdcfg[11]);
+		reg11 = SET_CFG_MUX1_SDHC1_DSPI(reg11, 0x40);
+		QIXIS_WRITE(brdcfg[11], reg11);
+	} else {
+		/* - Routes {SDHC1_CMD, SDHC1_CLK } to SDHC1 adapter slot.
+		 *          {SDHC1_DAT3, SDHC1_DAT2} to SDHC1 adapter slot.
+		 *          {SDHC1_DAT1, SDHC1_DAT0} to SDHC1 adapter slot.
+		 */
+		reg11 = QIXIS_READ(brdcfg[11]);
+		reg11 = SET_CFG_MUX1_SDHC1_SDHC(reg11);
+		QIXIS_WRITE(brdcfg[11], reg11);
+	}
 
-	/* - Routes {SDHC1_DAT5, SDHC1_DAT6} nowhere.
-	 * {SDHC1_DAT7, SDHC1_DS } to SPI3 devices as {nothing, SPI3_M0_CLK }.
-	 * {I2C5_SCL, I2C5_SDA } to SPI3 devices as {SPI3_M0_MOSI, SPI3_M0_MISO}.
+	/* Check RCW field sdhc2_base_pmux
+	 * esdhc1 : sdhc2_base_pmux = 0 (default)
+	 * dspi1  : sdhc2_base_pmux = 2
 	 */
-	reg11 = QIXIS_READ(brdcfg[11]);
-	reg11 = SET_CFG_MUX3_SDHC1_SPI(reg11, 0x01);
-	QIXIS_WRITE(brdcfg[11], reg11);
+	sdhc2_base_pmux = gur_in32(&gur->rcwsr[FSL_CHASSIS3_RCWSR13_REGSR - 1])
+		& FSL_CHASSIS3_SDHC2_BASE_PMUX_MASK;
+	sdhc2_base_pmux >>= FSL_CHASSIS3_SDHC2_BASE_PMUX_SHIFT;
+
+	if (sdhc2_base_pmux == SDHC2_BASE_PMUX_DSPI) {
+		reg13 = QIXIS_READ(brdcfg[13]);
+		reg13 = SET_CFG_MUX_SDHC2_DSPI(reg13, 0x01);
+		QIXIS_WRITE(brdcfg[13], reg13);
+	} else {
+		reg13 = QIXIS_READ(brdcfg[13]);
+		reg13 = SET_CFG_MUX_SDHC2_DSPI(reg13, 0x00);
+		QIXIS_WRITE(brdcfg[13], reg13);
+	}
+
+	/* Check RCW field IIC5 to enable dspi2 DT nodei
+	 * dspi2: IIC5 = 3
+	 */
+	iic5_pmux = gur_in32(&gur->rcwsr[FSL_CHASSIS3_RCWSR12_REGSR - 1])
+		& FSL_CHASSIS3_IIC5_PMUX_MASK;
+	iic5_pmux >>= FSL_CHASSIS3_IIC5_PMUX_SHIFT;
+
+	if (iic5_pmux == IIC5_PMUX_SPI3) {
+		/* - Routes {SDHC1_DAT4} to SPI3 devices as {SPI3_M_CS0_B}. */
+		reg11 = QIXIS_READ(brdcfg[11]);
+		reg11 = SET_CFG_MUX2_SDHC1_SPI(reg11, 0x10);
+		QIXIS_WRITE(brdcfg[11], reg11);
+
+		/* - Routes {SDHC1_DAT5, SDHC1_DAT6} nowhere.
+		 * {SDHC1_DAT7, SDHC1_DS } to {nothing, SPI3_M0_CLK }.
+		 * {I2C5_SCL, I2C5_SDA } to {SPI3_M0_MOSI, SPI3_M0_MISO}.
+		 */
+		reg11 = QIXIS_READ(brdcfg[11]);
+		reg11 = SET_CFG_MUX3_SDHC1_SPI(reg11, 0x01);
+		QIXIS_WRITE(brdcfg[11], reg11);
+	} else {
+		/*  Routes {SDHC1_DAT4} to SDHC1 adapter slot */
+		reg11 = QIXIS_READ(brdcfg[11]);
+		reg11 = SET_CFG_MUX2_SDHC1_SPI(reg11, 0x00);
+		QIXIS_WRITE(brdcfg[11], reg11);
+
+		/* - Routes {SDHC1_DAT5, SDHC1_DAT6} to SDHC1 adapter slot.
+		 * {SDHC1_DAT7, SDHC1_DS } to SDHC1 adapter slot.
+		 * {I2C5_SCL, I2C5_SDA } to SDHC1 adapter slot.
+		 */
+		reg11 = QIXIS_READ(brdcfg[11]);
+		reg11 = SET_CFG_MUX3_SDHC1_SPI(reg11, 0x00);
+		QIXIS_WRITE(brdcfg[11], reg11);
+	}
 
 	return 0;
 }
