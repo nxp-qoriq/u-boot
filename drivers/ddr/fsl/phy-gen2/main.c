@@ -280,6 +280,7 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 		dimm->ec_sdram_width = dimm_param->ec_sdram_width;
 		dimm->n_ranks = dimm_param->n_ranks;
 		dimm->data_width = dimm_param->device_width;
+		dimm->mirror = dimm_param->mirrored_dimm;
 		dimm->mr[0] = ddr->ddr_sdram_mode & 0xffff;
 		dimm->mr[1] = ddr->ddr_sdram_mode >> 16;
 		dimm->mr[2] = ddr->ddr_sdram_mode_2 >> 16;

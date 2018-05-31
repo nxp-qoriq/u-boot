@@ -87,8 +87,10 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 
 	input->cs_d0 = dimm->cs_d0;
 	input->cs_d1 = dimm->cs_d1;
+	input->mirror = dimm->mirror;
 	debug("input->cs_d0 = 0x%x\n", input->cs_d0);
 	debug("input->cs_d1 = 0x%x\n", input->cs_d1);
+	debug("input->mirror = 0x%x\n", input->mirror);
 
 	for (i = 0; i < 4; i++) {
 		input->odt[i] = dimm->odt[i];
@@ -172,7 +174,8 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	msg_blk->addr_mirror		= 0;
 #else
-	msg_blk->addr_mirror		= 0x0a;	/* odd CS are mirrored */
+	if (input->mirror)
+		msg_blk->addr_mirror	= 0x0a;	/* odd CS are mirrored */
 #endif
 
 	msg_blk->acsm_odt_ctrl0		= input->odt[0];

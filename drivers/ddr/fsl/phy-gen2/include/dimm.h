@@ -31,6 +31,7 @@ struct dimm {
 	unsigned int	data_width;
 	unsigned int	primary_sdram_width;
 	unsigned int	ec_sdram_width;
+	unsigned int	mirror;
 	unsigned int	mr[7];
 	unsigned int	cs_d0;
 	unsigned int	cs_d1;
