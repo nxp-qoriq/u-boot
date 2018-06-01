@@ -133,6 +133,7 @@ u8 qixis_esdhc_detect_quirk(void);
 	func(DHCP, dhcp, na)
 
 #ifdef CONFIG_PCI
+#define CONFIG_SYS_PCI_64BIT
 #define CONFIG_PCI_SCAN_SHOW
 #define CONFIG_CMD_PCI
 #endif

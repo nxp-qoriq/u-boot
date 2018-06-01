@@ -60,8 +60,8 @@ static int lx_pcie_outbound_win_set(struct lx_pcie *pcie, int idx, int type,
 	if (idx > PAB_WINS_NUM)
 		return -EINVAL;
 
-	size_h = upper_32_bits(~((u64)size - 1));
-	size_l = lower_32_bits(~((u64)size - 1));
+	size_h = upper_32_bits(~(size - 1));
+	size_l = lower_32_bits(~(size - 1));
 
 	val = ccsr_readl(pcie, PAB_AXI_AMAP_CTRL(idx));
 	val &= ~((AXI_AMAP_CTRL_TYPE_MASK << AXI_AMAP_CTRL_TYPE_SHIFT) |
@@ -83,10 +83,10 @@ static int lx_pcie_outbound_win_set(struct lx_pcie *pcie, int idx, int type,
 }
 
 static int lx_pcie_inbound_win_set_rc(struct lx_pcie *pcie, int idx, int type,
-				      u64 phys, u64 bus_addr, u64 size)
+				      u64 phys, u64 bus_addr, pci_size_t size)
 {
 	u32 val;
-	u64 win_size = ~(size - 1);
+	pci_size_t win_size = ~(size - 1);
 
 	val = ccsr_readl(pcie, PAB_PEX_AMAP_CTRL(idx));
 

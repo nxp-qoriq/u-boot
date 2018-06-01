@@ -144,6 +144,7 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 5
 
 #ifdef CONFIG_PCI
+#define CONFIG_SYS_PCI_64BIT
 #define CONFIG_PCI_SCAN_SHOW
 #define CONFIG_CMD_PCI
 #endif
