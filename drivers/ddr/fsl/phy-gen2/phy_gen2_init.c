@@ -324,11 +324,11 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	if (input->basic.train2d) {
 		memcpy(msg_blk_2d, msg_blk, *len);
 		msg_blk_2d->sequence_ctrl	= 0x0061;
-		msg_blk_2d->rx2d_train_opt	= 0;
-		msg_blk_2d->tx2d_train_opt	= 0;
-		msg_blk_2d->share2dvref_result	= 0;
-		msg_blk_2d->delay_weight2d	= 0x20;
-		msg_blk_2d->voltage_weight2d	= 0x80;
+		msg_blk_2d->rx2d_train_opt	= 1;
+		msg_blk_2d->tx2d_train_opt	= 1;
+		msg_blk_2d->share2dvref_result	= 1;
+		msg_blk_2d->delay_weight2d	= 0x4;
+		msg_blk_2d->voltage_weight2d	= 0x1;
 	}
 
 	*msg_1d = msg_blk;

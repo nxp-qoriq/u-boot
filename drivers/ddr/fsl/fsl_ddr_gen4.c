@@ -323,15 +323,29 @@ step2:
 	temp32 &= ~(SDRAM_CFG_MEM_EN);
 	ddr_out32(&ddr->sdram_cfg, temp32);
 
-	/*
-	 * 500 painful micro-seconds must elapse between
-	 * the DDR clock setup and the DDR config enable.
-	 * DDR2 need 200 us, and DDR3 need 500 us from spec,
-	 * we choose the max, that is 500 us for all of case.
-	 */
-	udelay(500);
-	mb();
-	isb();
+	if (fsl_ddr_get_version(ctrl_num) < 0x50500) {
+		/*
+		 * 500 painful micro-seconds must elapse between
+		 * the DDR clock setup and the DDR config enable.
+		 * DDR2 need 200 us, and DDR3 need 500 us from spec,
+		 * we choose the max, that is 500 us for all of case.
+		 */
+		udelay(500);
+		mb();
+		isb();
+	} else {
+		/* wait for PHY complete */
+		timeout = 40;
+		while (!(ddr_in32(&ddr->ddr_dsr2) & 0x4) &&
+		       (timeout > 0)) {
+			udelay(500);
+			timeout--;
+		}
+		if (timeout <= 0) {
+			printf("PHY%d init timeout, ddr_dsr2 = %x\n",
+			       ctrl_num, ddr_in32(&ddr->ddr_dsr2));
+		}
+	}
 
 #ifdef CONFIG_DEEP_SLEEP
 	if (is_warm_boot()) {
