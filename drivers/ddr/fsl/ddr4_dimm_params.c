@@ -184,6 +184,8 @@ unsigned int ddr_compute_dimm_parameters(const unsigned int ctrl_num,
 	pdimm->registered_dimm = 0;
 	switch (spd->module_type & DDR4_SPD_MODULETYPE_MASK) {
 	case DDR4_SPD_MODULETYPE_RDIMM:
+	case DDR4_SPD_MODULETYPE_MINI_RDIMM:
+	case DDR4_SPD_MODULETYPE_72B_SO_RDIMM:
 		/* Registered/buffered DIMMs */
 		pdimm->registered_dimm = 1;
 		if (spd->mod_section.registered.reg_map & 0x1)
@@ -213,6 +215,10 @@ unsigned int ddr_compute_dimm_parameters(const unsigned int ctrl_num,
 
 	case DDR4_SPD_MODULETYPE_UDIMM:
 	case DDR4_SPD_MODULETYPE_SO_DIMM:
+	case DDR4_SPD_MODULETYPE_MINI_UDIMM:
+	case DDR4_SPD_MODULETYPE_72B_SO_UDIMM:
+	case DDR4_SPD_MODULETYPE_16B_SO_DIMM:
+	case DDR4_SPD_MODULETYPE_32B_SO_DIMM:
 		/* Unbuffered DIMMs */
 		if (spd->mod_section.unbuffered.addr_mapping & 0x1)
 			pdimm->mirrored_dimm = 1;
