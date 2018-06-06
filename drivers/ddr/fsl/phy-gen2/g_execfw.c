@@ -11,12 +11,7 @@
 #include "include/init.h"
 #include "include/messages.h"
 
-/* FIXME: Replace with timer */
-#ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
-#define TIMEOUTDEFAULT 100
-#else
-#define TIMEOUTDEFAULT 10
-#endif
+#define TIMEOUTDEFAULT 200
 
 static uint32_t get_mail(const unsigned int ctrl_num, bool stream)
 {
