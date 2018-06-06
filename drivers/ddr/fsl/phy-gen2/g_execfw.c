@@ -116,10 +116,10 @@ static int wait_fw_done(const unsigned int ctrl_num, int train2d)
 		mail = get_mail(ctrl_num, 0);
 		switch (mail) {
 		case 0x7:
-			debug("Training completed\n");
+			debug("%s Training completed\n", train2d ? "2D" : "1D");
 			break;
 		case 0xff:
-			debug("Training failure\n");
+			debug("%s Training failure\n", train2d ? "2D" : "1D");
 			break;
 		case 0x0:
 			debug("End of initialization\n");
