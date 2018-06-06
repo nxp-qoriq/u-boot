@@ -82,18 +82,18 @@ static const char * lookup_msg(uint32_t index, int train2d)
 
 static void decode_stream_message(const unsigned int ctrl_num, int train2d)
 {
-#ifdef DEBUG
 	uint32_t index;
-	const char *format;
-	uint32_t args[12];
+	__maybe_unused const char *format;
+	__maybe_unused uint32_t args[12];
 	int i;
 
 	index = get_mail(ctrl_num, 1);
-	format = lookup_msg(index, train2d);
 	if ((index & 0xffff) > 12)	/* up to 12 args so far */
 		printf("Program error in %s\n", __func__);
 	for (i = 0; i < (index & 0xffff) && i < 12; i++)
 		args[i] = get_mail(ctrl_num, 1);
+#ifdef DEBUG
+	format = lookup_msg(index, train2d);
 	if (format) {
 		printf("0x%08x: ", index);
 		printf(format, args[0], args[1], args[2], args[3], args[4],
