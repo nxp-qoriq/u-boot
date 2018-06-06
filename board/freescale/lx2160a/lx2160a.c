@@ -482,9 +482,7 @@ void fdt_fixup_board_enet(void *fdt)
 
 	if ((get_mc_boot_status() == 0) && (get_dpl_apply_status() == 0)) {
 		fdt_status_okay(fdt, offset);
-	#ifdef CONFIG_TARGET_LX2160AQDS
 		fdt_fixup_board_phy(fdt);
-	#endif
 	} else
 		fdt_status_fail(fdt, offset);
 }

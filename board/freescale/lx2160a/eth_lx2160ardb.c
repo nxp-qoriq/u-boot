@@ -20,6 +20,26 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+static bool get_inphi_phy_id(struct mii_dev *bus, int addr, int devad)
+{
+	int phy_reg;
+	u32 phy_id;
+
+	/* Grab the bits from PHYIR1, and put them
+	* in the upper half */
+	phy_reg = bus->read(bus, addr, devad, MII_PHYSID1);
+	phy_id = (phy_reg & 0xffff) << 16;
+
+	/* Grab the bits from PHYIR2, and put them in the lower half */
+	phy_reg = bus->read(bus, addr, devad, MII_PHYSID2);
+	phy_id |= (phy_reg & 0xffff);
+
+	if (phy_id == PHY_UID_IN112525_S03)
+		return true;
+	else
+		return false;
+}
+
 int board_eth_init(bd_t *bis)
 {
 #ifndef CONFIG_ARCH_LX2160A_EMU_COMMON
@@ -52,13 +72,16 @@ int board_eth_init(bd_t *bis)
 	fm_memac_mdio_init(bis, &mdio_info);
 
 #ifndef CONFIG_ARCH_LX2160A_SIMU
+	dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO2_NAME);
 	switch (srds_s1) {
 	case 19:
 		wriop_set_phy_address(WRIOP1_DPMAC2, CORTINA_PHY_ADDR1);
 		wriop_set_phy_address(WRIOP1_DPMAC3, AQR107_PHY_ADDR1);
 		wriop_set_phy_address(WRIOP1_DPMAC4, AQR107_PHY_ADDR2);
-		wriop_set_phy_address(WRIOP1_DPMAC5, INPHI_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC6, INPHI_PHY_ADDR1);
+		if (get_inphi_phy_id(dev, INPHI_PHY_ADDR1, MDIO_MMD_VEND1)) {
+			wriop_set_phy_address(WRIOP1_DPMAC5, INPHI_PHY_ADDR1);
+			wriop_set_phy_address(WRIOP1_DPMAC6, INPHI_PHY_ADDR1);
+		}
 		wriop_set_phy_address(WRIOP1_DPMAC17, RGMII_PHY_ADDR1);
 		wriop_set_phy_address(WRIOP1_DPMAC18, RGMII_PHY_ADDR2);
 		break;
@@ -131,3 +154,36 @@ void reset_phy(void)
 #endif
 }
 #endif /* CONFIG_RESET_PHY_R */
+
+int fdt_fixup_board_phy(void *fdt)
+{
+	int mdio_offset;
+	int ret;
+	struct mii_dev *dev;
+
+	ret = 0;
+
+	dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO2_NAME);
+	if (!get_inphi_phy_id(dev, INPHI_PHY_ADDR1, MDIO_MMD_VEND1)) {
+		mdio_offset = fdt_path_offset(fdt, "/soc/mdio@0x8B97000");
+
+		if (mdio_offset < 0)
+			mdio_offset = fdt_path_offset(fdt, "/mdio@0x8B97000");
+
+		if (mdio_offset < 0) {
+			printf("%s node not found in device tree\n",
+			       "mdio@0x8B97000");
+			return mdio_offset;
+		}
+
+		ret = fdt_setprop_string(fdt, mdio_offset, "status",
+					 "disabled");
+		if (ret) {
+			printf("WARNING: could not set status for pci0: %s.\n",
+			       fdt_strerror(ret));
+			return ret;
+		}
+	}
+
+	return ret;
+}
