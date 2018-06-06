@@ -60,12 +60,21 @@ static uint32_t get_mail(const unsigned int ctrl_num, bool stream)
 }
 
 #ifdef DEBUG
-static const char * lookup_msg(uint32_t index)
+static const char * lookup_msg(uint32_t index, int train2d)
 {
 	int i;
+	int size;
+	const struct phy_msg *messages;
 	const char *ptr = NULL;
 
-	for (i = 0; i < ARRAY_SIZE(messages); i++) {
+	if (train2d) {
+		messages = messages_2d;
+		size = ARRAY_SIZE(messages_2d);
+	} else {
+		messages = messages_1d;
+		size = ARRAY_SIZE(messages_1d);
+	}
+	for (i = 0; i < size; i++) {
 		if (messages[i].index == index) {
 			ptr = messages[i].msg;
 			break;
@@ -76,7 +85,7 @@ static const char * lookup_msg(uint32_t index)
 }
 #endif
 
-static void decode_stream_message(const unsigned int ctrl_num)
+static void decode_stream_message(const unsigned int ctrl_num, int train2d)
 {
 #ifdef DEBUG
 	uint32_t index;
@@ -85,7 +94,7 @@ static void decode_stream_message(const unsigned int ctrl_num)
 	int i;
 
 	index = get_mail(ctrl_num, 1);
-	format = lookup_msg(index);
+	format = lookup_msg(index, train2d);
 	if ((index & 0xffff) > 12)	/* up to 12 args so far */
 		printf("Program error in %s\n", __func__);
 	for (i = 0; i < (index & 0xffff) && i < 12; i++)
@@ -99,7 +108,7 @@ static void decode_stream_message(const unsigned int ctrl_num)
 #endif
 }
 
-static int wait_fw_done(const unsigned int ctrl_num)
+static int wait_fw_done(const unsigned int ctrl_num, int train2d)
 {
 	uint32_t mail = 0;
 
@@ -141,7 +150,7 @@ static int wait_fw_done(const unsigned int ctrl_num)
 			mail = 0;
 			break;
 		case 0x8:
-			decode_stream_message(ctrl_num);
+			decode_stream_message(ctrl_num, train2d);
 			mail = 0;
 			break;
 		case 0x9:
@@ -186,7 +195,7 @@ static int wait_fw_done(const unsigned int ctrl_num)
 	return -EINVAL;
 }
 
-int g_exec_fw(const unsigned int ctrl_num)
+int g_exec_fw(const unsigned int ctrl_num, int train2d)
 {
 	int ret;
 
@@ -197,7 +206,7 @@ int g_exec_fw(const unsigned int ctrl_num)
 		       csr_stall_to_micro_mask);
 	phy_io_write16(ctrl_num, t_apbonly | csr_micro_reset_addr, 0);
 
-	ret = wait_fw_done(ctrl_num);
+	ret = wait_fw_done(ctrl_num, train2d);
 	if (ret == -ETIME)
 		printf("Timed out while waiting for firmware execution\n");
 	else if (ret == -EIO)

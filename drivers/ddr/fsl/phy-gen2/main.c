@@ -362,7 +362,7 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 
 	/* FIXME: How to determine training firmware is done? */
 	debug("Execute firmware\n");
-	ret = g_exec_fw(ctrl_num);
+	ret = g_exec_fw(ctrl_num, 0);
 	/* FIXME: add 2D training parameter later */
 	debug("Read message block\n");
 	h_readmsgblock(ctrl_num);
@@ -375,7 +375,7 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 				return ret;
 			}
 		debug("Execute 2D firmware\n");
-		ret = g_exec_fw(ctrl_num);
+		ret = g_exec_fw(ctrl_num, 1);
 		/* FIXME: add 2D training parameter later */
 		debug("Read 2D message block\n");
 		h_readmsgblock(ctrl_num);

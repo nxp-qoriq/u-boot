@@ -155,7 +155,7 @@ int c_init_phy_config(const unsigned int ctrl_num, struct input *input,
 		      const void *msg);
 int d_load_imem(const struct input *input, int train2d);
 int f_load_dmem(const struct input *input, void *msg, size_t len, int train2d);
-int g_exec_fw(const unsigned int ctrl_num);
+int g_exec_fw(const unsigned int ctrl_num, int train2d);
 void h_readmsgblock(const unsigned int ctrl_num);
 void i_load_pie(const unsigned int ctrl_num, const struct input *input,
 		const void *msg);
