@@ -543,7 +543,7 @@ static void config_core_prefetch(void)
 					 &arglen, buf);
 
 	if (prefetch_arg) {
-		mask = simple_strtoul(prefetch_arg, NULL, 0) & 0xff;
+		mask = simple_strtoul(prefetch_arg, NULL, 0) & 0xffff;
 		if (mask & 0x1) {
 			printf("Core0 prefetch can't be disabled\n");
 			return;
