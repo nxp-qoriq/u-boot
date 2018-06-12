@@ -273,6 +273,60 @@ static void ddr_cntlr_fixed_settings(void)
 #endif
 #endif
 
+/* MT36ADS4G72PZ-2G3B1 */
+#ifdef CONFIG_SYS_DDR_RAW_TIMING
+dimm_params_t ddr_raw_timing = {
+	.n_ranks = 2,
+	.rank_density = 17179869184u,
+	.capacity = 34359738368u,
+	.primary_sdram_width = 64,
+	.ec_sdram_width = 8,
+	.data_width = 72,
+	.device_width = 4,
+	.die_density = 0x5,
+	.registered_dimm = 1,
+	.mirrored_dimm = 0,
+	.n_row_addr = 17,
+	.n_col_addr = 10,
+	.bank_addr_bits = 0,
+	.bank_group_bits = 2,
+	.edc_config = 2,
+	.burst_lengths_bitmask = 0x0c,
+
+	.tckmin_x_ps = 833,
+	.tckmax_ps = 1600,
+	.caslat_x = 0x0007FC00,
+	.taa_ps = 13750,
+	.trcd_ps = 13750,
+	.trp_ps = 13750,
+	.tras_ps = 32000,
+	.trc_ps = 45750,
+	.trfc1_ps = 350000,
+	.trfc2_ps = 260000,
+	.trfc4_ps = 160000,
+	.tfaw_ps = 13000,
+	.trrds_ps = 3300,
+	.trrdl_ps = 4900,
+	.tccdl_ps = 5000,
+	.refresh_rate_ps = 7800000,
+};
+int fsl_ddr_get_dimm_params(dimm_params_t *pdimm,
+			    unsigned int controller_number,
+			    unsigned int dimm_number)
+{
+	static const char dimm_model[] = "Fixed DDR on board";
+
+	if (((controller_number == 0) && (dimm_number == 0)) ||
+	    ((controller_number == 1) && (dimm_number == 0))) {
+		memcpy(pdimm, &ddr_raw_timing, sizeof(dimm_params_t));
+		memset(pdimm->mpart, 0, sizeof(pdimm->mpart));
+		memcpy(pdimm->mpart, dimm_model, sizeof(dimm_model) - 1);
+	}
+
+	return 0;
+}
+#endif
+
 int fsl_initdram(void)
 {
 #ifndef CONFIG_SYS_PEB_BOOT
