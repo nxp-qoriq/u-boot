@@ -423,10 +423,6 @@ int board_init(void)
 #ifdef CONFIG_TARGET_LX2RDB
 	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
 #endif
-
-#ifdef CONFIG_FSL_QIXIS
-	QIXIS_WRITE(rst_ctl, QIXIS_RST_CTL_RESET_EN);
-#endif
 #endif
 
 #ifdef CONFIG_FSL_CAAM
