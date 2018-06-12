@@ -273,8 +273,47 @@ static void ddr_cntlr_fixed_settings(void)
 #endif
 #endif
 
-/* MT36ADS4G72PZ-2G3B1 */
 #ifdef CONFIG_SYS_DDR_RAW_TIMING
+#if 1
+/* MT18ASF1G72AZ-2G6B1 */
+dimm_params_t ddr_raw_timing = {
+	.n_ranks = 2,
+	.rank_density = 4294967296u,
+	.capacity = 8589934592u,
+	.primary_sdram_width = 64,
+	.ec_sdram_width = 8,
+	.data_width = 72,
+	.device_width = 8,
+	.die_density = 0x4,
+	.registered_dimm = 0,
+	.mirrored_dimm = 1,
+	.n_row_addr = 15,
+	.n_col_addr = 10,
+	.bank_addr_bits = 0,
+	.bank_group_bits = 2,
+	.edc_config = 2,
+	.burst_lengths_bitmask = 0x0c,
+
+	.tckmin_x_ps = 750,
+	.tckmax_ps = 1600,
+	.caslat_x = 0x00FFFC00,
+	.taa_ps = 13750,
+	.trcd_ps = 13750,
+	.trp_ps = 13750,
+	.tras_ps = 32000,
+	.trc_ps = 45750,
+	.trfc1_ps = 260000,
+	.trfc2_ps = 160000,
+	.trfc4_ps = 110000,
+	.tfaw_ps = 21000,
+	.trrds_ps = 3000,
+	.trrdl_ps = 4900,
+	.tccdl_ps = 5000,
+	.refresh_rate_ps = 7800000,
+};
+
+#else
+/* MT36ADS4G72PZ-2G3B1 */
 dimm_params_t ddr_raw_timing = {
 	.n_ranks = 2,
 	.rank_density = 17179869184u,
@@ -310,6 +349,8 @@ dimm_params_t ddr_raw_timing = {
 	.tccdl_ps = 5000,
 	.refresh_rate_ps = 7800000,
 };
+#endif
+
 int fsl_ddr_get_dimm_params(dimm_params_t *pdimm,
 			    unsigned int controller_number,
 			    unsigned int dimm_number)
