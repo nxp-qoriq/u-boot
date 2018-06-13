@@ -492,6 +492,12 @@ static int lx_pcie_probe(struct udevice *dev)
 	      dev->name, (unsigned long)pcie->ccsr, (unsigned long)pcie->cfg,
 	      pcie->big_endian);
 
+	/* Set ACK latency timeout */
+	val = ccsr_readl(pcie, GPEX_ACK_REPLAY_TO);
+	val &= ~(ACK_LAT_TO_VAL_MASK << ACK_LAT_TO_VAL_SHIFT);
+	val |= (4 << ACK_LAT_TO_VAL_SHIFT);
+	ccsr_writel(pcie, GPEX_ACK_REPLAY_TO, val);
+
 	pcie->mode = readb(pcie->ccsr + PCI_HEADER_TYPE) & 0x7f;
 
 	if (pcie->mode == PCI_HEADER_TYPE_NORMAL) {

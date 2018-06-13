@@ -46,6 +46,10 @@
 #define GPEX_CLASSCODE_SHIFT			16
 #define GPEX_CLASSCODE_MASK			0xffff
 
+#define GPEX_ACK_REPLAY_TO			0x438
+#define ACK_LAT_TO_VAL_SHIFT			0
+#define ACK_LAT_TO_VAL_MASK			0x1fff
+
 #define PCI_BAR_ENABLE				0x4D4
 #define PCI_BAR_BAR_SIZE_LDW			0x4D8
 #define PCI_BAR_BAR_SIZE_UDW			0x4DC
