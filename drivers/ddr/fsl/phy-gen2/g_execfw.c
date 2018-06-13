@@ -55,21 +55,12 @@ static uint32_t get_mail(const unsigned int ctrl_num, bool stream)
 }
 
 #ifdef DEBUG
-static const char * lookup_msg(uint32_t index, int train2d)
+static const char * lookup_msg(uint32_t index)
 {
 	int i;
-	int size;
-	const struct phy_msg *messages;
 	const char *ptr = NULL;
 
-	if (train2d) {
-		messages = messages_2d;
-		size = ARRAY_SIZE(messages_2d);
-	} else {
-		messages = messages_1d;
-		size = ARRAY_SIZE(messages_1d);
-	}
-	for (i = 0; i < size; i++) {
+	for (i = 0; i < ARRAY_SIZE(messages); i++) {
 		if (messages[i].index == index) {
 			ptr = messages[i].msg;
 			break;
@@ -80,7 +71,7 @@ static const char * lookup_msg(uint32_t index, int train2d)
 }
 #endif
 
-static void decode_stream_message(const unsigned int ctrl_num, int train2d)
+static void decode_stream_message(const unsigned int ctrl_num)
 {
 	uint32_t index;
 	__maybe_unused const char *format;
@@ -93,7 +84,7 @@ static void decode_stream_message(const unsigned int ctrl_num, int train2d)
 	for (i = 0; i < (index & 0xffff) && i < 12; i++)
 		args[i] = get_mail(ctrl_num, 1);
 #ifdef DEBUG
-	format = lookup_msg(index, train2d);
+	format = lookup_msg(index);
 	if (format) {
 		printf("0x%08x: ", index);
 		printf(format, args[0], args[1], args[2], args[3], args[4],
@@ -145,7 +136,7 @@ static int wait_fw_done(const unsigned int ctrl_num, int train2d)
 			mail = 0;
 			break;
 		case 0x8:
-			decode_stream_message(ctrl_num, train2d);
+			decode_stream_message(ctrl_num);
 			mail = 0;
 			break;
 		case 0x9:
