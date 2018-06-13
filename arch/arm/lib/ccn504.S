@@ -80,3 +80,23 @@ ENTRY(ccn504_set_aux)
 	ret
 ENDPROC(ccn504_set_aux)
 
+/*************************************************************************
+ *
+ * void ccn_clear_reg_bit(CCI_REG, Value);
+ *
+ * Initialize AUX control settings
+ *
+ *************************************************************************/
+ENTRY(ccn_clear_reg_bit)
+	/*
+	 * x0: CCI_REG
+	 * x1: Value
+	 */
+
+	ldr	x9, [x0]
+	mov	x10, x1
+	bic	x9, x9, x1
+	str	x9, [x0]
+
+	ret
+ENDPROC(ccn_clear_reg_bit)

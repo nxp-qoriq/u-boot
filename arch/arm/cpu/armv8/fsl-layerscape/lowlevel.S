@@ -76,6 +76,25 @@ ENTRY(lowlevel_init)
 1:
 
 #if defined CONFIG_SYS_FSL_HAS_CCN508
+	/*Clear pos_early_wr_comp_en and hni_pos_en bits in HNI13, HNI30*/
+	dsb	sy
+
+	ldr     x0, =CCI_HN_I_13_POS_CONTROL
+	ldr     x1, =CCI_HN_I_HNI_POS_EN
+	bl      ccn_clear_reg_bit
+
+	ldr     x0, =CCI_HN_I_30_POS_CONTROL
+	ldr     x1, =CCI_HN_I_HNI_POS_EN
+	bl      ccn_clear_reg_bit
+
+	ldr     x0, =CCI_HN_I_13_SA_AUX_CTL
+	ldr     x1, =CCI_HN_I_POS_EARLY_WR_COMP_EN
+	bl      ccn_clear_reg_bit
+
+	ldr     x0, =CCI_HN_I_30_SA_AUX_CTL
+	ldr     x1, =CCI_HN_I_POS_EARLY_WR_COMP_EN
+	bl      ccn_clear_reg_bit
+
 	/*Set Wuo bit for RN-I 17*/
         ldr     x0, =CCI_AUX_CONTROL_BASE(17)
         ldr     x1, =0x00000010
