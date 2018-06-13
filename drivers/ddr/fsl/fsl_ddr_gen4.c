@@ -342,8 +342,11 @@ step2:
 			timeout--;
 		}
 		if (timeout <= 0) {
-			printf("PHY%d init timeout, ddr_dsr2 = %x\n",
+			printf("PHY%d handshake timeout, ddr_dsr2 = %x\n",
 			       ctrl_num, ddr_in32(&ddr->ddr_dsr2));
+		} else {
+			debug("PHY%d handshake completed, dsr2 = 0x%x\n",
+			      ctrl_num, ddr_in32(&ddr->ddr_dsr2));
 		}
 	}
 
