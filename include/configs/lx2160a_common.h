@@ -317,7 +317,7 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_BOOTARGS		"console=ttyAMA0,115200 root=/dev/ram0 " \
 				"earlycon=pl011,mmio32,0x21c0000 " \
 				"ramdisk_size=0x2000000 default_hugepagesz=1024m" \
-				" hugepagesz=1024m hugepages=2"
+				" hugepagesz=1024m hugepages=2 pci=pcie_bus_perf"
 #else
 #define CONFIG_BOOTARGS		"console=ttyAMA0,115200 root=/dev/ram0 " \
 				"earlycon=pl011,mmio32,0x21c0000 " \
