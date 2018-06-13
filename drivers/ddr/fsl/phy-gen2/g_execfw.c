@@ -9,7 +9,6 @@
 #include "include/dimm.h"
 #include "include/io.h"
 #include "include/init.h"
-#include "include/messages.h"
 
 #define TIMEOUTDEFAULT 200
 
@@ -54,44 +53,21 @@ static uint32_t get_mail(const unsigned int ctrl_num, bool stream)
 	return mail;
 }
 
-#ifdef DEBUG
-static const char * lookup_msg(uint32_t index)
-{
-	int i;
-	const char *ptr = NULL;
-
-	for (i = 0; i < ARRAY_SIZE(messages); i++) {
-		if (messages[i].index == index) {
-			ptr = messages[i].msg;
-			break;
-		}
-	}
-
-	return ptr;
-}
-#endif
-
 static void decode_stream_message(const unsigned int ctrl_num)
 {
 	uint32_t index;
-	__maybe_unused const char *format;
-	__maybe_unused uint32_t args[12];
-	int i;
+	uint32_t args[12];
+	int i, j;
 
 	index = get_mail(ctrl_num, 1);
 	if ((index & 0xffff) > 12)	/* up to 12 args so far */
 		printf("Program error in %s\n", __func__);
 	for (i = 0; i < (index & 0xffff) && i < 12; i++)
 		args[i] = get_mail(ctrl_num, 1);
-#ifdef DEBUG
-	format = lookup_msg(index);
-	if (format) {
-		printf("0x%08x: ", index);
-		printf(format, args[0], args[1], args[2], args[3], args[4],
-		       args[5], args[6], args[7], args[8], args[9], args[10],
-		       args[11]);
-	}
-#endif
+	debug("0x%08x:\t", index);
+	for (j = 0; j < i; j++)
+		debug("0x%x\t", args[j]);
+	debug("\n");
 }
 
 static int wait_fw_done(const unsigned int ctrl_num, int train2d)
