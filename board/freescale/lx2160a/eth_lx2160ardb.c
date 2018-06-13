@@ -86,6 +86,21 @@ int board_eth_init(bd_t *bis)
 		wriop_set_phy_address(WRIOP1_DPMAC18, RGMII_PHY_ADDR2);
 		break;
 
+	case 18:
+		wriop_set_phy_address(WRIOP1_DPMAC7, CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC8, CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC9, CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC10, CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC3, AQR107_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC4, AQR107_PHY_ADDR2);
+		if (get_inphi_phy_id(dev, INPHI_PHY_ADDR1, MDIO_MMD_VEND1)) {
+			wriop_set_phy_address(WRIOP1_DPMAC5, INPHI_PHY_ADDR1);
+			wriop_set_phy_address(WRIOP1_DPMAC6, INPHI_PHY_ADDR1);
+		}
+		wriop_set_phy_address(WRIOP1_DPMAC17, RGMII_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC18, RGMII_PHY_ADDR2);
+		break;
+
 	default:
 		printf("SerDes1 protocol 0x%x is not supported on LX2160ARDB\n",
 		       srds_s1);
@@ -93,7 +108,7 @@ int board_eth_init(bd_t *bis)
 		break;
 	}
 
-	for (i = WRIOP1_DPMAC2; i <= WRIOP1_DPMAC6; i++) {
+	for (i = WRIOP1_DPMAC2; i <= WRIOP1_DPMAC10; i++) {
 		interface = wriop_get_enet_if(i);
 		switch (interface) {
 		case PHY_INTERFACE_MODE_XGMII:
