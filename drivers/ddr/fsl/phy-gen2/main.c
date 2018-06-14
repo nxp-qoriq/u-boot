@@ -135,7 +135,7 @@ void load_image(const unsigned int ctrl_num, enum image_types image_type)
 	debug("Load Image-%d..Done\n", image_type);
 }
 
-unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
+int compute_phy_config_regs(const unsigned int ctrl_num,
 		const memctl_options_t *popts,
 		const dimm_params_t *dimm_param,
 		fsl_ddr_cfg_regs_t *ddr)
@@ -156,7 +156,7 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 	load_image(ctrl_num, DMEM);
 
 	/* Execute training firmware and Wait for training to complete */
-	g_exec_fw(ctrl_num);
+	g_exec_fw(ctrl_num, 0);
 
 #ifndef CONFIG_ARCH_LX2160A_PXP
 	phy_io_write16(ctrl_num, 0x0d0000, 0x0);
@@ -168,7 +168,7 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 	load_image(ctrl_num, DMEM_2D);
 
 	/* Execute training firmware and Wait for training to complete */
-	g_exec_fw(ctrl_num);
+	g_exec_fw(ctrl_num, 1);
 #endif
 
 	/* Load Phy Init Engine image */
