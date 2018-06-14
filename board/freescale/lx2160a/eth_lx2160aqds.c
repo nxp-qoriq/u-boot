@@ -362,7 +362,6 @@ int board_eth_init(bd_t *bis)
 	struct memac_mdio_info mdio_info;
 	struct memac_mdio_controller *regs;
 	int i;
-	u8 ioslot;
 	const char *ret;
 	char *env_dpmac;
 	char dpmacid[] = "dpmac00", srds[] = "00_00_00";
@@ -463,17 +462,22 @@ int board_eth_init(bd_t *bis)
 		}
 	}
 
-	wriop_set_phy_address(WRIOP1_DPMAC17, RGMII_PHY_ADDR1);
-	wriop_set_phy_address(WRIOP1_DPMAC18, RGMII_PHY_ADDR2);
-
-	/*Set MDIO bus 1 muxing front-ends for RGMII interfaces*/
-	for (ioslot = EMI1_RGMII1; ioslot <= EMI1_RGMII2; ioslot++) {
-		i = (ioslot - EMI1_RGMII1) + 1;
-		bus = lx2160a_qds_mdio_init(EMI1, ioslot);
+	if (wriop_get_enet_if(WRIOP1_DPMAC17) == PHY_INTERFACE_MODE_RGMII_ID) {
+		wriop_set_phy_address(WRIOP1_DPMAC17, RGMII_PHY_ADDR1);
+		bus = lx2160a_qds_mdio_init(EMI1, EMI1_RGMII1);
 		if (!bus)
-			printf("could not get bus for RGMII%d\n", i);
+			printf("could not get bus for RGMII1\n");
 		else
-			wriop_set_mdio(WRIOP1_DPMAC16 + i, bus);
+			wriop_set_mdio(WRIOP1_DPMAC17, bus);
+	}
+
+	if (wriop_get_enet_if(WRIOP1_DPMAC18) == PHY_INTERFACE_MODE_RGMII_ID) {
+		wriop_set_phy_address(WRIOP1_DPMAC18, RGMII_PHY_ADDR2);
+		bus = lx2160a_qds_mdio_init(EMI1, EMI1_RGMII2);
+		if (!bus)
+			printf("could not get bus for RGMII2\n");
+		else
+			wriop_set_mdio(WRIOP1_DPMAC18, bus);
 	}
 
 	cpu_eth_init(bis);

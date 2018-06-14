@@ -92,7 +92,7 @@ void fsl_rgmii_init(void)
 		& FSL_CHASSIS3_EC1_REGSR_PRTCL_MASK;
 	ec >>= FSL_CHASSIS3_EC1_REGSR_PRTCL_SHIFT;
 
-	if (!ec)
+	if (!ec && (wriop_is_enabled_dpmac(17) == (u8)-1))
 		wriop_init_dpmac_enet_if(17, PHY_INTERFACE_MODE_RGMII_ID);
 #endif
 
@@ -101,7 +101,7 @@ void fsl_rgmii_init(void)
 		& FSL_CHASSIS3_EC2_REGSR_PRTCL_MASK;
 	ec >>= FSL_CHASSIS3_EC2_REGSR_PRTCL_SHIFT;
 
-	if (!ec)
+	if (!ec && (wriop_is_enabled_dpmac(18) == (u8)-1))
 		wriop_init_dpmac_enet_if(18, PHY_INTERFACE_MODE_RGMII_ID);
 #endif
 }
