@@ -421,9 +421,9 @@ int board_eth_init(bd_t *bis)
 				       "variable\n", srds);
 			}
 
-			for (i = WRIOP1_DPMAC1; i <= WRIOP1_DPMAC16; i++) {
-				/* Look for dpmac1..dpmac16 arg in dpmac
-				 * environment variable
+			for (i = WRIOP1_DPMAC1; i < NUM_WRIOP_PORTS; i++) {
+				/* Look for dpmac1 to dpmac24(current max) arg
+				 * in dpmac environment variable
 				 */
 				sprintf(dpmacid, "dpmac%d", i);
 				ret = hwconfig_arg_f(dpmacid, &len, env_dpmac);
