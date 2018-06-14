@@ -36,6 +36,7 @@ typedef enum {
 	IO_SLOT_4,
 	IO_SLOT_5,
 	IO_SLOT_6,
+	IO_SLOT_7,
 	IO_SLOT_8,
 	EMI1_RGMII1,
 	EMI1_RGMII2,
@@ -93,17 +94,26 @@ static const struct serdes_phy_config serdes1_phy_config[] = {
 	     {WRIOP1_DPMAC3, AQ_PHY_ADDR1, EMI1, IO_SLOT_1},
 	     {WRIOP1_DPMAC4, AQ_PHY_ADDR2, EMI1, IO_SLOT_1},
 	     {WRIOP1_DPMAC5, INPHI_PHY_ADDR1, EMI1, IO_SLOT_6},
-	     {WRIOP1_DPMAC6, INPHI_PHY_ADDR1, EMI1, IO_SLOT_6} } }
+	     {WRIOP1_DPMAC6, INPHI_PHY_ADDR1, EMI1, IO_SLOT_6} } },
+	{20, {{WRIOP1_DPMAC1, CORTINA_PHY_ADDR1, EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC2, CORTINA_PHY_ADDR1, EMI1, IO_SLOT_2} } }
 };
 
 static const struct serdes_phy_config serdes2_phy_config[] = {
 	{2, {} },
 	{3, {} },
-	{5, {} }
+	{5, {} },
+	{11, {{WRIOP1_DPMAC12, SGMII_CARD_PORT2_PHY_ADDR, EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC17, SGMII_CARD_PORT3_PHY_ADDR, EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC18, SGMII_CARD_PORT4_PHY_ADDR, EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC16, SGMII_CARD_PORT2_PHY_ADDR, EMI1, IO_SLOT_8},
+	     {WRIOP1_DPMAC13, SGMII_CARD_PORT3_PHY_ADDR, EMI1, IO_SLOT_8},
+	     {WRIOP1_DPMAC14, SGMII_CARD_PORT4_PHY_ADDR, EMI1, IO_SLOT_8} } },
 };
 
 static const struct serdes_phy_config serdes3_phy_config[] = {
-	{2, {} }
+	{2, {} },
+	{3, {} }
 };
 
 static inline const struct phy_config *get_phy_config(u8 serdes,
