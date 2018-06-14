@@ -61,10 +61,12 @@ struct serdes_phy_config {
 
 /* Table defining the phy configuration on 8 lanes of a serdes.
  * Various assumptions have been made while defining this table.
- * e.g. for serdes1 protocol 0x2A it is being assummed that X-M11-USXGMII
- * card is being used for dpmac 5-8. (X-M12-XFI could also have been used)
- * And also that this card is connected to IO Slot 3 (could have been connected
+ * e.g. for serdes1 protocol 19 it is being assummed that X-M11-USXGMII
+ * card is being used for dpmac 3-4. (X-M12-XFI could also have been used)
+ * And also that this card is connected to IO Slot 1 (could have been connected
  * to any of the 8 IO slots (IO slot 1 - IO slot 8)).
+ * similary, it is also being assumed that MDIO 1 is selected on X-M7-40G card
+ * used in serdes1 protocol 19 (could have selected MDIO 2)
  * To override these settings "dpmac" environment variable can be used after
  * defining "dpmac_override" in hwconfig environment variable.
  * This table has limited serdes protocol entries. It can be expanded as per
@@ -439,7 +441,7 @@ int board_eth_init(bd_t *bis)
 					    ARRAY_SIZE(serdes1_phy_config));
 		if (!phy_config) {
 			printf("%s qds: WRIOP: Unsupported SerDes1 Protocol "
-			       "%02d\n", __func__, srds_s1);
+			       "%d\n", __func__, srds_s1);
 		} else {
 			do_phy_config(phy_config);
 		}
@@ -447,7 +449,7 @@ int board_eth_init(bd_t *bis)
 					    ARRAY_SIZE(serdes2_phy_config));
 		if (!phy_config) {
 			printf("%s qds: WRIOP: Unsupported SerDes2 Protocol "
-			       "%02d\n", __func__, srds_s2);
+			       "%d\n", __func__, srds_s2);
 		} else {
 			do_phy_config(phy_config);
 		}
@@ -455,7 +457,7 @@ int board_eth_init(bd_t *bis)
 					    ARRAY_SIZE(serdes3_phy_config));
 		if (!phy_config) {
 			printf("%s qds: WRIOP: Unsupported SerDes3 Protocol "
-			       "%02d\n", __func__, srds_s3);
+			       "%d\n", __func__, srds_s3);
 		} else {
 			do_phy_config(phy_config);
 		}
