@@ -403,6 +403,7 @@ compute_lowest_common_dimm_parameters(const unsigned int ctrl_num,
 #ifdef CONFIG_SYS_FSL_DDR4
 	unsigned int twr_ps = 15000;
 	unsigned int trfc1_ps = 0;
+	unsigned int trfc1_min;
 	unsigned int trfc2_ps = 0;
 	unsigned int trfc4_ps = 0;
 	unsigned int trrds_ps = 0;
@@ -478,6 +479,12 @@ compute_lowest_common_dimm_parameters(const unsigned int ctrl_num,
 #ifdef CONFIG_SYS_FSL_DDR4
 		trfc1_ps = max(trfc1_ps,
 			       (unsigned int)dimm_params[i].trfc1_ps);
+		trfc1_min = dimm_params[i].die_density <= 0x3 ? 160000 :
+			    (dimm_params[i].die_density == 0x4 ? 260000 :
+			     (dimm_params[i].die_density == 0x5 ? 350000 :
+			      550000));
+		if (trfc1_ps < trfc1_min)
+			printf("Warning: trfc1_ps (%u) too small\n", trfc1_ps);
 		trfc2_ps = max(trfc2_ps,
 			       (unsigned int)dimm_params[i].trfc2_ps);
 		trfc4_ps = max(trfc4_ps,
