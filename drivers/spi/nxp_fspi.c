@@ -58,8 +58,9 @@ DECLARE_GLOBAL_DATA_PTR;
 #define FSPI_CMD_RDSR		0x05	/* Read status register */
 #define FSPI_CMD_RDFSR		0x70	/* Read flag status register */
 #define FSPI_CMD_WREN		0x06	/* Write enable */
-#define FSPI_CMD_FAST_READ	0x0b	/* Read data bytes (high frequency) */
 #define FSPI_CMD_READ		0x03	/* Read data bytes */
+#define FSPI_CMD_FAST_READ	0x0b	/* Read data bytes (high frequency) */
+#define FSPI_CMD_OCTAL_READ	0x8b	/* Octal Read (CMD-ADDR-DATA : 1-1-8) */
 #define FSPI_CMD_BE_4K		0x20    /* 4K erase */
 #define FSPI_CMD_CHIP_ERASE	0xc7	/* Erase whole flash chip */
 #define FSPI_CMD_SE		0xd8	/* Sector erase (usually 64KiB) */
@@ -72,6 +73,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define FSPI_CMD_FAST_READ_4B	0x0c    /* Read data bytes (high frequency) */
 #define FSPI_CMD_OCTAL_READ_4B	0x7c	/* Octal Read (CMD-ADDR-DATA : 1-1-8) */
 #define FSPI_CMD_PP_4B		0x12    /* Page program (up to 256 bytes) */
+#define FSPI_CMD_BE_4K_4B	0x21    /* 4K erase */
 #define FSPI_CMD_SE_4B		0xdc    /* Sector erase (usually 64KiB) */
 
 /* Number of SPI lines supported for Rx and Tx lines */
@@ -206,11 +208,19 @@ static void fspi_set_lut(struct nxp_fspi_priv *priv)
 
 	/* Fast Read */
 	lut_base = SEQID_FAST_READ * 4;
-	fspi_write32(priv->flags, &regs->lut[lut_base],
-		     OPRND0(FSPI_CMD_FAST_READ_4B) |
-		     PAD0(LUT_PAD1) | INSTR0(LUT_CMD) |
-		     OPRND1(ADDR32BIT) | PAD1(LUT_PAD1) |
-		     INSTR1(LUT_ADDR));
+	if (NXP_FSPI_FLASH_SIZE <= SZ_16M)
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_FAST_READ) |
+			     PAD0(LUT_PAD1) | INSTR0(LUT_CMD) |
+			     OPRND1(ADDR24BIT) | PAD1(LUT_PAD1) |
+			     INSTR1(LUT_ADDR));
+	else
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_FAST_READ_4B) |
+			     PAD0(LUT_PAD1) | INSTR0(LUT_CMD) |
+			     OPRND1(ADDR32BIT) | PAD1(LUT_PAD1) |
+			     INSTR1(LUT_ADDR));
+
 	fspi_write32(priv->flags, &regs->lut[lut_base + 1],
 		     OPRND0(8) | PAD0(LUT_PAD1) | INSTR0(LUT_DUMMY) |
 		     OPRND1(0) | PAD1(LUT_PAD1) |
@@ -229,10 +239,16 @@ static void fspi_set_lut(struct nxp_fspi_priv *priv)
 
 	/* Erase a sector */
 	lut_base = SEQID_SE * 4;
-	fspi_write32(priv->flags, &regs->lut[lut_base],
-		     OPRND0(FSPI_CMD_SE_4B) | PAD0(LUT_PAD1) |
-		     INSTR0(LUT_CMD) | OPRND1(ADDR32BIT) |
-		     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
+	if (NXP_FSPI_FLASH_SIZE <= SZ_16M)
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_SE) | PAD0(LUT_PAD1) |
+			     INSTR0(LUT_CMD) | OPRND1(ADDR24BIT) |
+			     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
+	else
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_SE_4B) | PAD0(LUT_PAD1) |
+			     INSTR0(LUT_CMD) | OPRND1(ADDR32BIT) |
+			     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
 	fspi_write32(priv->flags, &regs->lut[lut_base + 1], 0);
 	fspi_write32(priv->flags, &regs->lut[lut_base + 2], 0);
 	fspi_write32(priv->flags, &regs->lut[lut_base + 3], 0);
@@ -248,10 +264,16 @@ static void fspi_set_lut(struct nxp_fspi_priv *priv)
 
 	/* Page Program */
 	lut_base = SEQID_PP * 4;
-	fspi_write32(priv->flags, &regs->lut[lut_base],
-		     OPRND0(FSPI_CMD_PP_4B) | PAD0(LUT_PAD1) |
-		     INSTR0(LUT_CMD) | OPRND1(ADDR32BIT) |
-		     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
+	if (NXP_FSPI_FLASH_SIZE <= SZ_16M)
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_PP) | PAD0(LUT_PAD1) |
+			     INSTR0(LUT_CMD) | OPRND1(ADDR24BIT) |
+			     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
+	else
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_PP_4B) | PAD0(LUT_PAD1) |
+			     INSTR0(LUT_CMD) | OPRND1(ADDR32BIT) |
+			     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
 	fspi_write32(priv->flags, &regs->lut[lut_base + 1],
 		     OPRND0(0) |
 		     PAD0(LUT_PAD1) | INSTR0(LUT_WRITE));
@@ -269,9 +291,16 @@ static void fspi_set_lut(struct nxp_fspi_priv *priv)
 
 	/* SUB SECTOR 4K ERASE */
 	lut_base = SEQID_BE_4K * 4;
-	fspi_write32(priv->flags, &regs->lut[lut_base], OPRND0(FSPI_CMD_BE_4K) |
-		     PAD0(LUT_PAD1) | INSTR0(LUT_CMD) | OPRND1(ADDR24BIT) |
-		     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
+	if (NXP_FSPI_FLASH_SIZE <= SZ_16M)
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_BE_4K) | PAD0(LUT_PAD1) |
+			     INSTR0(LUT_CMD) | OPRND1(ADDR24BIT) |
+			     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
+	else
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_BE_4K_4B) | PAD0(LUT_PAD1) |
+			     INSTR0(LUT_CMD) | OPRND1(ADDR32BIT) |
+			     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
 
 	/* Read Flag Status */
 	lut_base = SEQID_RDFSR * 4;
@@ -293,11 +322,19 @@ static void fspi_set_lut(struct nxp_fspi_priv *priv)
 
 	/* 8-Bit Read */
 	lut_base = SEQID_OCTAL_READ * 4;
-	fspi_write32(priv->flags, &regs->lut[lut_base],
-		     OPRND0(FSPI_CMD_OCTAL_READ_4B) |
-		     PAD0(LUT_PAD1) | INSTR0(LUT_CMD) |
-		     OPRND1(ADDR32BIT) | PAD1(LUT_PAD1) |
-		     INSTR1(LUT_ADDR));
+	if (NXP_FSPI_FLASH_SIZE <= SZ_16M)
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_OCTAL_READ) |
+			     PAD0(LUT_PAD1) | INSTR0(LUT_CMD) |
+			     OPRND1(ADDR24BIT) | PAD1(LUT_PAD1) |
+			     INSTR1(LUT_ADDR));
+	else
+		fspi_write32(priv->flags, &regs->lut[lut_base],
+			     OPRND0(FSPI_CMD_OCTAL_READ_4B) |
+			     PAD0(LUT_PAD1) | INSTR0(LUT_CMD) |
+			     OPRND1(ADDR32BIT) | PAD1(LUT_PAD1) |
+			     INSTR1(LUT_ADDR));
+
 	fspi_write32(priv->flags, &regs->lut[lut_base + 1],
 		     OPRND0(8) | PAD0(LUT_PAD8) | INSTR0(LUT_DUMMY) |
 		     OPRND1(0) | PAD1(LUT_PAD8) |
@@ -749,7 +786,9 @@ static int fspi_xfer(struct nxp_fspi_priv *priv, unsigned int bitlen,
 		}
 
 		if ((priv->cur_seqid == FSPI_CMD_SE) ||
-		    (priv->cur_seqid == FSPI_CMD_BE_4K)) {
+		    (priv->cur_seqid == FSPI_CMD_SE_4B) ||
+		    (priv->cur_seqid == FSPI_CMD_BE_4K) ||
+		    (priv->cur_seqid == FSPI_CMD_BE_4K_4B)) {
 			debug("FSPI Erase Invoked\n");
 			fspi_op_erase(priv);
 		}
@@ -762,7 +801,8 @@ static int fspi_xfer(struct nxp_fspi_priv *priv, unsigned int bitlen,
 		    (priv->cur_seqid == FSPI_CMD_RDSR) ||
 		    (priv->cur_seqid == FSPI_CMD_RDFSR))
 			fspi_op_rdxx(priv, din, bytes);
-		else if (priv->cur_seqid == FSPI_CMD_FAST_READ)
+		else if (priv->cur_seqid == FSPI_CMD_FAST_READ ||
+			 priv->cur_seqid == FSPI_CMD_FAST_READ_4B)
 #ifdef CONFIG_SYS_FSPI_AHB_INIT
 			fspi_ahb_read(priv, din, bytes);
 #else
@@ -775,8 +815,11 @@ static int fspi_xfer(struct nxp_fspi_priv *priv, unsigned int bitlen,
 
 #ifdef CONFIG_SYS_FSPI_AHB_INIT
 	if ((priv->cur_seqid == FSPI_CMD_SE) ||
+	    (priv->cur_seqid == FSPI_CMD_SE_4B) ||
 	    (priv->cur_seqid == FSPI_CMD_PP) ||
-	    (priv->cur_seqid == FSPI_CMD_BE_4K))
+	    (priv->cur_seqid == FSPI_CMD_PP_4B) ||
+	    (priv->cur_seqid == FSPI_CMD_BE_4K) ||
+	    (priv->cur_seqid == FSPI_CMD_BE_4K_4B))
 		fspi_ahb_invalid(priv);
 #endif
 
