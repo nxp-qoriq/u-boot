@@ -580,9 +580,12 @@ fsl_ddr_compute(fsl_ddr_info_t *pinfo, unsigned int start_step,
 				 dbw_capacity_adjust[i],
 				 size_only);
 
-			compute_phy_config_regs(i, &pinfo->memctl_opts[i],
-					&pinfo->dimm_params[i][0],
-					&ddr_reg[i]);
+			if (!size_only)
+				compute_phy_config_regs
+					(i,
+					 &pinfo->memctl_opts[i],
+					 &pinfo->dimm_params[i][0],
+					 &ddr_reg[i]);
 		}
 
 	default:
