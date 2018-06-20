@@ -661,7 +661,7 @@ int fdt_fixup_board_phy (void *fdt)
 			// TODO: use sscanf instead of loop
 			dpmac_id = WRIOP1_DPMAC1;
 			while (dpmac_id < NUM_WRIOP_PORTS) {
-				sprintf(ethname, "DPMAC%d@%s", dpmac_id,
+				snprintf(ethname, ETH_NAME_LEN, "DPMAC%d@%s", dpmac_id,
 					phy_interface_strings[wriop_get_enet_if(dpmac_id)]);
 				if (strcmp(ethname, phy_dev->dev->name) == 0)
 					break;
