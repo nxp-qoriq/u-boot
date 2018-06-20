@@ -168,6 +168,7 @@ config FSL_PHY_GEN2_DDR_PHY_DMEM_ADDR
 config FSL_PHY_GEN2_DDR_IMG_ADDR
 	depends on SYS_PHY_GEN2_DDR_PHY
 	hex "Address of Gen2 phy FW image"
+	default 0x800000 if SD_BOOT
 	default 0x20800000
 
 config FSL_PHY_GEN2_PHY_A2017_11
