@@ -311,7 +311,8 @@ unsigned long get_board_ddr_clk(void);
 	" 0x20e00000 \0"
 
 #define CONFIG_BOOTCOMMAND	"fsl_mc apply dpl 0x20d00000;" \
-				"bootm 0x81000000"
+				"sf probe 0:0;sf read 0xa0000000 0x1000000 0x3000000;" \
+				"bootm 0xa0000000"
 
 #ifndef CONFIG_ARCH_LX2160A_EMU_COMMON
 #define CONFIG_BOOTARGS		"console=ttyAMA0,115200 root=/dev/ram0 " \
