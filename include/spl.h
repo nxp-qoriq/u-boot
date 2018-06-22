@@ -268,4 +268,8 @@ int spl_mmc_load_image(struct spl_image_info *spl_image,
 		       struct spl_boot_device *bootdev);
 
 void bl31_entry(void);
+
+#ifdef CONFIG_SPL_EARLY_MMC_INIT
+int spl_early_mmc_init(void);
+#endif
 #endif

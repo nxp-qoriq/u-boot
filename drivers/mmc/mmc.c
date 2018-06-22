@@ -1820,10 +1820,13 @@ static int mmc_probe(bd_t *bis)
 #else
 static int mmc_probe(bd_t *bis)
 {
-	if (board_mmc_init(bis) < 0)
-		cpu_mmc_init(bis);
+	int ret;
 
-	return 0;
+	ret = board_mmc_init(bis);
+	if (ret < 0)
+		return cpu_mmc_init(bis);
+
+	return ret;
 }
 #endif
 

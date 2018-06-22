@@ -671,3 +671,13 @@ config HAS_FSL_XHCI_USB
 	help
 	 For some SoC(such as LS1043A and LS1046A), USB and QE-HDLC multiplex use
 	 pins, select it when the pins are assigned to USB.
+
+config SPL_EARLY_MMC_INIT
+	bool
+	depends on SYS_PHY_GEN2_DDR_PHY && SD_BOOT
+	default y if ARCH_LX2160A && SD_BOOT
+	help
+	  MMC needs to initialize before DDR in SD boot if DDR Controller
+	  requires firmware for its initialization. If DDR does not depend
+	  on any firmware then MMC initialization is not needed before dram_init
+	  in SPL boot.

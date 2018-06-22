@@ -193,6 +193,9 @@ int checkboard(void)
 	sw = QIXIS_READ(arch);
 	printf("Board version: %c, boot from ", (sw & 0xf) - 1 + 'A');
 
+#ifdef CONFIG_SD_BOOT
+	puts("SD\n");
+#else
 	sw = QIXIS_READ(brdcfg[0]);
 	sw = (sw >> QIXIS_XMAP_SHIFT) & QIXIS_XMAP_MASK;
 	switch (sw) {
@@ -211,6 +214,7 @@ int checkboard(void)
 		printf("invalid setting of boot location (xmap): %d\n", sw);
 		break;
 	}
+#endif
 #if defined (CONFIG_TARGET_LX2160ARDB)
 	printf("FPGA: v%d.%d\n", QIXIS_READ(scver), QIXIS_READ(tagdata));
 #endif

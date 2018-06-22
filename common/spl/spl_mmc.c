@@ -18,6 +18,34 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#ifdef CONFIG_SPL_EARLY_MMC_INIT
+int spl_early_mmc_init(void)
+{
+	struct mmc *mmc;
+	int dev = 0;
+	int ret;
+
+	ret = mmc_initialize(NULL);
+	if (ret) {
+		printf("%s: mmc_initialize() failed\n", __func__);
+		return ret;
+	}
+	mmc = find_mmc_device(dev);
+	if (!mmc) {
+		printf("MMC cannot find device\n");
+		return -ENODEV;
+	}
+
+	ret = mmc_init(mmc);
+	if (ret) {
+		printf("%s: mmc_init() failed\n", __func__);
+		return ret;
+	}
+
+	return 0;
+}
+#endif
+
 static int mmc_load_legacy(struct spl_image_info *spl_image, struct mmc *mmc,
 			   ulong sector, struct image_header *header)
 {

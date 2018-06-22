@@ -221,7 +221,9 @@ static int esdhc_setup_data(struct mmc *mmc, struct mmc_data *data)
 	struct fsl_esdhc_priv *priv = mmc->priv;
 	struct fsl_esdhc *regs = priv->esdhc_regs;
 #if defined(CONFIG_FSL_LAYERSCAPE) || defined(CONFIG_S32V234)
+#ifndef CONFIG_SYS_FSL_ESDHC_USE_PIO
 	dma_addr_t addr;
+#endif
 #endif
 	uint wml_value;
 
@@ -867,10 +869,25 @@ int fsl_esdhc_initialize(bd_t *bis, struct fsl_esdhc_cfg *cfg)
 int fsl_esdhc_mmc_init(bd_t *bis)
 {
 	struct fsl_esdhc_cfg *cfg;
+#ifdef CONFIG_SPL_EARLY_MMC_INIT
+	struct sys_info sys_info;
+#endif
 
 	cfg = calloc(sizeof(struct fsl_esdhc_cfg), 1);
+
+	if (!cfg) {
+		printf("errno %d\n", errno);
+		return -EINVAL;
+	}
+
 	cfg->esdhc_base = CONFIG_SYS_FSL_ESDHC_ADDR;
+#ifdef CONFIG_SPL_EARLY_MMC_INIT
+	get_sys_info(&sys_info);
+	cfg->sdhc_clk = (sys_info.freq_systembus / CONFIG_SYS_FSL_PCLK_DIV)/
+			CONFIG_SYS_FSL_SDHC_CLK_DIV;
+#else
 	cfg->sdhc_clk = gd->arch.sdhc_clk;
+#endif
 	return fsl_esdhc_initialize(bis, cfg);
 }
 #endif

@@ -84,7 +84,16 @@ void board_init_f(ulong dummy)
 #ifdef CONFIG_SPL_I2C_SUPPORT
 	i2c_init_all();
 #endif
+
+#ifdef CONFIG_SPL_EARLY_MMC_INIT
+	gd->malloc_base = CONFIG_SYS_SPL_MALLOC_START;
+	gd->malloc_limit = CONFIG_SYS_SPL_MALLOC_SIZE;
+	gd->malloc_ptr = 0;
+
+	spl_early_mmc_init();
+#endif
 	dram_init();
+
 #ifdef CONFIG_SPL_FSL_LS_PPA
 #ifndef CONFIG_SYS_MEM_RESERVE_SECURE
 #error Need secure RAM for PPA
