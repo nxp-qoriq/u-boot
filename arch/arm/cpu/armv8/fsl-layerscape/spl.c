@@ -90,6 +90,11 @@ void board_init_f(ulong dummy)
 	gd->malloc_limit = CONFIG_SYS_SPL_MALLOC_SIZE;
 	gd->malloc_ptr = 0;
 
+	/*
+	 * Mark BSS and HEAP area of OCRAM non-secure
+	 * to support DMA mode in SD.
+	 */
+	out_le32(TZPCR0SIZE_BASE, OCRAM_NONSECURE_SIZE);
 	spl_early_mmc_init();
 #endif
 	dram_init();
