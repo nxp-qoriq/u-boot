@@ -374,6 +374,20 @@ int config_board_mux(void)
 
 	return 0;
 }
+#elif defined (CONFIG_TARGET_LX2160ARDB)
+int config_board_mux(void)
+{
+	u8 brdcfg;
+
+	// Read BRDCFG4 Register @ 0x54 offset
+	brdcfg = QIXIS_READ(brdcfg[4]);
+	// Enable CFG_CAN_EN_B bit BRDCFG4[5]
+	brdcfg |= BIT_MASK(5);
+	// Write new configuration
+	QIXIS_WRITE(brdcfg[4], brdcfg);
+
+	return 0;
+}
 #endif
 
 unsigned long get_board_sys_clk(void)
@@ -457,9 +471,7 @@ void detail_board_ddr_info(void)
 #if defined(CONFIG_ARCH_MISC_INIT)
 int arch_misc_init(void)
 {
-#if defined (CONFIG_TARGET_LX2160AQDS)
 	config_board_mux();
-#endif
 
 	return 0;
 }
