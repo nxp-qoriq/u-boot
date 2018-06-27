@@ -258,7 +258,7 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 			    const dimm_params_t *dimm_param,
 			    fsl_ddr_cfg_regs_t *ddr)
 {
-	int ret;
+	int ret = 0;
 	struct dimm *dimm;
 	struct input *input;
 	void *msg_1d, *msg_2d;
@@ -329,35 +329,37 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 		}
 	} else {
 		printf("Error: empty DIMM parameters.\n");
-		return -EINVAL;
+		ret = -EINVAL;
+		goto err_dimm;
 	}
 	debug("Initializing input data structure\n");
 	input = phy_gen2_init_input(ctrl_num, dimm,
 				(get_ddr_freq(ctrl_num) + 1000000) / 2000000);
 	if (!input) {
 		printf("%s %d: Could not allocate memory\n", __func__, __LINE__);
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto err_dimm;
 	}
 
 	debug("Initializing message block\n");
 	ret = phy_gen2_msg_init(ctrl_num, &msg_1d, &msg_2d, input, &len);
 	if (ret) {
 		printf("%s %d: Error init msg\n", __func__, __LINE__);
-		return ret;
+		goto err_input;
 	}
 
 	debug("Initialize PHY config\n");
 	ret = c_init_phy_config(ctrl_num, input, msg_1d);
 	if (ret) {
 		printf("Error in step C\n");
-		return ret;
+		goto err_msg_block;
 	}
 
 	debug("Load firmware\n");
 	ret = phy_gen2_dimm_train(ctrl_num, input, 0, msg_1d, len); /* train 1D first */
 	if (ret) {
 		printf("%s %d: Error training\n", __func__, __LINE__);
-		return ret;
+		goto err_msg_block;
 	}
 
 	/* FIXME: How to determine training firmware is done? */
@@ -372,7 +374,7 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 		ret = phy_gen2_dimm_train(ctrl_num, input, 1, msg_2d, len); /* train 2D */
 			if (ret) {
 				printf("%s %d: Error training\n", __func__, __LINE__);
-				return ret;
+				goto err_msg_block;
 			}
 		debug("Execute 2D firmware\n");
 		ret = g_exec_fw(ctrl_num, 1);
@@ -398,14 +400,14 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 	phy_io_write16(ctrl_num, t_apbonly | csr_micro_cont_mux_sel_addr, 1);
 #endif
 
-	if (msg_1d)
-		free(msg_1d);
-	if (msg_2d)
+err_msg_block:
+	if (input->basic.train2d)
 		free(msg_2d);
-	if (input)
-		free(input);
-	if (dimm)
-		free(dimm);
+	free(msg_1d);
+err_input:
+	free(input);
+err_dimm:
+	free(dimm);
 
 	return ret;
 }

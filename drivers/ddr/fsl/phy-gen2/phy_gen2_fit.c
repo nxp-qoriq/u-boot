@@ -251,7 +251,7 @@ out:
 unsigned int phy_gen2_dimm_train(const unsigned int ctrl_num, struct input *input,
 		int train2d, void *msg, size_t len)
 {
-	int ret;
+	int ret = 0;
 	void *blob;
 	struct phy_gen2_fw_info *info;
 	struct phy_gen2_image_loader *dev;
@@ -259,13 +259,15 @@ unsigned int phy_gen2_dimm_train(const unsigned int ctrl_num, struct input *inpu
 	info = calloc(1, sizeof(struct phy_gen2_fw_info));
 	if (!info) {
 		printf("failed to allocate memory\n");
-		goto dimm_train_failed;
+		return -EINVAL;
 	}
 
 	/* Find boot device, hang if fail*/
 	dev = phy_gen2_ll_find_loader(phy_gen2_boot_device());
-	if (!dev)
-		goto dimm_train_failed;
+	if (!dev) {
+		ret = -EINVAL;
+		goto err_info;
+	}
 	else
 		info->dev = dev;
 	debug("PHY_GEN2 FW: device %s found\n", dev->name);
@@ -277,8 +279,10 @@ unsigned int phy_gen2_dimm_train(const unsigned int ctrl_num, struct input *inpu
 	 */
 	blob = phy_gen2_phy_prep_img(ctrl_num, dev,
 			CONFIG_FSL_PHY_GEN2_DDR_IMG_ADDR);
-	if (!blob)
-		goto dimm_train_failed;
+	if (!blob) {
+		ret = -EINVAL;
+		goto err_info;
+	}
 
 	info->hdr = blob;
 	info->input = input;
@@ -289,14 +293,12 @@ unsigned int phy_gen2_dimm_train(const unsigned int ctrl_num, struct input *inpu
 	 */
 	ret = phy_gen2_phy_image_load(ctrl_num, info, train2d, msg, len);
 	if (ret)
-		goto dimm_train_failed;
+		goto err_blob;
 
-	free(info);
+err_blob:
 	free(blob);
+err_info:
+	free(info);
 
-	return 0;
-
-dimm_train_failed:
-
-	return -EINVAL;
+	return ret;
 }

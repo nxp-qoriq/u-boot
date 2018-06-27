@@ -165,12 +165,12 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	msg_blk->cs_present		= 3;
 	msg_blk->cs_present_d0		= 3;
+	msg_blk->cs_present_d1		= 0;
 #else
 	msg_blk->cs_present		= input->cs_d0 | input->cs_d1;
 	msg_blk->cs_present_d0		= input->cs_d0;
 	msg_blk->cs_present_d1		= input->cs_d1;
 #endif
-	msg_blk->cs_present_d1		= 0;
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	msg_blk->addr_mirror		= 0;
 #else
