@@ -42,7 +42,7 @@ static int lx_pcie_link_up(struct lx_pcie *pcie)
 
 static void lx_pcie_ep_enable_cfg(struct lx_pcie *pcie)
 {
-	ccsr_writel(pcie, PCIE_CFG_READY, PCIE_CONFIG_READY);
+	ccsr_writel(pcie, GPEX_CFG_READY, PCIE_CONFIG_READY);
 }
 
 static void lx_pcie_cfg_set_target(struct lx_pcie *pcie, u32 target)
@@ -374,9 +374,9 @@ static void lx_pcie_ep_setup_bar(struct lx_pcie *pcie, int bar)
 		size_h = upper_32_bits(~(PCIE_BAR1_SIZE - 1));
 	}
 
-	ccsr_writel(pcie, PCI_BAR_SELECT, bar);
-	ccsr_writel(pcie, PCI_BAR_BAR_SIZE_LDW, size_l);
-	ccsr_writel(pcie, PCI_BAR_BAR_SIZE_UDW, size_h);
+	ccsr_writel(pcie, GPEX_BAR_SELECT, bar);
+	ccsr_writel(pcie, GPEX_BAR_SIZE_LDW, size_l);
+	ccsr_writel(pcie, GPEX_BAR_SIZE_UDW, size_h);
 }
 
 static void lx_pcie_ep_setup_bars(struct lx_pcie *pcie)
@@ -386,14 +386,14 @@ static void lx_pcie_ep_setup_bars(struct lx_pcie *pcie)
 
 	if (pcie->sriov_enabled) {
 		bar_num = 16;
-		val = ccsr_readl(pcie, PCI_BAR_ENABLE);
+		val = ccsr_readl(pcie, GPEX_BAR_ENABLE);
 		if ((val & 0xffff) != 0xffff)
-			ccsr_writel(pcie, PCI_BAR_ENABLE, 0xffff);
+			ccsr_writel(pcie, GPEX_BAR_ENABLE, 0xffff);
 	} else {
 		bar_num = 4;
-		val = ccsr_readl(pcie, PCI_BAR_ENABLE);
+		val = ccsr_readl(pcie, GPEX_BAR_ENABLE);
 		if ((val & 0x0f) != 0x0f)
-			ccsr_writel(pcie, PCI_BAR_ENABLE, 0x0f);
+			ccsr_writel(pcie, GPEX_BAR_ENABLE, 0x0f);
 
 	}
 
