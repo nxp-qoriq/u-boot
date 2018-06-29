@@ -30,6 +30,7 @@
 #define PCIE_SRIOV_VF_OFFSET_STRIDE             0x2b4
 
 #define PCIE_BAR_SIZE				(8 * 1024) /* 4K */
+#define PCIE_BAR1_SIZE                          (8 * 1024 * 1024) /* 8M */
 #define SIZE_1T				(1024 * 1024 * 1024 * 1024ULL)
 #define SIZE_1M				(1024 * 1024)
 

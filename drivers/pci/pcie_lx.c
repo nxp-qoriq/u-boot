@@ -364,6 +364,11 @@ static void lx_pcie_ep_setup_bar(struct lx_pcie *pcie, int bar)
 	u32 size_l = lower_32_bits(~(PCIE_BAR_SIZE - 1));
 	u32 size_h = upper_32_bits(~(PCIE_BAR_SIZE - 1));
 
+	if ((bar == 13) || (bar == 9)) {
+		size_l = lower_32_bits(~(PCIE_BAR1_SIZE - 1));
+		size_h = upper_32_bits(~(PCIE_BAR1_SIZE - 1));
+	}
+
 	ccsr_writel(pcie, PCI_BAR_SELECT, bar);
 	ccsr_writel(pcie, PCI_BAR_BAR_SIZE_LDW, size_l);
 	ccsr_writel(pcie, PCI_BAR_BAR_SIZE_UDW, size_h);
