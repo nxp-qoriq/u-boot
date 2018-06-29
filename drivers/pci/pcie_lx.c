@@ -331,7 +331,7 @@ static void lx_pcie_ep_setup_wins(struct lx_pcie *pcie, int pf)
 		bar_num = 8;
 		if (pf == 1)
 			phys = CONFIG_SYS_PCI_EP_MEMORY_BASE +
-				128 * PCIE_BAR_SIZE;
+				PCIE_BAR_SIZE * 4;
 		else
 			phys = CONFIG_SYS_PCI_EP_MEMORY_BASE;
 	} else {
@@ -340,9 +340,14 @@ static void lx_pcie_ep_setup_wins(struct lx_pcie *pcie, int pf)
 	}
 
 	for (bar = 0; bar < bar_num; bar++) {
-		if ((bar != 1) && (bar != 5))
-			lx_pcie_ep_inbound_win_set(pcie, pf, bar, phys);
-		phys += PCIE_BAR_SIZE;
+		if ((bar == 1) || (bar == 5))
+			ccsr_writel(pcie, PAB_PEX_BAR_AMAP(pf, bar), 1);
+		else {
+			if (bar < 4) {
+				lx_pcie_ep_inbound_win_set(pcie, pf, bar, phys);
+				phys += PCIE_BAR_SIZE;
+			}
+		}
 	}
 
 	/* WIN 0 : OUTBOUND : map MEM */
