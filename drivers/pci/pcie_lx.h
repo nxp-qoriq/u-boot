@@ -21,12 +21,13 @@
 #endif
 
 #define PCIE_PF_NUM				2
-#define PCIE_VF_NUM				128
+#define PCIE_VF_NUM				32
 #define PCIE_SRIOV_CAPABILITY			0x2a0
 #define PCIE_CFG_READY				0x4b0
 #define PCIE_CONFIG_READY			(1 << 0)
 #define PCI_EXT_CAP_ID(header)			(header & 0x0000ffff)
 #define PCI_EXT_CAP_ID_SRIOV			0x10
+#define PCIE_SRIOV_VF_OFFSET_STRIDE             0x2b4
 
 #define PCIE_BAR_SIZE				(8 * 1024) /* 4K */
 #define SIZE_1T				(1024 * 1024 * 1024 * 1024ULL)
@@ -54,6 +55,13 @@
 #define PCI_BAR_BAR_SIZE_LDW			0x4D8
 #define PCI_BAR_BAR_SIZE_UDW			0x4DC
 #define PCI_BAR_SELECT				0x4E0
+
+#define GPEX_SRIOV_INIT_VFS_TOTAL_VF(func)	(0x644 + func * 4)
+#define TTL_VF_MASK                             0xffff
+#define TTL_VF_SHIFT                            16
+#define INI_VF_MASK                             0xffff
+#define INI_VF_SHIFT                            0
+#define GPEX_SRIOV_VF_OFFSET_STRIDE(func)	(0x704 + func * 4)
 
 /* PAB CSR */
 #define PAB_CTRL				0x808

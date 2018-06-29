@@ -391,6 +391,24 @@ static void lx_pcie_ep_setup_bars(struct lx_pcie *pcie)
 		lx_pcie_ep_setup_bar(pcie, bar);
 }
 
+static void lx_pcie_set_sriov(struct lx_pcie *pcie, int func)
+{
+	unsigned int val;
+
+	val =  ccsr_readl(pcie, GPEX_SRIOV_INIT_VFS_TOTAL_VF(func));
+	val &= ~(TTL_VF_MASK << TTL_VF_SHIFT);
+	val |= PCIE_VF_NUM << TTL_VF_SHIFT;
+	val &= ~(INI_VF_MASK << INI_VF_SHIFT);
+	val |= PCIE_VF_NUM << INI_VF_SHIFT;
+	ccsr_writel(pcie, GPEX_SRIOV_INIT_VFS_TOTAL_VF(func), val);
+
+	if (func == 1) {
+		val =  ccsr_readl(pcie, PCIE_SRIOV_VF_OFFSET_STRIDE);
+		val += PCIE_VF_NUM - 1;
+		ccsr_writel(pcie, GPEX_SRIOV_VF_OFFSET_STRIDE(func), val);
+	}
+}
+
 static void lx_pcie_setup_ep(struct lx_pcie *pcie)
 {
 	u32 pf;
@@ -407,8 +425,10 @@ static void lx_pcie_setup_ep(struct lx_pcie *pcie)
 		pcie->sriov_enabled = 1;
 
 		lx_pcie_ep_setup_bars(pcie);
-		for (pf = 0; pf < PCIE_PF_NUM; pf++)
+		for (pf = 0; pf < PCIE_PF_NUM; pf++) {
 			lx_pcie_ep_setup_wins(pcie, pf);
+			lx_pcie_set_sriov(pcie, pf);
+		}
 	} else {
 		pcie->sriov_enabled = 0;
 
