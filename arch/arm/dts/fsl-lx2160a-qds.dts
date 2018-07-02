@@ -128,6 +128,7 @@
 &fspi {
 	bus-num = <0>;
 	status = "okay";
+	fspi-has-second-chip;
 
 	qflash0: mt35xu512g@0 {
 		#address-cells = <1>;
@@ -142,9 +143,11 @@
 
 	/*
 	 * MCR2[SAMEDEVICEEN] bit is enabled in FlexSPI controller for
-	 * LX2160ARDB and LX2160AQDS board. Both these has same type of flash
-	 * slave devices connected on both A0 and A1.
-	 * No need to provide node info for second flash device.
+	 * LX2160ARDB and LX2160AQDS board.
+	 * On Lx2160AQDS same type of flash slave device, mt35xu512g, is
+	 * connected on A0, A1 and B1.
+	 * No slave device connected on B0.
+	 * Thus, no need to provide node info for other slave devices.
 	 */
 };
 

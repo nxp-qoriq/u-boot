@@ -994,7 +994,7 @@ static int nxp_fspi_ofdata_to_platdata(struct udevice *bus)
 	plat->reg_base = res_regs.start;
 	plat->amba_base = 0;
 	plat->memmap_phy = res_mem.start;
-	plat->amba_total_size = res_mem.end;
+	plat->amba_total_size = res_mem.end - res_mem.start + 1;
 	plat->flash_num = flash_num;
 
 	debug("%s: regs=<0x%llx> <0x%llx, 0x%llx>\n",
@@ -1023,9 +1023,17 @@ static int nxp_fspi_claim_bus(struct udevice *dev)
 		return -1;
 	}
 
+	if (slave_plat->cs > (priv->num_chipselect - 1)) {
+		printf("ERR: Given CS [%x] is larger than supported CS [%x]\n",
+		       slave_plat->cs, (priv->num_chipselect - 1));
+		return -1;
+	}
+
 	priv->cur_amba_base = priv->amba_base[0] +
 			      NXP_FSPI_FLASH_SIZE * slave_plat->cs;
 
+	debug("FSPI CS [%x] cur_amba_base[0x%x]\n",
+	      slave_plat->cs, priv->cur_amba_base);
 	return 0;
 }
 
