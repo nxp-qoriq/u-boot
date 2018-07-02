@@ -20,6 +20,12 @@ void fsl_ddr_board_options(memctl_options_t *popts,
 			   dimm_params_t *pdimm,
 			   unsigned int ctrl_num)
 {
+	/* Vref PHY side */
+	popts->vref_phy = 0x60;		/* 75% */
+
+	/* Vref DIMM side */
+	popts->vref_dimm = 0x24;	/* range 1, 83.4% */
+
 	/*
 	 * Rtt and Rtt_WR override
 	 */

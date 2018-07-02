@@ -82,6 +82,7 @@ struct input {
 	unsigned int odt[4];
 	unsigned int rcw[16];
 	unsigned int rcw3x;
+	unsigned int vref;
 };
 
 #endif

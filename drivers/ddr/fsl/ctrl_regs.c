@@ -1349,7 +1349,9 @@ static void set_ddr_sdram_mode_10(const unsigned int ctrl_num,
 	tccdl_min = max(5U, tccdl_min);
 	esdmode6 = ((tccdl_min - 4) & 0x7) << 10;
 
-	if (popts->ddr_cdr2 & DDR_CDR2_VREF_RANGE_2)
+	if (popts->vref_dimm)
+		esdmode6 |= popts->vref_dimm & 0x7f;
+	else if (popts->ddr_cdr2 & DDR_CDR2_VREF_RANGE_2)
 		esdmode6 |= 1 << 6;	/* Range 2 */
 
 	ddr->ddr_sdram_mode_10 = (0

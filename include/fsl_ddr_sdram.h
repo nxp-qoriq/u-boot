@@ -427,6 +427,9 @@ typedef struct memctl_options_s {
 	unsigned int twrt;
 	unsigned int trrt;
 	unsigned int twwt;
+
+	unsigned int vref_phy;
+	unsigned int vref_dimm;
 } memctl_options_t;
 
 phys_size_t fsl_ddr_sdram(void);

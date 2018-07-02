@@ -294,6 +294,7 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 		debug("ddr_sdram_mode_10 = 0x%x\n", ddr->ddr_sdram_mode_10);
 		dimm->cs_d0 = popts->cs_d0;
 		dimm->cs_d1 = popts->cs_d1;
+		dimm->vref = popts->vref_phy;
 		for (i = 0; i < CONFIG_CHIP_SELECTS_PER_CTRL; i++) {
 			if (!(ddr->cs[i].config & SDRAM_CS_CONFIG_EN))
 				continue;

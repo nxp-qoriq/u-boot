@@ -77,13 +77,10 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 	debug("input->basic.num_rank_dfi0 = 0x%x\n", input->basic.num_rank_dfi0);
 	debug("input->basic.dram_data_width = 0x%x\n", input->basic.dram_data_width);
 
-	for (i = 0; i < 6; i++) {
+	for (i = 0; i < 7; i++) {
 		input->mr[i] = dimm->mr[i];
 		debug("mr[%d] = 0x%x\n", i, input->mr[i]);
 	}
-	input->mr[6] = dimm->mr[6] & ~0x7f;	/* force to range 1 */
-	input->mr[6] |= 0x24;	/* force Vref value to 83.4% */
-	debug("mr[6] = 0x%x\n", input->mr[6]);
 
 	input->cs_d0 = dimm->cs_d0;
 	input->cs_d1 = dimm->cs_d1;
@@ -99,6 +96,7 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 	for (i = 0; i < 16; i++)
 		input->rcw[i] = dimm->rcw[i];
 	input->rcw3x = dimm->rcw3x;
+	input->vref = dimm->vref;
 
 	return input;
 }
@@ -161,7 +159,7 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	msg_blk->msg_misc		= 0x0;
 #endif
 	msg_blk->dfimrlmargin		= 0x1;
-	msg_blk->phy_vref		= 0x61;
+	msg_blk->phy_vref		= input->vref ? input->vref : 0x61;
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	msg_blk->cs_present		= 3;
 	msg_blk->cs_present_d0		= 3;
@@ -263,7 +261,7 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	debug("msg_blk->phy_drv_impedance = 0x%x\n", msg_blk->phy_drv_impedance);
 	debug("msg_blk->bpznres_val = 0x%x\n", msg_blk->bpznres_val);
 	debug("msg_blk->enabled_dqs = 0x%x\n", msg_blk->enabled_dqs);
-	debug("msg_blk->phy_cfg = 0x%x\n", msg_blk->phy_cfg);
+	debug("msg_blk->phy_vref = 0x%x\n", msg_blk->phy_vref);
 	debug("msg_blk->acsm_odt_ctrl0 = 0x%x\n", msg_blk->acsm_odt_ctrl0);
 	debug("msg_blk->acsm_odt_ctrl1 = 0x%x\n", msg_blk->acsm_odt_ctrl1);
 	debug("msg_blk->acsm_odt_ctrl2 = 0x%x\n", msg_blk->acsm_odt_ctrl2);
