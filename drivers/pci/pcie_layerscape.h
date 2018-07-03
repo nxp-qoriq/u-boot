@@ -129,6 +129,8 @@
 #define LS1021_PEXMSCPORTSR(pex_idx)	(0x94 + (pex_idx) * 4)
 #define LS1021_LTSSM_STATE_SHIFT	20
 
+#define PCI_LS_DRV_NAME	"pci_layerscape"
+
 struct ls_pcie {
 	int idx;
 	struct list_head list;
