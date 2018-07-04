@@ -362,8 +362,7 @@ static int mc_fixup_mac_addrs(void *blob, enum mc_fixup_type type)
 
 	for (i = WRIOP1_DPMAC1; i < NUM_WRIOP_PORTS; i++) {
 		/* port not enabled */
-		if ((wriop_is_enabled_dpmac(i) != 1) ||
-		    (wriop_get_phy_address(i) == -1))
+		if (wriop_is_enabled_dpmac(i) != 1)
 			continue;
 
 		sprintf(ethname, "DPMAC%d@%s", i,
@@ -878,8 +877,7 @@ int fsl_mc_ldpaa_init(bd_t *bis)
 	int i;
 
 	for (i = WRIOP1_DPMAC1; i < NUM_WRIOP_PORTS; i++)
-		if ((wriop_is_enabled_dpmac(i) == 1) &&
-		    (wriop_get_phy_address(i) != -1))
+		if (wriop_is_enabled_dpmac(i) == 1)
 			ldpaa_eth_init(i, wriop_get_enet_if(i));
 	return 0;
 }
