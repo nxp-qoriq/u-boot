@@ -128,7 +128,6 @@ struct ldpaa_eth_priv {
 	uint16_t tx_flow_id;
 
 	enum ldpaa_eth_type type;	/* 1G or 10G ethernet */
-	struct phy_device *phydev;
 };
 
 struct dprc_endpoint dpmac_endpoint;
