@@ -75,30 +75,47 @@ int board_eth_init(bd_t *bis)
 	dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO2_NAME);
 	switch (srds_s1) {
 	case 19:
-		wriop_set_phy_address(WRIOP1_DPMAC2, CORTINA_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC3, AQR107_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC4, AQR107_PHY_ADDR2);
+		wriop_set_phy_address(WRIOP1_DPMAC2, 0,
+				      CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC3, 0,
+				      AQR107_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC4, 0,
+				      AQR107_PHY_ADDR2);
 		if (get_inphi_phy_id(dev, INPHI_PHY_ADDR1, MDIO_MMD_VEND1)) {
-			wriop_set_phy_address(WRIOP1_DPMAC5, INPHI_PHY_ADDR1);
-			wriop_set_phy_address(WRIOP1_DPMAC6, INPHI_PHY_ADDR1);
+			wriop_set_phy_address(WRIOP1_DPMAC5, 0,
+					      INPHI_PHY_ADDR1);
+			wriop_set_phy_address(WRIOP1_DPMAC6, 0,
+					      INPHI_PHY_ADDR1);
 		}
-		wriop_set_phy_address(WRIOP1_DPMAC17, RGMII_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC18, RGMII_PHY_ADDR2);
+		wriop_set_phy_address(WRIOP1_DPMAC17, 0,
+				      RGMII_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC18, 0,
+				      RGMII_PHY_ADDR2);
 		break;
 
 	case 18:
-		wriop_set_phy_address(WRIOP1_DPMAC7, CORTINA_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC8, CORTINA_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC9, CORTINA_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC10, CORTINA_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC3, AQR107_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC4, AQR107_PHY_ADDR2);
+		wriop_set_phy_address(WRIOP1_DPMAC7, 0,
+				      CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC8, 0,
+				      CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC9, 0,
+				      CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC10, 0,
+				      CORTINA_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC3, 0,
+				      AQR107_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC4, 0,
+				      AQR107_PHY_ADDR2);
 		if (get_inphi_phy_id(dev, INPHI_PHY_ADDR1, MDIO_MMD_VEND1)) {
-			wriop_set_phy_address(WRIOP1_DPMAC5, INPHI_PHY_ADDR1);
-			wriop_set_phy_address(WRIOP1_DPMAC6, INPHI_PHY_ADDR1);
+			wriop_set_phy_address(WRIOP1_DPMAC5, 0,
+					      INPHI_PHY_ADDR1);
+			wriop_set_phy_address(WRIOP1_DPMAC6, 0,
+					      INPHI_PHY_ADDR1);
 		}
-		wriop_set_phy_address(WRIOP1_DPMAC17, RGMII_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC18, RGMII_PHY_ADDR2);
+		wriop_set_phy_address(WRIOP1_DPMAC17, 0,
+				      RGMII_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC18, 0,
+				      RGMII_PHY_ADDR2);
 		break;
 
 	default:

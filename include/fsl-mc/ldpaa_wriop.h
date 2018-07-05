@@ -7,7 +7,11 @@
 #ifndef __LDPAA_WRIOP_H
 #define __LDPAA_WRIOP_H
 
- #include <phy.h>
+#include <phy.h>
+
+#define DEFAULT_WRIOP_MDIO1_NAME "FSL_MDIO0"
+#define DEFAULT_WRIOP_MDIO2_NAME "FSL_MDIO1"
+#define WRIOP_MAX_PHY_NUM        2
 
 enum wriop_port {
 	WRIOP1_DPMAC1 = 1,
@@ -41,16 +45,13 @@ struct wriop_dpmac_info {
 	u8 enabled;
 	u8 id;
 	u8 board_mux;
-	int phy_addr;
+	int phy_addr[WRIOP_MAX_PHY_NUM];
 	phy_interface_t enet_if;
-	struct phy_device *phydev;
+	struct phy_device *phydev[WRIOP_MAX_PHY_NUM];
 	struct mii_dev *bus;
 };
 
 extern struct wriop_dpmac_info dpmac_info[NUM_WRIOP_PORTS];
-
-#define DEFAULT_WRIOP_MDIO1_NAME "FSL_MDIO0"
-#define DEFAULT_WRIOP_MDIO2_NAME "FSL_MDIO1"
 
 void wriop_init_dpmac(int, int, int);
 void wriop_disable_dpmac(int);
@@ -58,10 +59,10 @@ void wriop_enable_dpmac(int);
 u8 wriop_is_enabled_dpmac(int dpmac_id);
 void wriop_set_mdio(int, struct mii_dev *);
 struct mii_dev *wriop_get_mdio(int);
-void wriop_set_phy_address(int, int);
-int wriop_get_phy_address(int);
-void wriop_set_phy_dev(int, struct phy_device *);
-struct phy_device *wriop_get_phy_dev(int);
+void wriop_set_phy_address(int, int, int);
+int wriop_get_phy_address(int, int);
+void wriop_set_phy_dev(int, int, struct phy_device *);
+struct phy_device *wriop_get_phy_dev(int, int);
 phy_interface_t wriop_get_enet_if(int);
 
 void wriop_dpmac_disable(int);

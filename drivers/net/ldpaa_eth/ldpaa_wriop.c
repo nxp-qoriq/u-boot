@@ -23,11 +23,10 @@ __weak phy_interface_t wriop_dpmac_enet_if(int dpmac_id, int lane_prtc)
 void wriop_init_dpmac(int sd, int dpmac_id, int lane_prtcl)
 {
 	phy_interface_t enet_if;
+	int phy_num;
 
 	dpmac_info[dpmac_id].enabled = 0;
 	dpmac_info[dpmac_id].id = 0;
-	dpmac_info[dpmac_id].phy_addr = -1;
-	dpmac_info[dpmac_id].phydev = NULL;
 	dpmac_info[dpmac_id].enet_if = PHY_INTERFACE_MODE_NONE;
 
 	enet_if = wriop_dpmac_enet_if(dpmac_id, lane_prtcl);
@@ -36,15 +35,35 @@ void wriop_init_dpmac(int sd, int dpmac_id, int lane_prtcl)
 		dpmac_info[dpmac_id].id = dpmac_id;
 		dpmac_info[dpmac_id].enet_if = enet_if;
 	}
+	for (phy_num = 0;
+	     phy_num < ARRAY_SIZE(dpmac_info[dpmac_id].phydev);
+	     phy_num++) {
+		dpmac_info[dpmac_id].phydev[phy_num] = NULL;
+	}
+	for (phy_num = 0;
+	     phy_num < ARRAY_SIZE(dpmac_info[dpmac_id].phy_addr);
+	     phy_num++) {
+		dpmac_info[dpmac_id].phy_addr[phy_num] = -1;
+	}
 }
 
 void wriop_init_dpmac_enet_if(int dpmac_id, phy_interface_t enet_if)
 {
+	int phy_num;
+
 	dpmac_info[dpmac_id].enabled = 1;
 	dpmac_info[dpmac_id].id = dpmac_id;
-	dpmac_info[dpmac_id].phy_addr = -1;
 	dpmac_info[dpmac_id].enet_if = enet_if;
-	dpmac_info[dpmac_id].phydev = NULL;
+	for (phy_num = 0;
+	     phy_num < ARRAY_SIZE(dpmac_info[dpmac_id].phydev);
+	     phy_num++) {
+		dpmac_info[dpmac_id].phydev[phy_num] = NULL;
+	}
+	for (phy_num = 0;
+	     phy_num < ARRAY_SIZE(dpmac_info[dpmac_id].phy_addr);
+	     phy_num++) {
+		dpmac_info[dpmac_id].phy_addr[phy_num] = -1;
+	}
 }
 
 
@@ -114,44 +133,52 @@ struct mii_dev *wriop_get_mdio(int dpmac_id)
 	return dpmac_info[i].bus;
 }
 
-void wriop_set_phy_address(int dpmac_id, int address)
+void wriop_set_phy_address(int dpmac_id, int phy_num, int address)
 {
 	int i = wriop_dpmac_to_index(dpmac_id);
 
 	if (i == -1)
 		return;
+	if (phy_num < 0 || phy_num >= ARRAY_SIZE(dpmac_info[dpmac_id].phy_addr))
+		return;
 
-	dpmac_info[i].phy_addr = address;
+	dpmac_info[i].phy_addr[phy_num] = address;
 }
 
-int wriop_get_phy_address(int dpmac_id)
+int wriop_get_phy_address(int dpmac_id, int phy_num)
 {
 	int i = wriop_dpmac_to_index(dpmac_id);
 
 	if (i == -1)
 		return -1;
+	if (phy_num < 0 || phy_num >= ARRAY_SIZE(dpmac_info[dpmac_id].phy_addr))
+		return -1;
 
-	return dpmac_info[i].phy_addr;
+	return dpmac_info[i].phy_addr[phy_num];
 }
 
-void wriop_set_phy_dev(int dpmac_id, struct phy_device *phydev)
+void wriop_set_phy_dev(int dpmac_id, int phy_num, struct phy_device *phydev)
 {
 	int i = wriop_dpmac_to_index(dpmac_id);
 
 	if (i == -1)
 		return;
+	if (phy_num < 0 || phy_num >= ARRAY_SIZE(dpmac_info[dpmac_id].phydev))
+		return;
 
-	dpmac_info[i].phydev = phydev;
+	dpmac_info[i].phydev[phy_num] = phydev;
 }
 
-struct phy_device *wriop_get_phy_dev(int dpmac_id)
+struct phy_device *wriop_get_phy_dev(int dpmac_id, int phy_num)
 {
 	int i = wriop_dpmac_to_index(dpmac_id);
 
 	if (i == -1)
 		return NULL;
+	if (phy_num < 0 || phy_num >= ARRAY_SIZE(dpmac_info[dpmac_id].phydev))
+		return NULL;
 
-	return dpmac_info[i].phydev;
+	return dpmac_info[i].phydev[phy_num];
 }
 
 phy_interface_t wriop_get_enet_if(int dpmac_id)

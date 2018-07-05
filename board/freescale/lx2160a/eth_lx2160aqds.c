@@ -54,7 +54,7 @@ struct serdes_phy_config {
 	u8 serdes; /* serdes protocol */
 	struct phy_config {
 		u8 dpmacid;
-		u8 phy_address;
+		int phy_address[WRIOP_MAX_PHY_NUM];
 		u8 mdio_bus;
 		IO_SLOT ioslot;
 	} phy_config[SRDS_MAX_LANES];
@@ -74,41 +74,41 @@ struct serdes_phy_config {
  * requirement.
  */
 static const struct serdes_phy_config serdes1_phy_config[] = {
-	{3, {{WRIOP1_DPMAC3, AQ_PHY_ADDR1, EMI1, IO_SLOT_1},
-	    {WRIOP1_DPMAC4, AQ_PHY_ADDR2, EMI1, IO_SLOT_1},
-	    {WRIOP1_DPMAC5, AQ_PHY_ADDR3, EMI1, IO_SLOT_1},
-	    {WRIOP1_DPMAC6, AQ_PHY_ADDR4, EMI1, IO_SLOT_1} } },
-	{7, {{WRIOP1_DPMAC3, AQ_PHY_ADDR1, EMI1, IO_SLOT_1},
-	    {WRIOP1_DPMAC4, AQ_PHY_ADDR2, EMI1, IO_SLOT_1},
-	    {WRIOP1_DPMAC5, AQ_PHY_ADDR3, EMI1, IO_SLOT_1},
-	    {WRIOP1_DPMAC6, AQ_PHY_ADDR4, EMI1, IO_SLOT_1},
-	    {WRIOP1_DPMAC7, SGMII_CARD_PORT1_PHY_ADDR, EMI1, IO_SLOT_2},
-	    {WRIOP1_DPMAC8, SGMII_CARD_PORT2_PHY_ADDR, EMI1, IO_SLOT_2},
-	    {WRIOP1_DPMAC9, SGMII_CARD_PORT3_PHY_ADDR, EMI1, IO_SLOT_2},
-	    {WRIOP1_DPMAC10, SGMII_CARD_PORT4_PHY_ADDR, EMI1, IO_SLOT_2} } },
-	{13, {{WRIOP1_DPMAC1, INPHI_PHY_ADDR1, EMI1, IO_SLOT_1},
-	     {WRIOP1_DPMAC2, INPHI_PHY_ADDR1, EMI1, IO_SLOT_2} } },
-	{15, {{WRIOP1_DPMAC1, INPHI_PHY_ADDR1, EMI1, IO_SLOT_1},
-	     {WRIOP1_DPMAC2, INPHI_PHY_ADDR1, EMI1, IO_SLOT_1} } },
-	{19, {{WRIOP1_DPMAC2, CORTINA_PHY_ADDR1, EMI1, IO_SLOT_2},
-	     {WRIOP1_DPMAC3, AQ_PHY_ADDR1, EMI1, IO_SLOT_1},
-	     {WRIOP1_DPMAC4, AQ_PHY_ADDR2, EMI1, IO_SLOT_1},
-	     {WRIOP1_DPMAC5, INPHI_PHY_ADDR1, EMI1, IO_SLOT_6},
-	     {WRIOP1_DPMAC6, INPHI_PHY_ADDR1, EMI1, IO_SLOT_6} } },
-	{20, {{WRIOP1_DPMAC1, CORTINA_PHY_ADDR1, EMI1, IO_SLOT_1},
-	     {WRIOP1_DPMAC2, CORTINA_PHY_ADDR1, EMI1, IO_SLOT_2} } }
+	{3, {{WRIOP1_DPMAC3, {AQ_PHY_ADDR1, -1}, EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC4, {AQ_PHY_ADDR2, -1}, EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC5, {AQ_PHY_ADDR3, -1}, EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC6, {AQ_PHY_ADDR4, -1}, EMI1, IO_SLOT_1} } },
+	{7, {{WRIOP1_DPMAC3, {AQ_PHY_ADDR1, -1}, EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC4, {AQ_PHY_ADDR2, -1}, EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC5, {AQ_PHY_ADDR3, -1}, EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC6, {AQ_PHY_ADDR4, -1}, EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC7, {SGMII_CARD_PORT1_PHY_ADDR, -1}, EMI1, IO_SLOT_2},
+	    {WRIOP1_DPMAC8, {SGMII_CARD_PORT2_PHY_ADDR, -1}, EMI1, IO_SLOT_2},
+	    {WRIOP1_DPMAC9, {SGMII_CARD_PORT3_PHY_ADDR, -1}, EMI1, IO_SLOT_2},
+	    {WRIOP1_DPMAC10, {SGMII_CARD_PORT4_PHY_ADDR, -1}, EMI1, IO_SLOT_2} } },
+	{13, {{WRIOP1_DPMAC1, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2}, EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC2, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2}, EMI1, IO_SLOT_2} } },
+	{15, {{WRIOP1_DPMAC1, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2}, EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC2, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2}, EMI1, IO_SLOT_1} } },
+	{19, {{WRIOP1_DPMAC2, {CORTINA_PHY_ADDR1, -1}, EMI1, IO_SLOT_2},
+	     {WRIOP1_DPMAC3, {AQ_PHY_ADDR1, -1}, EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC4, {AQ_PHY_ADDR2, -1}, EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC5, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2}, EMI1, IO_SLOT_6},
+	     {WRIOP1_DPMAC6, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2}, EMI1, IO_SLOT_6} } },
+	{20, {{WRIOP1_DPMAC1, {CORTINA_PHY_ADDR1, -1}, EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC2, {CORTINA_PHY_ADDR1, -1}, EMI1, IO_SLOT_2} } }
 };
 
 static const struct serdes_phy_config serdes2_phy_config[] = {
 	{2, {} },
 	{3, {} },
 	{5, {} },
-	{11, {{WRIOP1_DPMAC12, SGMII_CARD_PORT2_PHY_ADDR, EMI1, IO_SLOT_7},
-	     {WRIOP1_DPMAC17, SGMII_CARD_PORT3_PHY_ADDR, EMI1, IO_SLOT_7},
-	     {WRIOP1_DPMAC18, SGMII_CARD_PORT4_PHY_ADDR, EMI1, IO_SLOT_7},
-	     {WRIOP1_DPMAC16, SGMII_CARD_PORT2_PHY_ADDR, EMI1, IO_SLOT_8},
-	     {WRIOP1_DPMAC13, SGMII_CARD_PORT3_PHY_ADDR, EMI1, IO_SLOT_8},
-	     {WRIOP1_DPMAC14, SGMII_CARD_PORT4_PHY_ADDR, EMI1, IO_SLOT_8} } },
+	{11, {{WRIOP1_DPMAC12, {SGMII_CARD_PORT2_PHY_ADDR, -1}, EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC17, {SGMII_CARD_PORT3_PHY_ADDR, -1}, EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC18, {SGMII_CARD_PORT4_PHY_ADDR, -1}, EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC16, {SGMII_CARD_PORT2_PHY_ADDR, -1}, EMI1, IO_SLOT_8},
+	     {WRIOP1_DPMAC13, {SGMII_CARD_PORT3_PHY_ADDR, -1}, EMI1, IO_SLOT_8},
+	     {WRIOP1_DPMAC14, {SGMII_CARD_PORT4_PHY_ADDR, -1}, EMI1, IO_SLOT_8} } },
 };
 
 static const struct serdes_phy_config serdes3_phy_config[] = {
@@ -300,22 +300,28 @@ static struct mii_dev *lx2160a_qds_mdio_init(u8 realbusnum, IO_SLOT ioslot)
 static inline void do_phy_config(const struct phy_config *phy_config)
 {
 	struct mii_dev *bus;
-	int i;
+	int i, phy_num, phy_address;
 
 	for (i = 0; i < SRDS_MAX_LANES; i++) {
-		if (phy_config[i].dpmacid) {
+		if (!phy_config[i].dpmacid)
+			continue;
+
+		for (phy_num = 0;
+		     phy_num < ARRAY_SIZE(phy_config[i].phy_address);
+		     phy_num++) {
+			phy_address = phy_config[i].phy_address[phy_num];
 			wriop_set_phy_address(phy_config[i].dpmacid,
-					      phy_config[i].phy_address);
-			/*Register the muxing front-ends to the MDIO buses*/
-			bus = lx2160a_qds_mdio_init(phy_config[i].mdio_bus,
-						    phy_config[i].ioslot);
-			if (!bus)
-				printf("could not get bus for mdio %d"
-				       " ioslot %d\n",	phy_config[i].mdio_bus,
-				       phy_config[i].ioslot);
-			else
-				wriop_set_mdio(phy_config[i].dpmacid, bus);
+					      phy_num, phy_address);
 		}
+		/*Register the muxing front-ends to the MDIO buses*/
+		bus = lx2160a_qds_mdio_init(phy_config[i].mdio_bus,
+					    phy_config[i].ioslot);
+		if (!bus)
+			printf("could not get bus for mdio %d ioslot %d\n",
+			       phy_config[i].mdio_bus,
+			       phy_config[i].ioslot);
+		else
+			wriop_set_mdio(phy_config[i].dpmacid, bus);
 	}
 }
 
@@ -326,19 +332,31 @@ static inline void do_dpmac_config(int dpmac, const char *arg_dpmacid,
 	size_t len;
 	u8 realbusnum, ioslot;
 	struct mii_dev *bus;
+	int phy_num;
+	char *phystr = "phy00";
 
 	/*search phy in dpmac arg*/
-	ret = hwconfig_subarg_f(arg_dpmacid, "phy", &len, env_dpmac);
-	if (ret) {
-		if ((len != 4) ||
-		    (strncmp(ret, "0x", 2)))
-			printf("please specify phy for %s in 0x[XX] format in "
-			       "%s variable. e.g. 0x12\n", arg_dpmacid,
-			       env_dpmac);
+	for (phy_num = 0; phy_num < WRIOP_MAX_PHY_NUM; phy_num++) {
+		sprintf(phystr, "phy%d", phy_num + 1);
+		ret = hwconfig_subarg_f(arg_dpmacid, phystr, &len, env_dpmac);
+		if (!ret) {
+			/*look for phy instead of phy1*/
+			if (!phy_num)
+				ret = hwconfig_subarg_f(arg_dpmacid, "phy",
+							&len, env_dpmac);
+			if (!ret)
+				continue;
+		}
+
+		if ((len != 4) || (strncmp(ret, "0x", 2)))
+			printf("please specify phy%d for %s in 0x[XX] format in"
+			       " %s variable. e.g. 0x12\n", phy_num + 1,
+			       arg_dpmacid, env_dpmac);
 		else
-			wriop_set_phy_address(dpmac,
+			wriop_set_phy_address(dpmac, phy_num,
 					      simple_strtoul(ret, NULL, 16));
 	}
+
 	/*search mdio in dpmac arg*/
 	ret = hwconfig_subarg_f(arg_dpmacid, "mdio", &len, env_dpmac);
 	if (ret)
@@ -473,7 +491,7 @@ int board_eth_init(bd_t *bis)
 	}
 
 	if (wriop_get_enet_if(WRIOP1_DPMAC17) == PHY_INTERFACE_MODE_RGMII_ID) {
-		wriop_set_phy_address(WRIOP1_DPMAC17, RGMII_PHY_ADDR1);
+		wriop_set_phy_address(WRIOP1_DPMAC17, 0, RGMII_PHY_ADDR1);
 		bus = lx2160a_qds_mdio_init(EMI1, EMI1_RGMII1);
 		if (!bus)
 			printf("could not get bus for RGMII1\n");
@@ -482,7 +500,7 @@ int board_eth_init(bd_t *bis)
 	}
 
 	if (wriop_get_enet_if(WRIOP1_DPMAC18) == PHY_INTERFACE_MODE_RGMII_ID) {
-		wriop_set_phy_address(WRIOP1_DPMAC18, RGMII_PHY_ADDR2);
+		wriop_set_phy_address(WRIOP1_DPMAC18, 0, RGMII_PHY_ADDR2);
 		bus = lx2160a_qds_mdio_init(EMI1, EMI1_RGMII2);
 		if (!bus)
 			printf("could not get bus for RGMII2\n");
@@ -543,7 +561,7 @@ int fdt_fixup_dpmac_phy_handle (void *fdt, int dpmac_id, int node_phandle)
 		return offset;
 	}
 
-	ret = fdt_setprop_cell (fdt, offset, "phy-handle", node_phandle);
+	ret = fdt_appendprop_cell (fdt, offset, "phy-handle", node_phandle);
 	if (ret) {
 		printf("%d@%s %d\n", __LINE__, __func__, ret);
 	}
