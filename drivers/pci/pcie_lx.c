@@ -20,6 +20,22 @@ DECLARE_GLOBAL_DATA_PTR;
 
 LIST_HEAD(lx_pcie_list);
 
+#ifdef INIC_FLAG
+static u64 bar_size[4] = {
+	PCIE_BAR0_SIZE,
+	PCIE_BAR1_SIZE,
+	PCIE_BAR2_SIZE,
+	PCIE_BAR4_SIZE
+};
+#else
+static u64 bar_size[4] = {
+	PCIE_BAR_SIZE,
+	PCIE_BAR_SIZE,
+	PCIE_BAR_SIZE,
+	PCIE_BAR_SIZE
+};
+#endif
+
 static int lx_pcie_ltssm(struct lx_pcie *pcie)
 {
 	u32 state;
@@ -364,41 +380,81 @@ static void lx_pcie_ep_setup_wins(struct lx_pcie *pcie, int pf)
 
 }
 
-static void lx_pcie_ep_setup_bar(struct lx_pcie *pcie, int bar)
+static void lx_pcie_ep_enable_bar(struct lx_pcie *pcie, int bar)
 {
-	u32 size_l = lower_32_bits(~(PCIE_BAR_SIZE - 1));
-	u32 size_h = upper_32_bits(~(PCIE_BAR_SIZE - 1));
+	u32 val;
 
+	val = ccsr_readl(pcie, GPEX_BAR_ENABLE);
+	val |= 1 << bar;
+	ccsr_writel(pcie, GPEX_BAR_ENABLE, val);
+}
+
+static void lx_pcie_ep_disable_bar(struct lx_pcie *pcie, int bar)
+{
+	u32 val;
+
+	val = ccsr_readl(pcie, GPEX_BAR_ENABLE);
+	val &= ~(1 << bar);
+	ccsr_writel(pcie, GPEX_BAR_ENABLE, val);
+}
+
+static void lx_pcie_ep_set_bar_size(struct lx_pcie *pcie, int bar, u64 size)
+{
+	u32 mask_l = lower_32_bits(~(size - 1));
+	u32 mask_h = upper_32_bits(~(size - 1));
+
+	/* due to the HW bug, set the BAR1 for all VFs is 8M,
+	 * this is a temporary workaround */
 	if ((bar == 13) || (bar == 9)) {
-		size_l = lower_32_bits(~(PCIE_BAR1_SIZE - 1));
-		size_h = upper_32_bits(~(PCIE_BAR1_SIZE - 1));
+		mask_l = lower_32_bits(~(PCIE_BAR1_SIZE - 1));
+		mask_h = upper_32_bits(~(PCIE_BAR1_SIZE - 1));
 	}
 
 	ccsr_writel(pcie, GPEX_BAR_SELECT, bar);
-	ccsr_writel(pcie, GPEX_BAR_SIZE_LDW, size_l);
-	ccsr_writel(pcie, GPEX_BAR_SIZE_UDW, size_h);
+	ccsr_writel(pcie, GPEX_BAR_SIZE_LDW, mask_l);
+	ccsr_writel(pcie, GPEX_BAR_SIZE_UDW, mask_h);
 }
 
-static void lx_pcie_ep_setup_bars(struct lx_pcie *pcie)
+static void lx_pcie_ep_setup_bar_vf(struct lx_pcie *pcie,
+				int pf, int bar, u64 size)
 {
-	int bar, bar_num;
-	u32 val;
+	if (pf == LX_PF1)
+		bar += PF1_VF_BAR_OFFSET;
+	else
+		bar += PF0_VF_BAR_OFFSET;
 
+	if (size == 0)
+		lx_pcie_ep_disable_bar(pcie, bar);
+	else
+		lx_pcie_ep_enable_bar(pcie, bar);
+
+	lx_pcie_ep_set_bar_size(pcie, bar, size);
+}
+
+static void lx_pcie_ep_setup_bar_pf(struct lx_pcie *pcie,
+				int pf, int bar, u64 size)
+{
+	if (pf == LX_PF1)
+		bar += PF1_BAR_OFFSET;
+
+	if (size == 0)
+		lx_pcie_ep_disable_bar(pcie, bar);
+	else
+		lx_pcie_ep_enable_bar(pcie, bar);
+
+	lx_pcie_ep_set_bar_size(pcie, bar, size);
+}
+
+static void lx_pcie_ep_setup_bars(struct lx_pcie *pcie, int pf)
+{
+	int bar;
+
+	for (bar = 0; bar < BAR_NUM; bar++)
+		lx_pcie_ep_setup_bar_pf(pcie, pf, bar, bar_size[bar]);
 	if (pcie->sriov_enabled) {
-		bar_num = 16;
-		val = ccsr_readl(pcie, GPEX_BAR_ENABLE);
-		if ((val & 0xffff) != 0xffff)
-			ccsr_writel(pcie, GPEX_BAR_ENABLE, 0xffff);
-	} else {
-		bar_num = 4;
-		val = ccsr_readl(pcie, GPEX_BAR_ENABLE);
-		if ((val & 0x0f) != 0x0f)
-			ccsr_writel(pcie, GPEX_BAR_ENABLE, 0x0f);
-
+		for (bar = 0; bar < BAR_NUM; bar++)
+			lx_pcie_ep_setup_bar_vf(pcie, pf, bar, bar_size[bar]);
 	}
-
-	for (bar = 0; bar < bar_num; bar++)
-		lx_pcie_ep_setup_bar(pcie, bar);
 }
 
 static void lx_pcie_set_sriov(struct lx_pcie *pcie, int func)
@@ -434,15 +490,15 @@ static void lx_pcie_setup_ep(struct lx_pcie *pcie)
 	if (PCI_EXT_CAP_ID(sriov) == PCI_EXT_CAP_ID_SRIOV) {
 		pcie->sriov_enabled = 1;
 
-		lx_pcie_ep_setup_bars(pcie);
 		for (pf = 0; pf < PCIE_PF_NUM; pf++) {
+			lx_pcie_ep_setup_bars(pcie, pf);
 			lx_pcie_ep_setup_wins(pcie, pf);
 			lx_pcie_set_sriov(pcie, pf);
 		}
 	} else {
 		pcie->sriov_enabled = 0;
 
-		lx_pcie_ep_setup_bars(pcie);
+		lx_pcie_ep_setup_bars(pcie, 0);
 		lx_pcie_ep_setup_wins(pcie, 0);
 	}
 

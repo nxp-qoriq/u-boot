@@ -27,10 +27,18 @@
 #define PCI_EXT_CAP_ID_SRIOV			0x10
 #define PCIE_SRIOV_VF_OFFSET_STRIDE             0x2b4
 
-#define PCIE_BAR_SIZE				(8 * 1024) /* 4K */
-#define PCIE_BAR1_SIZE                          (8 * 1024 * 1024) /* 8M */
-#define SIZE_1T				(1024 * 1024 * 1024 * 1024ULL)
-#define SIZE_1M				(1024 * 1024)
+#define LX_PF1					1
+#define BAR_NUM					4
+#define PF1_BAR_OFFSET				4
+#define PF0_VF_BAR_OFFSET			8
+#define PF1_VF_BAR_OFFSET			12
+#define PCIE_BAR_SIZE				(8 * 1024)		/* 8K */
+#define PCIE_BAR0_SIZE				(8 * 1024)		/* 8K */
+#define PCIE_BAR1_SIZE				(8 * 1024 * 1024)	/* 8M */
+#define PCIE_BAR2_SIZE				(2 * 1024 * 1024)	/* 2M */
+#define PCIE_BAR4_SIZE				0			/* 0M */
+#define SIZE_1T					(1024 * 1024 * 1024 * 1024ULL)
+#define SIZE_1M					(1024 * 1024)
 
 /* LUT registers */
 #define PCIE_LUT_GCR				(0x28)
