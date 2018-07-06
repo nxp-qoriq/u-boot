@@ -16,6 +16,7 @@
 #include <linux/err.h>
 #include <phy.h>
 #include <cortina.h>
+#include <cs4224_api.h>
 #ifdef CONFIG_SYS_CORTINA_FW_IN_NAND
 #include <nand.h>
 #elif defined(CONFIG_SYS_CORTINA_FW_IN_SPIFLASH)
@@ -286,14 +287,52 @@ int cs4340_startup(struct phy_device *phydev)
 	return 0;
 }
 
+extern void cs4223_glue_phydev_set(struct phy_device *phydev);
+
+int cs4223_phy_cx1_to_cx1_setup(struct phy_device *phydev)
+{
+    cs_status status = CS_OK;
+    cs4224_rules_t rules;
+    cs_uint32 slice = 0;
+
+    cs4223_glue_phydev_set(phydev);
+
+    status |= cs4224_hard_reset(slice);
+    if(CS_OK != status)
+    {
+        CS_TRACE(("ERROR trying to reset device\n"));
+        return status;
+    }
+
+    status |= cs4224_rules_set_default(CS4224_TARGET_APPLICATION_10G, &rules);
+
+    rules.rx_if.dplx_line_edc_mode         = CS_HSIO_EDC_MODE_CX1;
+    rules.rx_if.dplx_line_eq.traceloss     = CS_HSIO_TRACE_LOSS_4dB;
+    rules.tx_if.dplx_line_driver.traceloss = CS_HSIO_TRACE_LOSS_4dB;
+
+    rules.rx_if.dplx_host_edc_mode         = CS_HSIO_EDC_MODE_CX1;
+    rules.rx_if.dplx_host_eq.traceloss     = CS_HSIO_TRACE_LOSS_3dB;
+    rules.tx_if.dplx_host_driver.traceloss = CS_HSIO_TRACE_LOSS_3dB;
+
+    for(slice = 0; slice < CS4224_MAX_NUM_SLICES(0); slice++) {
+        status |= cs4224_slice_enter_operational_state(slice, &rules);
+    }
+
+    return status;
+}
+
 int cs4223_phy_init(struct phy_device *phydev)
 {
 	int reg_value;
 
 	reg_value = phy_read(phydev, 0x00, CS4223_EEPROM_STATUS);
 	if (!(reg_value & CS4223_EEPROM_FIRMWARE_LOADDONE)) {
-		printf("%s CS4223 Firmware not present in EERPOM\n", __func__);
-		return -1;
+		printf("\nCS4223: Using software initialization...\n");
+		cs4223_phy_cx1_to_cx1_setup(phydev);
+	}
+	else {
+		printf("\nCS4223: WARNING: Using EEPROM configuration...\n");
+		printf("CS4223: WARNING: Change SW2[2] for software config\n");
 	}
 
 	return 0;
@@ -370,7 +409,6 @@ int get_phy_id(struct mii_dev *bus, int addr, int devad, u32 *phy_id)
 
 	if ((*phy_id == PHY_UID_CS4340) || (*phy_id == PHY_UID_CS4223))
 		return 0;
-
 	/*
 	 * If Cortina PHY not detected,
 	 * try generic way to find PHY ID registers
