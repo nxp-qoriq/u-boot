@@ -25,6 +25,7 @@
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
  *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2018 NXP Semiconductors 
  *
  *    API Version Number: 3.7.8
  ****************************************************************************/
@@ -140,32 +141,6 @@ void CS_TRACE_FUNCTION(const char *fmt, ...)
     va_end(ap);
 }
 #endif
-#endif
-
-#if 0
-cs_status CS_VERIFY_ENDIANESS()
-{
-  cs_uint16 val = 0x2211 ;
-  cs_uint8  low_byte = ((cs_uint8 *)&val)[0] ;
-
-  if (low_byte == 0x22) {
-#ifdef CS_BIG_ENDIAN
-    return (CS_OK) ;
-#else /* CS_LITTLE_ENDIAN */
-    return (CS_ERROR) ;
-#endif
-  }
-  else if (low_byte == 0x11) {
-#ifdef CS_BIG_ENDIAN
-    return (CS_ERROR) ;
-#else /* CS_LITTLE_ENDIAN */
-    return (CS_OK) ;
-#endif
-  }
-  else {
-    return (CS_ERROR) ;
-  }
-}
 #endif
 
 void cs4223_glue_phydev_set(struct phy_device *phydev)
