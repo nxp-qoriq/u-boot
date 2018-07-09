@@ -548,6 +548,12 @@ int fdt_fixup_dpmac_phy_handle (void *fdt, int dpmac_id, int node_phandle)
 		printf("%d@%s %d\n", __LINE__, __func__, ret);
 	}
 
+	ret = fdt_setprop_string (fdt, offset, "phy-connection-type",
+				  phy_interface_strings[wriop_get_enet_if(dpmac_id)]);
+	if (ret) {
+		printf("%d@%s %d\n", __LINE__, __func__, ret);
+	}
+
 	return ret;
 }
 
