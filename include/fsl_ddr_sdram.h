@@ -421,6 +421,7 @@ typedef struct memctl_options_s {
 	/* control register 1 */
 	unsigned int ddr_cdr1;
 	unsigned int ddr_cdr2;
+	unsigned int odt;
 
 	unsigned int trwt_override;
 	unsigned int trwt;			/* read-to-write turnaround */

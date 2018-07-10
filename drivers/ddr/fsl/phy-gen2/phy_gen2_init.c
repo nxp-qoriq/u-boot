@@ -130,7 +130,7 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num,
 	input->adv.tx_slew_fall_dq		= 0xf;
 	input->adv.tx_slew_rise_ac		= 0xf;
 	input->adv.tx_slew_fall_ac		= 0xf;
-	input->adv.odtimpedance		= 60;
+	input->adv.odtimpedance		= popts->odt ? popts->odt : 60;
 	input->adv.tx_impedance		= 28;
 	input->adv.atx_impedance		= 30;
 	input->adv.mem_alert_en		= 0;
