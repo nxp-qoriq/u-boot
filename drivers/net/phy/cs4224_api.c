@@ -1,3 +1,6 @@
+
+
+
 #include "cs4224_api.h"
 
 /** @file cs4224_diags.c
@@ -23,11 +26,10 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
-
 
 static cs4224_diags_duplex_loopback_state_t g_cs4224_duplex_loopback_line_state[CS4224_MAX_NUM_CS4343_PORTS] = 
 {
@@ -348,8 +350,7 @@ cs_status cs4224_diags_query_loopbacks(
     if (cs4224_is_hw_simplex(slice))
     {
         CS_TRACE(("ERROR: Loopbacks query supported on Duplex chips only\n"));
-        
-	return CS_ERROR;
+        return CS_ERROR;
     }
 
     status |= cs4224_reg_get_channel(slice, CS4224_PP_HOST_SDS_COMMON_RX0_Config, &data);
@@ -5199,9 +5200,9 @@ cs_status cs4224_diags_dump_pgrm_store(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
 
 extern cs_uint32 cs4224_max_num_dies;
@@ -7393,9 +7394,9 @@ cs_status cs4224_fcan_status_summary(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ****************************************************************************/
   
 #if !defined(CS_SKIP_UCODE_DOWNLOAD)
@@ -9657,7 +9658,7 @@ unsigned short cs4224_kr_ucode_image[] = {
     0x0302, 0x003a,
     0x0303, 0x00c3,
     0x0302, 0x005a,
-    0x0303, 0x0369,
+    0x0303, 0x036a,
     0x0302, 0x0003,
     0x0303, 0x0068,
     0x0302, 0x00ba,
@@ -9939,7 +9940,7 @@ unsigned short cs4224_kr_ucode_image[] = {
     0x0302, 0x003a,
     0x0303, 0x00b4,
     0x0302, 0x003a,
-    0x0303, 0x0369,
+    0x0303, 0x036a,
     0x0302, 0x0003,
     0x0303, 0x00f5,
     0x0302, 0x003a,
@@ -12614,7 +12615,7 @@ unsigned short cs4224_kr_ucode_image[] = {
     0x0303, 0xc090,
     0x0302, 0x0003,
     0x0303, 0xf299,
-    0x0302, 0x0008,
+    0x0302, 0x0004,
     0x0303, 0x002c,
     0x0302, 0x00ba,
     0x0303, 0x0372,
@@ -12642,7 +12643,7 @@ unsigned short cs4224_kr_ucode_image[] = {
     0x0303, 0xc090,
     0x0302, 0x0003,
     0x0303, 0xf2a7,
-    0x0302, 0x0088,
+    0x0302, 0x0084,
     0x0303, 0x003a,
     0x0302, 0x003a,
     0x0303, 0x0372,
@@ -13095,7 +13096,7 @@ unsigned short cs4224_kr_ucode_image[] = {
     0x0302, 0x003a,
     0x0303, 0x0352,
     0x0302, 0x0083,
-    0x0303, 0x6953,
+    0x0303, 0x6a53,
     0x0302, 0x0003,
     0x0303, 0x0144,
     0x0302, 0x00e0,
@@ -13103,7 +13104,7 @@ unsigned short cs4224_kr_ucode_image[] = {
     0x0302, 0x003a,
     0x0303, 0x0352,
     0x0302, 0x0083,
-    0x0303, 0x694f,
+    0x0303, 0x6a4f,
     0x0302, 0x001f,
     0x0303, 0x0353,
     0x0302, 0x0003,
@@ -15861,13 +15862,13 @@ unsigned short cs4224_kr_ucode_image[] = {
     0x1a35, 0x01f7,
     0x1ab1, 0x0000,
     0x0017, 0x0000,
-    0x000a, 0x1557,
-    0x0009, 0x2015,
-    0x0008, 0x0702,
+    0x000a, 0x0946,
+    0x0009, 0x2016,
+    0x0008, 0x0314,
     0x0005, 0x0003,
     0x0007, 0x0000,
     0x0011, 0x0000,
-    0x0014, 0x25e0,
+    0x0014, 0x12cd,
     0x0017, 0x0000,
 };
 
@@ -15898,9 +15899,9 @@ unsigned int cs4224_kr_ucode_image_length = sizeof(cs4224_kr_ucode_image)/sizeof
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ****************************************************************************/
   
 #if !defined(CS_SKIP_UCODE_DOWNLOAD)
@@ -18162,7 +18163,7 @@ unsigned short cs4224_fc_ucode_image[] = {
     0x0302, 0x003a,
     0x0303, 0x00c3,
     0x0302, 0x005a,
-    0x0303, 0x0369,
+    0x0303, 0x036a,
     0x0302, 0x0003,
     0x0303, 0x0068,
     0x0302, 0x00ba,
@@ -18444,7 +18445,7 @@ unsigned short cs4224_fc_ucode_image[] = {
     0x0302, 0x003a,
     0x0303, 0x00b4,
     0x0302, 0x003a,
-    0x0303, 0x0369,
+    0x0303, 0x036a,
     0x0302, 0x0003,
     0x0303, 0x00f5,
     0x0302, 0x003a,
@@ -24366,13 +24367,13 @@ unsigned short cs4224_fc_ucode_image[] = {
     0x1a35, 0x01f7,
     0x1ab1, 0x0000,
     0x0017, 0x0000,
-    0x000a, 0x1557,
-    0x0009, 0x2015,
-    0x0008, 0x0702,
+    0x000a, 0x0946,
+    0x0009, 0x2016,
+    0x0008, 0x0314,
     0x0005, 0x0000,
     0x0007, 0x0003,
     0x0011, 0x0000,
-    0x0014, 0x2de7,
+    0x0014, 0x6e6a,
     0x0017, 0x0000,
 };
 
@@ -24403,9 +24404,9 @@ unsigned int cs4224_fc_ucode_image_length = sizeof(cs4224_fc_ucode_image)/sizeof
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
 
 #define CS_HAS_INLINE_UCODE 1
@@ -25869,8 +25870,15 @@ cs_status cs4224_init_vco(
 
     if(i == 0)
     {
-        CS_TRACE(("ERROR: Timed out waiting for VCO to lock, waited 15ms (check CS_UDELAY implementation for delay accuracy)\n"));
-        status |= CS_ERROR;
+        if (offset == 0)
+        {
+            CS_TRACE(("ERROR: Timed out waiting for Line side VCO on slice %x to lock, waited 15ms (check CS_UDELAY implementation for delay accuracy)\n", slice));
+        }
+        else
+        {
+            CS_TRACE(("ERROR: Timed out waiting for Host side VCO on slice %x to lock, waited 15ms (check CS_UDELAY implementation for delay accuracy)\n", slice));
+        }
+        status |= CS_ERROR; 
     }
     
     return status;
@@ -28438,12 +28446,12 @@ cs_status cs4224_pp_clock_monitor_freq_fixp(
         cs_uint16 temp = des_freq * 9;
         if((*freq * 10) < temp)
         {
-            CS_TRACE(("WARNING : freq < des_freq -10%% : %u < %u\n", *freq, temp / 9));
+            CS_TRACE(("WARNING: freq < des_freq -10%%: %u < %u\n", *freq, temp / 9));
         }
         temp = des_freq * 11;
         if((*freq * 10) > temp)
         {
-            CS_TRACE(("WARNING : freq > des_freq +10%% : %u > %u\n", *freq, temp / 11));
+            CS_TRACE(("WARNING: freq > des_freq +10%%: %u > %u\n", *freq, temp / 11));
         }
     }
 
@@ -28806,6 +28814,11 @@ cs_status cs4224_rules_set_default(
     /* By default all advanced rules should be turned off */
     rules->advanced.phsel_bypass = FALSE;
     rules->advanced.phsel_bypass_value = CS4224_RULE_DISABLED;
+   
+
+    /* This rule must be initialized to FALSE to avoid skipping
+     * coarse tuning in enter_operational_state in non KR modes */
+    rules->kran.advanced.ref106             = FALSE;
 
     /* Note for clkdiv, Rate = RefClk * rdiv / ddiv */
     switch(application)
@@ -33112,19 +33125,15 @@ cs_status cs4224_init_mseq_dyn_reconfig(
     cs_status status = CS_OK;
     cs_uint16 reg_data;
 
-    if (rules->mseq_dyn_reconfig == TRUE)
+    if ((rules->mseq_dyn_reconfig == TRUE) && 
+        (rules->application != CS4224_TARGET_APPLICATION_KRAN) &&
+        (rules->application != CS4224_TARGET_APPLICATION_FCAN))
     {
         /* The mseq_dyn_reconfig feature is not compatible with the FC microcode */
         status |= cs4224_reg_get_channel(slice, CS4224_GLOBAL_UCODE_VERSION_KR, &reg_data);
         if (reg_data == 0)
         {
             CS_TRACE(("ERROR: The mseq_dyn_reconfig feature requires KR microcode\n"));
-            return CS_ERROR;
-        }
-        if ((rules->application == CS4224_TARGET_APPLICATION_KRAN) ||
-            (rules->application == CS4224_TARGET_APPLICATION_FCAN))
-        {
-            CS_TRACE(("ERROR: The mseq_dyn_reconfig feature not compatible with KRAN and FCAN applications\n"));
             return CS_ERROR;
         }
 
@@ -35695,6 +35704,52 @@ cs_status cs4224_check_rules(cs_uint32 slice, cs4224_rules_t *rules)
 }
 
 /**
+ * This method is called from KR in dynamic reconfig mode to configure
+ * the SPARE24 register with the current EDC mode setting.
+ *
+ * @param slice [I] - The KR slice number, range: 0 to CS4224_MAX_NUM_PORTS()
+ *
+ * @return CS_OK on success, CS_ERROR on failure.
+ * 
+ * @private
+ */
+
+cs_status cs4224_set_spare24_for_kr_dyn_reconfig(
+    cs_uint32 slice)
+{
+    cs_status status = CS_OK;
+    e_cs4224_edc_mode edc_mode = CS_HSIO_EDC_MODE_DISABLED;
+    cs_uint16 data;
+
+    /* get the edc mode */
+    status |= cs4224_query_edc_mode(slice, CS4224_DPLX_HOST_MSEQ, &edc_mode);
+
+    /* See method cs4224_init_mseq_dyn_reconfig for SPARE24 encoding */
+    switch (edc_mode)
+    {
+        case CS_HSIO_EDC_MODE_CX1:
+            data = 0x0004;
+            break;
+        case CS_HSIO_EDC_MODE_SR:
+            data = 0x0008;
+            break;
+        case CS_HSIO_EDC_MODE_ZR:
+            data = 0x0010;
+            break;
+        case CS_HSIO_EDC_MODE_DWDM:
+            data = 0x0020;
+            break;
+        default:
+            /* default to EDC mode SR */
+            data = 0x0008;
+    }
+    status |= cs4224_reg_set_channel(slice, CS4224_PP_LINE_SDS_DSP_MSEQ_SPARE24_LSB, data);
+    status |= cs4224_reg_set_channel(slice, CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE22_LSB, data);
+    
+    return status;
+}
+
+/**
  * This method is called to put slice(s) into KR single or multi-port operational state.
  *
  * @param master_slice [I] - The KR master slice number, range: 0 to CS4224_MAX_NUM_PORTS()
@@ -35711,6 +35766,7 @@ cs_status cs4224_slice_enter_operational_state_kran(
     e_cs4224_kran_an_status_t  kran_done = CS4224_KRAN_AN_NOT_DONE;
     cs4224_kran_results_t_s    an_results;
     cs_uint32 base_slice;
+    cs_uint32 offset;
     cs_uint32 die = cs4224_get_die_from_slice(master_slice);
     cs_uint16 data = 0;
 
@@ -35725,9 +35781,6 @@ cs_status cs4224_slice_enter_operational_state_kran(
 
     /* force the application to KRAN */
     rules->application = CS4224_TARGET_APPLICATION_KRAN;
-
-    /* force this rule to false as it is incompatible with KR */
-    rules->mseq_dyn_reconfig = FALSE;
 
     /* Before we do anything, do some sanity checking of the rules */
     status |= cs4224_check_rules(master_slice, rules);
@@ -35773,15 +35826,31 @@ cs_status cs4224_slice_enter_operational_state_kran(
         (rules->kran.data_rates & CS4224_KRAN_DATA_RATE_BP_KX4))
     {
         /* configure the 4 data-paths */
-        status |= cs4224_slice_enter_operational_state(base_slice + 0, rules);
-        status |= cs4224_slice_enter_operational_state(base_slice + 1, rules);
-        status |= cs4224_slice_enter_operational_state(base_slice + 2, rules);
-        status |= cs4224_slice_enter_operational_state(base_slice + 3, rules);
+        for (offset = 0; offset < 4; offset++)
+        {
+            status |= cs4224_slice_enter_operational_state(base_slice + offset, rules);
+
+            /* assert HOST_SPARE22[30] if dynamic reconfig is TRUE (KR only) */
+            if (rules->mseq_dyn_reconfig == TRUE)
+            {
+                status |= cs4224_reg_set_channel(base_slice + offset, CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE22_MSB, 0x8000);
+                /* set SPARE24 to the current edc mode */
+                status |= cs4224_set_spare24_for_kr_dyn_reconfig(base_slice + offset);
+            }
+        }
     }
     else /* advertising only single-port KR (no multi-port) */
     {
         /* configure the 1 data-path */
         status |= cs4224_slice_enter_operational_state(master_slice, rules);
+
+        /* assert HOST_SPARE22[30] if dynamic reconfig is TRUE (KR only) */
+        if (rules->mseq_dyn_reconfig == TRUE)
+        {
+            status |= cs4224_reg_set_channel(master_slice, CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE22_MSB, 0x8000);
+            /* set SPARE24 to the current edc mode */
+            status |= cs4224_set_spare24_for_kr_dyn_reconfig(master_slice);
+        }
     }
 
     status |= cs4224_init_kran(master_slice, rules);
@@ -35801,7 +35870,8 @@ cs_status cs4224_slice_enter_operational_state_kran(
             }
         }
 
-        if (kran_done == CS4224_KRAN_AN_DONE)
+        if ((kran_done == CS4224_KRAN_AN_DONE) &&
+           (rules->mseq_dyn_reconfig == FALSE)) /* do call post-AN with dynamic re-config enabled */
         {
             /* if multi-port KR negotiated */
             if ((an_results.bp_10gkx4) || (an_results.bp_40gcr4) || (an_results.bp_40gkr4))
@@ -36602,34 +36672,38 @@ cs_status cs4224_slice_enter_operational_state(
 
     cs4224_lock(slice);
 
-    /* Enable then trigger VCO coarse tuning */
-    if (cs4224_is_hw_duplex(slice) || cs4224_line_rx_to_host_tx_dir(slice))
+    /* do not coarse tune VCOs if running KR w ref clock at 106.25Mhz, let the ucode take of it */
+    if (rules->kran.advanced.ref106 == FALSE)
     {
-        status |= cs4224_reg_get_channel(slice, CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB, &data);
-        status |= cs4224_reg_set_channel(slice, CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB, 0x01e7);
-        CS_MDELAY(1);
-        /* init_vco has built-in delays after coarse tuning */
-        status |= cs4224_init_vco(slice, CS4224_PP_LINE_SDS_COMMON_RXVCO0_CONTROL);
-        if ((data & 0x1c0) != 0x1c0)
+        /* Enable then trigger VCO coarse tuning */
+        if (cs4224_is_hw_duplex(slice) || cs4224_line_rx_to_host_tx_dir(slice))
         {
-            /* demux enabled, needs staggared power up */
-            status |= cs4224_reg_set_channel(slice, CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB, (data | 0x1f));
+            status |= cs4224_reg_get_channel(slice, CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB, &data);
+            status |= cs4224_reg_set_channel(slice, CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB, 0x01e7);
+            CS_MDELAY(1);
+            /* init_vco has built-in delays after coarse tuning */
+            status |= cs4224_init_vco(slice, CS4224_PP_LINE_SDS_COMMON_RXVCO0_CONTROL);
+            if ((data & 0x1c0) != 0x1c0)
+            {
+                /* demux enabled, needs staggered power up */
+                status |= cs4224_reg_set_channel(slice, CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB, (data | 0x1f));
+            }
+            status |= cs4224_reg_set_channel(slice, CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB, data);
         }
-        status |= cs4224_reg_set_channel(slice, CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB, data);
-    }
-    if (cs4224_is_hw_duplex(slice) || !cs4224_line_rx_to_host_tx_dir(slice))
-    {
-        status |= cs4224_reg_get_channel(slice, CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB, &data);
-        status |= cs4224_reg_set_channel(slice, CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB, 0x01e7);
-        CS_MDELAY(1);
-        /* init_vco has built-in delays after coarse tuning */
-        status |= cs4224_init_vco(slice, CS4224_PP_HOST_SDS_COMMON_RXVCO0_CONTROL);
-        if ((data & 0x1c0) != 0x1c0)
+        if (cs4224_is_hw_duplex(slice) || !cs4224_line_rx_to_host_tx_dir(slice))
         {
-            /* demux enabled, needs staggared power up */
-            status |= cs4224_reg_set_channel(slice, CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB, (data | 0x1f));
+            status |= cs4224_reg_get_channel(slice, CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB, &data);
+            status |= cs4224_reg_set_channel(slice, CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB, 0x01e7);
+            CS_MDELAY(1);
+            /* init_vco has built-in delays after coarse tuning */
+            status |= cs4224_init_vco(slice, CS4224_PP_HOST_SDS_COMMON_RXVCO0_CONTROL);
+            if ((data & 0x1c0) != 0x1c0)
+            {
+                /* demux enabled, needs staggered power up */
+                status |= cs4224_reg_set_channel(slice, CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB, (data | 0x1f));
+            }
+            status |= cs4224_reg_set_channel(slice, CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB, data);
         }
-        status |= cs4224_reg_set_channel(slice, CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB, data);
     }
     
     if (cs4224_is_hw_duplex(slice) || cs4224_line_rx_to_host_tx_dir(slice))
@@ -37367,9 +37441,9 @@ const char* cs4224_translate_cfg_side(e_cs4224_cfg_sides_t side)
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
 
 /* The address map for GPIO configuration registers */
@@ -37874,9 +37948,9 @@ cs_status cs4224_gpio_get(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ****************************************************************************/
 #if defined(CS_HAS_INTERRUPTS)
 
@@ -38438,9 +38512,9 @@ cs_status cs4224_irq_print_enabled_interrupts(cs_uint32 slice)
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ****************************************************************************/
 
 #if defined(CS_HAS_INTERRUPTS)
@@ -39095,9 +39169,9 @@ cs4224_irq_node_t CS4224_IRQ_NODE_PP_LINE_SDS_COMMON_RXLOCKD0_INTERRUPT = {
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
 
 extern cs_uint32 cs4224_max_num_dies;
@@ -41435,7 +41509,6 @@ cs_status cs4224_kran_config_an(
     /* 106.25, we'll just scale it appropriately. */
     if (config->advanced.ref106) 
     {
-        CS_PRINTF(("\n...................config->advanced.ref106 == TRUE\n"));
         spare27_lsb = (config->advanced.lfi_10g   * 680) / 1000; /* lfi_10g   * 106.25 / 156.25 */
         spare27_msb = (config->advanced.lfi_1g    * 680) / 1000; /* lfi_1g    * 106.25 / 156.25 */
         lfi_thresh  = (config->advanced.lfi_thres * 680) / 1000; /* lfi_thres * 106.25 / 156.25 */
@@ -42153,9 +42226,9 @@ void cs4224_kran_show_negotiated(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
 
 #if !defined(CS_SKIP_UCODE_DOWNLOAD)

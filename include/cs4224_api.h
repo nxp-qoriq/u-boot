@@ -33,9 +33,9 @@ extern "C" {
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  *****************************************************************************/
 #ifndef __CS4224_KRAN_TYPES_H__
 #define __CS4224_KRAN_TYPES_H__
@@ -305,9 +305,9 @@ typedef struct
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
 #ifndef __CS4224_H__
 #define __CS4224_H__
@@ -2501,9 +2501,9 @@ cs_uint32 cs4224_query_data_rate(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  *****************************************************************************/
 #ifndef __CS4224_REGISTERS_H__
 #define __CS4224_REGISTERS_H__
@@ -3460,6 +3460,10 @@ cs_uint32 cs4224_query_data_rate(
 #define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE15_MSB_dft 0x0
 #define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE20_MSB   0x1AA9
 #define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE20_MSB_dft 0x0
+#define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE22_LSB   0x1AAC
+#define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE22_LSB_dft 0x0
+#define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE22_MSB   0x1AAD
+#define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE22_MSB_dft 0x0
 #define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE24_MSB   0x1AB1
 #define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE24_MSB_dft 0x0
 #define CS4224_PP_HOST_SDS_DSP_MSEQ_SPARE25_LSB   0x1AB2
@@ -8782,9 +8786,9 @@ typedef union {
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
 #ifndef __CS4224_DIAGS_H__
 #define __CS4224_DIAGS_H__
@@ -9368,9 +9372,9 @@ cs_status cs4224_diags_dump_pgrm_store(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ****************************************************************************/
 #ifndef __FCAN_H__
 #define __FCAN_H__
@@ -9444,9 +9448,9 @@ cs_status cs4224_fcan_start_an(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ****************************************************************************/
 #ifndef __CS4224_KRAN_H__
 #define __CS4224_KRAN_H__
@@ -9501,12 +9505,12 @@ cs_status cs4224_kran_status_summary(
 #ifndef __CS_API_VERSION_H__
 #define __CS_API_VERSION_H__
 
-#define CS_API_VERSION    "3.7.8"
-#define CS_API_BUILD_DATE "Jul 15, 2015 at 07:06:38"
+#define CS_API_VERSION    "3.10.0"
+#define CS_API_BUILD_DATE "Apr 21, 2017 at 16:09:26"
 
 #define CS_API_VERSION_MAJOR  3
-#define CS_API_VERSION_MINOR  7
-#define CS_API_VERSION_UPDATE 8
+#define CS_API_VERSION_MINOR  10
+#define CS_API_VERSION_UPDATE 0
 
 #endif /* __CS_API_VERSION_H__ */
 /** @file cs4224_ucode.h
@@ -9532,9 +9536,9 @@ cs_status cs4224_kran_status_summary(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
 #ifndef __CS4224_UCODE_H__
 #define __CS4224_UCODE_H__
@@ -9592,9 +9596,9 @@ cs_status cs4224_ucode_data_prgm_image_broadcast(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ***************************************************************************/
 #ifndef __CS4224_IO_H__
 #define __CS4224_IO_H__
@@ -9850,9 +9854,9 @@ cs_status cs4224_gpio_get(
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ****************************************************************************/
 #ifndef __CS4224_IRQ_PRIV_H__
 #define __CS4224_IRQ_PRIV_H__
@@ -10022,9 +10026,9 @@ typedef struct cs4224_irq_node_s
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ****************************************************************************/
 #ifndef __CS4224_IRQ_H__
 #define __CS4224_IRQ_H__
@@ -10098,9 +10102,9 @@ cs_status cs4224_irq_print_enabled_interrupts(cs_uint32 slice);
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * 
- *    Copyright (C) 2006-2015 Inphi Corporation, Inc. All rights reserved.
+ *    Copyright (C) 2006-2017 Inphi Corporation, Inc. All rights reserved.
  *
- *    API Version Number: 3.7.8
+ *    API Version Number: 3.10.0
  ****************************************************************************/
 
 #ifndef __CS4224_IRQ_TREE_H__
