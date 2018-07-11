@@ -143,36 +143,36 @@ config SYS_FSL_DDR_PHY
 	bool "Freescale DDR PHY"
 	default y
 
-config SYS_PHY_GEN2_DDR_PHY
+config SYS_GEN2_DDR_PHY
 	bool "Gen2 DDR PHY"
 
 config DDR_FIXED_SETTINGS
-       depends on SYS_PHY_GEN2_DDR_PHY
+       depends on SYS_GEN2_DDR_PHY
        bool "DDR Hardcoded settings"
 
-config FSL_PHY_GEN2_DDR_PHY_IMEM_ADDR
-	depends on SYS_PHY_GEN2_DDR_PHY
+config GEN2_DDR_PHY_IMEM_ADDR
+	depends on SYS_GEN2_DDR_PHY
 	hex "Address of Gen2' phy imem"
 	default 0x50000
 
-config PHY_GEN2_DDR_PHY_MULTIPLIER
-	depends on SYS_PHY_GEN2_DDR_PHY
+config GEN2_DDR_PHY_MULTIPLIER
+	depends on SYS_GEN2_DDR_PHY
 	hex "Internal PLL Mutiplier"
 	default 4
 
-config FSL_PHY_GEN2_DDR_PHY_DMEM_ADDR
-	depends on SYS_PHY_GEN2_DDR_PHY
+config GEN2_DDR_PHY_DMEM_ADDR
+	depends on SYS_GEN2_DDR_PHY
 	hex "Address of Gen2' phy dmem"
 	default 0x54000
 
 config FSL_PHY_GEN2_DDR_IMG_ADDR
-	depends on SYS_PHY_GEN2_DDR_PHY
+	depends on SYS_GEN2_DDR_PHY
 	hex "Address of Gen2 phy FW image"
 	default 0x800000 if SD_BOOT
 	default 0x20800000
 
 config FSL_PHY_GEN2_PHY_A2017_11
-	depends on SYS_PHY_GEN2_DDR_PHY
+	depends on SYS_GEN2_DDR_PHY
 	bool "PHY_GEN2 PHY version A2017.11 Support"
 	default y
 

@@ -215,7 +215,7 @@ static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
 	fw->imem->image_start = fit_size + offset;
 	fit_image_get_data_size(fit, noffset, &offset);
 	fw->imem->image_len = offset;
-	fw->imem->load = CONFIG_FSL_PHY_GEN2_DDR_PHY_IMEM_ADDR;
+	fw->imem->load = CONFIG_GEN2_DDR_PHY_IMEM_ADDR;
 	debug("PHY_GEN2 FW: data-offset = 0x%lx, size = 0x%lx\n",
 	      fw->imem->image_start, fw->imem->image_len);
 
@@ -234,7 +234,7 @@ static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
 	fw->dmem->image_start = fit_size + offset;
 	fit_image_get_data_size(fit, noffset, &offset);
 	fw->dmem->image_len = offset;
-	fw->dmem->load = CONFIG_FSL_PHY_GEN2_DDR_PHY_DMEM_ADDR;
+	fw->dmem->load = CONFIG_GEN2_DDR_PHY_DMEM_ADDR;
 	debug("PHY_GEN2 FW: data-offset = 0x%lx, size = 0x%lx\n",
 	      fw->dmem->image_start, fw->dmem->image_len);
 
