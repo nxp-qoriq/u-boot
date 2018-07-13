@@ -278,7 +278,7 @@ unsigned long get_board_ddr_clk(void);
 #ifdef CONFIG_SD_BOOT
 #define CONFIG_SYS_MMC_ENV_DEV          0
 #define CONFIG_ENV_IS_IN_MMC
-#define CONFIG_ENV_OFFSET               0x200000
+#define CONFIG_ENV_OFFSET               0x300000
 #define CONFIG_ENV_SIZE                 0x20000
 #else
 #define CONFIG_ENV_SIZE			0x2000          /* 8KB */
@@ -319,7 +319,7 @@ unsigned long get_board_ddr_clk(void);
 	"fdt_high=0xa0000000\0"			\
 	"initrd_high=0xffffffffffffffff\0"	\
 	"mcmemsize=0x40000000\0"		\
-	"mcinitcmd=mmc info;mmc read 0x80000000 0x5000 0x800;"  \
+	"mcinitcmd=mmc read 0x80000000 0x5000 0x800;"  \
 	"mmc read 0x80100000 0x7000 0x800;" \
 	"fsl_mc start mc 0x80000000 0x80100000\0"
 #else
@@ -343,10 +343,10 @@ unsigned long get_board_ddr_clk(void);
 #endif
 
 #ifdef CONFIG_SD_BOOT
-#define CONFIG_BOOTCOMMAND	"mmc info; mmc read 0x80000000 6800 800;" \
-				"fsl_mc apply dpl 0x80000000;" \
-				"mmc read 0xa0000000 8000 1800;" \
-				"bootm 0xa0000000"
+#define CONFIG_BOOTCOMMAND	"mmc read 0xa0000000 0x6800 0xA0;" \
+				"fsl_mc apply dpl 0xa0000000;" \
+				"mmc read 0xb0000000 0x8000 0x1d000;" \
+				"bootm 0xb0000000"
 #else
 #define CONFIG_BOOTCOMMAND	"fsl_mc apply dpl 0x20d00000;" \
 				"sf probe 0:0;sf read 0xa0000000 0x1000000 0x3000000;" \
