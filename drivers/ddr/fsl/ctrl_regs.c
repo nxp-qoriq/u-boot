@@ -1031,7 +1031,7 @@ static void set_ddr_sdram_mode_2(const unsigned int ctrl_num,
 
 	esdmode2 = (0
 		| ((wr_crc & 0x1) << 12)
-		| ((rtt_wr & 0x3) << 9)
+		| ((rtt_wr & 0x7) << 9)
 		| ((srt & 0x3) << 6)
 		| ((cwl & 0x7) << 3));
 
