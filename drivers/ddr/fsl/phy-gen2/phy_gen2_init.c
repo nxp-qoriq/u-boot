@@ -174,8 +174,10 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num,
 			   input->odt);
 		parse_odt(odt_wr, false, i, input->cs_d0, input->cs_d1,
 			   input->odt);
-		debug("odt[%d] = 0x%x\n", i, input->odt[i]);
 	}
+	for (i = 0; i < CONFIG_CHIP_SELECTS_PER_CTRL; i++)
+		debug("odt[%d] = 0x%x\n", i, input->odt[i]);
+
 	if (dimm_param->registered_dimm) {
 		input->rcw[0] = (ddr->ddr_sdram_rcw_1 >> 28) & 0xf;
 		input->rcw[1] = (ddr->ddr_sdram_rcw_1 >> 24) & 0xf;
