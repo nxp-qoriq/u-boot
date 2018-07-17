@@ -11,7 +11,7 @@
 #include "include/init.h"
 #include "include/io.h"
 
-static void parase_odt(const unsigned int val,
+static void parse_odt(const unsigned int val,
 		       const bool read,
 		       const int i,
 		       const unsigned int cs_d0,
@@ -170,9 +170,9 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num,
 			continue;
 		odt_rd = (ddr->cs[i].config >> 20) & 0x7;
 		odt_wr = (ddr->cs[i].config >> 16) & 0x7;
-		parase_odt(odt_rd, true, i, input->cs_d0, input->cs_d1,
+		parse_odt(odt_rd, true, i, input->cs_d0, input->cs_d1,
 			   input->odt);
-		parase_odt(odt_wr, false, i, input->cs_d0, input->cs_d1,
+		parse_odt(odt_wr, false, i, input->cs_d0, input->cs_d1,
 			   input->odt);
 		debug("odt[%d] = 0x%x\n", i, input->odt[i]);
 	}
