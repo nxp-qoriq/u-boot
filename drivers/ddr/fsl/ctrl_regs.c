@@ -2259,7 +2259,7 @@ static void set_ddr_addr_dec(fsl_ddr_cfg_regs_t *ddr)
 		if (placement == intlv)
 			placement++;
 	}
-	for ( ; i < 12; i++)
+	for ( ; i < 11; i++)
 		map_col[i] = 0x3F;	/* unused col bits */
 
 	if (bg_bits >= 2)
