@@ -19,12 +19,12 @@ static unsigned int skip_caslat(unsigned int tckmin_ps,
 {
 	int i, j, k;
 	struct cas {
-		const unsigned tckmin_ps;
-		const unsigned caslat[4];
+		const unsigned int tckmin_ps;
+		const unsigned int caslat[4];
 	};
 	struct speed {
 		const struct cas *cl;
-		const unsigned taamin_ps[4];
+		const unsigned int taamin_ps[4];
 	};
 	const struct cas cl_3200[] = {
 		{625,	{0xa00000, 0xb00000, 0xf000000,} },
@@ -90,7 +90,6 @@ static unsigned int skip_caslat(unsigned int tckmin_ps,
 		{937,	{ 0xaab0000, 0xaab0000, 0xeaf0000,} },
 		{1071,	{ 0xaaa4000, 0xaaac000, 0xeaec000,} },
 		{1250,	{ 0xaaa0000, 0xaaa2000, 0xeaeb000,} },
-		{1500,	{ 0xaaa1000, 0xaaa3000, 0xeaeb000,} },
 	};
 	const struct cas cl_2666_3ds[] = {
 		{750,	{ 0xa00000, 0xb00000, 0xf00000,} },
@@ -127,11 +126,8 @@ static unsigned int skip_caslat(unsigned int tckmin_ps,
 	};
 	const struct speed *bin;
 	int size;
+	unsigned int taamin_max, tck_max;
 
-	if (mclk_ps < 625 || mclk_ps > 1600) {
-		printf("Error: mclk %u invalid\n", mclk_ps);
-		return 0;
-	}
 	if (taamin_ps > (package_3ds ? 21500 : 18000)) {
 		printf("Error: taamin_ps %u invalid\n", taamin_ps);
 		return 0;
@@ -139,9 +135,17 @@ static unsigned int skip_caslat(unsigned int tckmin_ps,
 	if (package_3ds) {
 		bin = bin_3ds;
 		size = ARRAY_SIZE(bin_3ds);
+		taamin_max = 1250;
+		tck_max = 1500;
 	} else {
 		bin = bin_0;
 		size = ARRAY_SIZE(bin_0);
+		taamin_max = 1500;
+		tck_max = 1600;
+	}
+	if (mclk_ps < 625 || mclk_ps > tck_max) {
+		printf("Error: mclk %u invalid\n", mclk_ps);
+		return 0;
 	}
 
 	for (i = 0; i < size; i++) {
@@ -160,12 +164,16 @@ static unsigned int skip_caslat(unsigned int tckmin_ps,
 		    bin[i].taamin_ps[j] >= taamin_ps)
 			break;
 	}
+	if (j >= 4) {
+		printf("Error: taamin_ps out of range.\n");
+		return 0;
+	}
 	if ((bin[i].taamin_ps[j] == 0) ||
 	    (bin[i].taamin_ps[j] > taamin_ps && j > 0))
 		j--;
 
 	for (k = 0; bin[i].cl[k].tckmin_ps < mclk_ps &&
-		    bin[i].cl[k].tckmin_ps < 1500; k++)
+		    bin[i].cl[k].tckmin_ps < taamin_max; k++)
 		;
 	if (bin[i].cl[k].tckmin_ps > mclk_ps && k > 0)
 		k--;
