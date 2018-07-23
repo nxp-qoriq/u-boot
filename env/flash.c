@@ -45,13 +45,13 @@ DECLARE_GLOBAL_DATA_PTR;
 #endif
 
 #ifdef ENV_IS_EMBEDDED
-env_t *env_ptr = &environment;
+static env_t *env_ptr = &environment;
 
 static __maybe_unused env_t *flash_addr = (env_t *)CONFIG_ENV_ADDR;
 
 #else /* ! ENV_IS_EMBEDDED */
 
-env_t *env_ptr = (env_t *)CONFIG_ENV_ADDR;
+static env_t *env_ptr = (env_t *)CONFIG_ENV_ADDR;
 static __maybe_unused env_t *flash_addr = (env_t *)CONFIG_ENV_ADDR;
 #endif /* ENV_IS_EMBEDDED */
 
