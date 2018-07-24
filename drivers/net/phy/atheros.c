@@ -17,6 +17,8 @@
 #define AR803x_DEBUG_REG_0		0x0
 #define AR803x_RGMII_RX_CLK_DLY		0x8000
 
+#define AR803X_LPI_EN			(1<<8)
+
 static int ar8021_config(struct phy_device *phydev)
 {
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x05);
@@ -52,10 +54,24 @@ static int ar8031_config(struct phy_device *phydev)
 	return 0;
 }
 
+static void ar803x_enable_smart_eee(struct phy_device *phydev, int on)
+{
+	int value;
+
+	/* 5.1.11 Smart_eee control3 */
+	value = phy_read_mmd_indirect(phydev, 0x805D, MDIO_MMD_PCS, MDIO_DEVAD_NONE);
+	if (on)
+		value |= AR803X_LPI_EN;
+	else
+		value &= ~AR803X_LPI_EN;
+	phy_write_mmd_indirect(phydev, 0x805D, MDIO_MMD_PCS, MDIO_DEVAD_NONE, value);
+}
+
 static int ar8035_config(struct phy_device *phydev)
 {
 	int regval;
 
+	ar803x_enable_smart_eee(phydev, 0);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0xd, 0x0007);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0xe, 0x8016);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0xd, 0x4007);
