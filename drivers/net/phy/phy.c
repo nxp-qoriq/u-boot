@@ -20,6 +20,7 @@
 #include <phy.h>
 #include <errno.h>
 #include <linux/err.h>
+#include <linux/mdio.h>
 #include <linux/compiler.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -923,4 +924,39 @@ int phy_get_interface_by_name(const char *str)
 	}
 
 	return -1;
+}
+
+int phy_read_mmd_indirect(struct phy_device *phydev, int prtad,
+			  int devad, int addr)
+{
+	int value = -1;
+
+	/* Write the desired MMD Devad */
+	phy_write(phydev, addr, MII_MMD_CTRL, devad);
+
+	/* Write the desired MMD register address */
+	phy_write(phydev, addr, MII_MMD_DATA, prtad);
+
+	/* Select the Function : DATA with no post increment */
+	phy_write(phydev, addr, MII_MMD_CTRL, (devad | MII_MMD_CTRL_NOINCR));
+
+	/* Read the content of the MMD's selected register */
+	value = phy_read(phydev, addr, MII_MMD_DATA);
+	return value;
+}
+
+void phy_write_mmd_indirect(struct phy_device *phydev, int prtad,
+			    int devad, int addr, u32 data)
+{
+	/* Write the desired MMD Devad */
+	phy_write(phydev, addr, MII_MMD_CTRL, devad);
+
+	/* Write the desired MMD register address */
+	phy_write(phydev, addr, MII_MMD_DATA, prtad);
+
+	/* Select the Function : DATA with no post increment */
+	phy_write(phydev, addr, MII_MMD_CTRL, (devad | MII_MMD_CTRL_NOINCR));
+
+	/* Write the data into MMD's selected register */
+	phy_write(phydev, addr, MII_MMD_DATA, data);
 }

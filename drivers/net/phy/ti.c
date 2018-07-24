@@ -70,16 +70,6 @@ DECLARE_GLOBAL_DATA_PTR;
 #define MII_DP83867_CFG2_SPEEDOPT_INTLOW	0x2000
 #define MII_DP83867_CFG2_MASK			0x003F
 
-#define MII_MMD_CTRL	0x0d /* MMD Access Control Register */
-#define MII_MMD_DATA	0x0e /* MMD Access Data Register */
-
-/* MMD Access Control register fields */
-#define MII_MMD_CTRL_DEVAD_MASK	0x1f /* Mask MMD DEVAD*/
-#define MII_MMD_CTRL_ADDR	0x0000 /* Address */
-#define MII_MMD_CTRL_NOINCR	0x4000 /* no post increment */
-#define MII_MMD_CTRL_INCR_RDWT	0x8000 /* post increment on reads & writes */
-#define MII_MMD_CTRL_INCR_ON_WT	0xC000 /* post increment on writes only */
-
 /* User setting - can be taken from DTS */
 #define DEFAULT_RX_ID_DELAY	DP83867_RGMIIDCTL_2_25_NS
 #define DEFAULT_TX_ID_DELAY	DP83867_RGMIIDCTL_2_75_NS
@@ -97,72 +87,6 @@ struct dp83867_private {
 	int fifo_depth;
 	int io_impedance;
 };
-
-/**
- * phy_read_mmd_indirect - reads data from the MMD registers
- * @phydev: The PHY device bus
- * @prtad: MMD Address
- * @devad: MMD DEVAD
- * @addr: PHY address on the MII bus
- *
- * Description: it reads data from the MMD registers (clause 22 to access to
- * clause 45) of the specified phy address.
- * To read these registers we have:
- * 1) Write reg 13 // DEVAD
- * 2) Write reg 14 // MMD Address
- * 3) Write reg 13 // MMD Data Command for MMD DEVAD
- * 3) Read  reg 14 // Read MMD data
- */
-int phy_read_mmd_indirect(struct phy_device *phydev, int prtad,
-			  int devad, int addr)
-{
-	int value = -1;
-
-	/* Write the desired MMD Devad */
-	phy_write(phydev, addr, MII_MMD_CTRL, devad);
-
-	/* Write the desired MMD register address */
-	phy_write(phydev, addr, MII_MMD_DATA, prtad);
-
-	/* Select the Function : DATA with no post increment */
-	phy_write(phydev, addr, MII_MMD_CTRL, (devad | MII_MMD_CTRL_NOINCR));
-
-	/* Read the content of the MMD's selected register */
-	value = phy_read(phydev, addr, MII_MMD_DATA);
-	return value;
-}
-
-/**
- * phy_write_mmd_indirect - writes data to the MMD registers
- * @phydev: The PHY device
- * @prtad: MMD Address
- * @devad: MMD DEVAD
- * @addr: PHY address on the MII bus
- * @data: data to write in the MMD register
- *
- * Description: Write data from the MMD registers of the specified
- * phy address.
- * To write these registers we have:
- * 1) Write reg 13 // DEVAD
- * 2) Write reg 14 // MMD Address
- * 3) Write reg 13 // MMD Data Command for MMD DEVAD
- * 3) Write reg 14 // Write MMD data
- */
-void phy_write_mmd_indirect(struct phy_device *phydev, int prtad,
-			    int devad, int addr, u32 data)
-{
-	/* Write the desired MMD Devad */
-	phy_write(phydev, addr, MII_MMD_CTRL, devad);
-
-	/* Write the desired MMD register address */
-	phy_write(phydev, addr, MII_MMD_DATA, prtad);
-
-	/* Select the Function : DATA with no post increment */
-	phy_write(phydev, addr, MII_MMD_CTRL, (devad | MII_MMD_CTRL_NOINCR));
-
-	/* Write the data into MMD's selected register */
-	phy_write(phydev, addr, MII_MMD_DATA, data);
-}
 
 #if defined(CONFIG_DM_ETH)
 /**
