@@ -357,7 +357,7 @@ static int mc_fixup_dpc_mac_addr(void *blob, int dpmac_id,
 static int mc_fixup_mac_addrs(void *blob, enum mc_fixup_type type)
 {
 	int i, err = 0, ret = 0;
-	char ethname[10];
+	char ethname[ETH_NAME_LEN];
 	struct eth_device *eth_dev;
 
 	for (i = WRIOP1_DPMAC1; i < NUM_WRIOP_PORTS; i++) {
@@ -365,7 +365,7 @@ static int mc_fixup_mac_addrs(void *blob, enum mc_fixup_type type)
 		if (wriop_is_enabled_dpmac(i) != 1)
 			continue;
 
-		sprintf(ethname, "DPMAC%d@%s", i,
+		snprintf(ethname, ETH_NAME_LEN, "DPMAC%d@%s", i,
 			phy_interface_strings[wriop_get_enet_if(i)]);
 
 		eth_dev = eth_get_dev_by_name(ethname);

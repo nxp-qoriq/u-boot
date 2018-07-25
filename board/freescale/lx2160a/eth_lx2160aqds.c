@@ -668,7 +668,7 @@ int fdt_fixup_board_phy (void *fdt)
 	struct list_head *mii_devs, *entry;
 	int ret, dpmac_id, phandle, i;
 	struct phy_device *phy_dev;
-	char ethname[10];
+	char ethname[ETH_NAME_LEN];
 
 	ret = 0;
 	/* we know FPGA is connected to i2c0, therfore search path directly,
