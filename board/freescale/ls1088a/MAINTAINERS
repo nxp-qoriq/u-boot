@@ -7,6 +7,14 @@ F:	include/configs/ls1088ardb.h
 F:	configs/ls1088ardb_qspi_defconfig
 F:	configs/ls1088ardb_sdcard_qspi_defconfig
 
+LS1088ARDB_PB BOARD
+M:	Pramod Kumar <Pramod.Kumar@nxp.com>
+S:	Maintained
+F:	board/freescale/ls1088a/
+F:	include/configs/ls1088ardb_pb.h
+F:	configs/ls1088ardb_pb_qspi_defconfig
+F:	configs/ls1088ardb_pb_sdcard_qspi_defconfig
+
 LS1088AQDS BOARD
 M:	Prabhakar Kushwaha <prabhakar.kushwaha@nxp.com>
 M:	Ashish Kumar <Ashish.Kumar@nxp.com>
@@ -34,3 +42,13 @@ LS1088ARDB_SD_SECURE_BOOT BOARD
 M:	Sumit Garg <sumit.garg@nxp.com>
 S:	Maintained
 F:	configs/ls1088ardb_sdcard_qspi_SECURE_BOOT_defconfig
+
+LS1088ARDB_PB_QSPI_SECURE_BOOT BOARD
+M:	Udit Agarwal <udit.agarwal@nxp.com>
+S:	Maintained
+F:	configs/ls1088ardb_pb_qspi_SECURE_BOOT_defconfig
+
+LS1088ARDB_PB_SD_SECURE_BOOT BOARD
+M:	Udit Agarwal <udit.agarwal@nxp.com>
+S:	Maintained
+F:	configs/ls1088ardb_pb_sdcard_qspi_SECURE_BOOT_defconfig

@@ -1005,6 +1005,20 @@ config TARGET_LS1088ARDB
 	  development platform that supports the QorIQ LS1088A
 	  Layerscape Architecture processor.
 
+config TARGET_LS1088ARDB_PB
+	bool "Support ls1088ardb_pb"
+	select ARCH_LS1088A
+	select ARM64
+	select ARMV8_MULTIENTRY
+	select ARCH_MISC_INIT
+	select BOARD_LATE_INIT
+	select SUPPORT_SPL
+	help
+	  Support for NXP LS1088ARDB_PB platform.
+	  The LS1088A Reference design board (RDB_PB) is a high-performance
+	  development platform that supports the QorIQ LS1088A
+	  Layerscape Architecture processor.
+
 config TARGET_LS1021AQDS
 	bool "Support ls1021aqds"
 	select BOARD_LATE_INIT

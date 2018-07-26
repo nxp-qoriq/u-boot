@@ -83,3 +83,46 @@ endif
 
 source "board/freescale/common/Kconfig"
 endif
+
+if TARGET_LS1088ARDB_PB
+
+config SYS_BOARD
+	default "ls1088a"
+
+config SYS_VENDOR
+	default "freescale"
+
+config SYS_SOC
+	default "fsl-layerscape"
+
+config SYS_CONFIG_NAME
+	default "ls1088ardb_pb"
+
+if SYS_LS_PPA_FW_IN_XIP
+
+config SYS_LS_PPA_FW_ADDR
+	hex "PPA Firmware Addr"
+	default 0x20400000
+
+if CHAIN_OF_TRUST
+config SYS_LS_PPA_ESBC_ADDR
+	hex "PPA Firmware HDR Addr"
+	default 0x20680000
+endif
+endif
+
+if (SYS_LS_PPA_FW_IN_MMC || SYS_LS_PPA_FW_IN_NAND)
+
+config SYS_LS_PPA_FW_ADDR
+	hex "PPA Firmware Addr"
+	default 0x400000
+
+if CHAIN_OF_TRUST
+config SYS_LS_PPA_ESBC_ADDR
+	hex "PPA Firmware HDR Addr"
+	default 0x680000
+endif
+endif
+
+source "board/freescale/common/Kconfig"
+endif

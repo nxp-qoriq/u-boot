@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 NXP
+ * Copyright 2017-2018 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -28,6 +28,15 @@
 #include <fsl_immap.h>
 
 DECLARE_GLOBAL_DATA_PTR;
+
+#ifdef CONFIG_TARGET_LS1088ARDB_PB
+int fixup_ls1088ardb_pb_banner(void *fdt)
+{
+	fdt_setprop_string(fdt, 0, "model", "LS1088ARDB-PB Board");
+
+	return 0;
+}
+#endif
 
 int board_early_init_f(void)
 {
@@ -79,6 +88,9 @@ int checkboard(void)
 
 #ifdef CONFIG_TARGET_LS1088AQDS
 	printf("Board: LS1088A-QDS, ");
+
+#elif CONFIG_TARGET_LS1088ARDB_PB
+	printf("Board: LS1088ARDB-PB, ");
 #else
 	printf("Board: LS1088A-RDB, ");
 #endif
@@ -328,7 +340,7 @@ void board_retimer_init(void)
 #ifdef CONFIG_MISC_INIT_R
 int misc_init_r(void)
 {
-#ifdef CONFIG_TARGET_LS1088ARDB
+#if defined(CONFIG_TARGET_LS1088ARDB) || defined(CONFIG_TARGET_LS1088ARDB_PB)
 	u8 brdcfg5;
 
 	if (hwconfig("esdhc-force-sd")) {
@@ -460,7 +472,7 @@ exit:
 int board_init(void)
 {
 	init_final_memctl_regs();
-#if defined(CONFIG_TARGET_LS1088ARDB) && defined(CONFIG_FSL_MC_ENET)
+#if defined(CONFIG_TARGET_LS1088ARDB) || defined(CONFIG_TARGET_LS1088ARDB_PB) && defined(CONFIG_FSL_MC_ENET)
 	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
 #endif
 
@@ -471,7 +483,7 @@ int board_init(void)
 	gd->env_addr = (ulong)&default_environment[0];
 #endif
 
-#if defined(CONFIG_TARGET_LS1088ARDB) && defined(CONFIG_FSL_MC_ENET)
+#if defined(CONFIG_TARGET_LS1088ARDB) || defined(CONFIG_TARGET_LS1088ARDB_PB) && defined(CONFIG_FSL_MC_ENET)
 	/* invert AQR105 IRQ pins polarity */
 	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR105_IRQ_MASK);
 #endif
@@ -587,6 +599,9 @@ int ft_board_setup(void *blob, bd_t *bd)
 		return err;
 #endif
 
+#ifdef CONFIG_TARGET_LS1088ARDB_PB
+fixup_ls1088ardb_pb_banner(blob);
+#endif
 	return 0;
 }
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 NXP
+ * Copyright 2017-2018 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -28,7 +28,7 @@ static const struct board_specific_parameters udimm0[] = {
 	 *   num|  hi| rank|  clk| wrlvl |   wrlvl   |  wrlvl
 	 * ranks| mhz| GB  |adjst| start |   ctl2    |  ctl3
 	 */
-#if defined(CONFIG_TARGET_LS1088ARDB)
+#if defined(CONFIG_TARGET_LS1088ARDB) || defined(CONFIG_TARGET_LS1088ARDB_PB)
 
 	{2,  1666, 0, 8,     8, 0x090A0B0E, 0x0F10110D,},
 	{2,  1900, 0, 4,     7, 0x09090B0D, 0x0E10120B,},
