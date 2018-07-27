@@ -1401,6 +1401,7 @@ struct dm_pci_emul_ops {
 int sandbox_pci_get_emul(struct udevice *bus, pci_dev_t find_devfn,
 			 struct udevice **emulp);
 
+int dm_pci_find_capability(struct udevice *dev, int cap);
 #endif /* CONFIG_DM_PCI */
 
 /**

@@ -1289,3 +1289,65 @@ void pci_init(void)
 		;
 	}
 }
+
+/* Find the header pointer to the Capabilities*/
+static int dm_pci_find_capability_start(struct udevice *dev, u8 hdr_type)
+{
+	u16 status;
+
+	dm_pci_read_config16(dev, PCI_STATUS, &status);
+
+	if (!(status & PCI_STATUS_CAP_LIST))
+		return 0;
+
+	switch (hdr_type) {
+	case PCI_HEADER_TYPE_NORMAL:
+	case PCI_HEADER_TYPE_BRIDGE:
+		return PCI_CAPABILITY_LIST;
+	case PCI_HEADER_TYPE_CARDBUS:
+		return PCI_CB_CAPABILITY_LIST;
+	default:
+		return 0;
+	}
+}
+
+static int dm_pci_find_capability_pos(struct udevice *dev, int pos, int cap)
+{
+	int ttl = PCI_FIND_CAP_TTL;
+	u8 id;
+	u8 next_pos;
+
+	while (ttl--) {
+		dm_pci_read_config8(dev, pos, &next_pos);
+		if (next_pos < CAP_START_POS)
+			break;
+		next_pos &= ~3;
+		pos = (int) next_pos;
+		dm_pci_read_config8(dev, pos + PCI_CAP_LIST_ID, &id);
+		if (id == 0xff)
+			break;
+		if (id == cap)
+			return pos;
+		pos += PCI_CAP_LIST_NEXT;
+	}
+	return 0;
+}
+
+/* Returns the address of the requested capability structure within the
+ * device's PCI configuration space or 0 in case the device does not
+ * support it.
+ * */
+int dm_pci_find_capability(struct udevice *dev, int cap)
+{
+	int pos;
+	u8 hdr_type;
+
+	dm_pci_read_config8(dev, PCI_HEADER_TYPE, &hdr_type);
+
+	pos = dm_pci_find_capability_start(dev, hdr_type & 0x7F);
+
+	if (pos)
+		pos = dm_pci_find_capability_pos(dev, pos, cap);
+
+	return pos;
+}
