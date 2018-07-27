@@ -33,6 +33,8 @@ void dm_pciauto_setup_device(struct udevice *dev, int bars_num,
 	struct pci_region *bar_res = NULL;
 	int found_mem64 = 0;
 	u16 class;
+	int pos;
+	u16 val;
 
 	dm_pci_read_config16(dev, PCI_COMMAND, &cmdstat);
 	cmdstat = (cmdstat & ~(PCI_COMMAND_IO | PCI_COMMAND_MEMORY)) |
@@ -160,6 +162,30 @@ void dm_pciauto_setup_device(struct udevice *dev, int bars_num,
 	dm_pci_write_config8(dev, PCI_CACHE_LINE_SIZE,
 			     CONFIG_SYS_PCI_CACHE_LINE_SIZE);
 	dm_pci_write_config8(dev, PCI_LATENCY_TIMER, 0x80);
+
+#ifdef CONFIG_PCIE_LX
+	/*
+	 * When LX2 PCIe controller is sending multiple split completions and
+	 * ACK latency expires indicating that ACK should be send at priority.
+	 * But because of large number of split completions and FC update DLLP,
+	 * the controller does not give priority to ACK transmission. This
+	 * results into ACK latency timer timeout error at the link partner and
+	 * the pending TLPs are replayed by the link partner again.
+	 *
+	 * The workaround:
+	 * Restrict the number of completions from the LX2 PCIe controller
+	 * to 1, by changing the Max Read Request Size (MRRS) of link partner
+	 * to the same value as Max Packet size (MPS).
+	 *
+	 * So, set the MPS and MRRS to 128B.
+	 */
+	pos = dm_pci_find_capability(dev, PCI_CAP_ID_EXP);
+	if (pos) {
+		dm_pci_read_config16(dev, pos + PCI_EXP_DEVCTL, &val);
+		val &= ~(PCI_EXP_DEVCTL_READRQ | PCI_EXP_DEVCTL_PAYLOAD);
+		dm_pci_write_config16(dev, pos + PCI_EXP_DEVCTL, val);
+	}
+#endif
 }
 
 void dm_pciauto_prescan_setup_bridge(struct udevice *dev, int sub_bus)
