@@ -438,6 +438,10 @@ int board_init(void)
 #ifdef CONFIG_ENV_IS_NOWHERE
 	gd->env_addr = (ulong)&default_environment[0];
 #endif
+
+#if defined(CONFIG_VID)
+	init_func_vid();
+#endif
 #ifdef CONFIG_TARGET_LX2RDB
 	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
 #endif
