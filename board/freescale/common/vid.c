@@ -321,6 +321,7 @@ static int set_voltage_to_IR(int i2caddress, int vdd)
 static int set_voltage_to_LTC(int i2caddress, int vdd)
 {
 	int ret, vdd_last, vdd_target = vdd;
+	int count = 100, temp = 0;
 
 	/* Scale up to the LTC resolution is 1/4096V */
 	vdd = (vdd * 4096) / 1000;
@@ -339,11 +340,17 @@ static int set_voltage_to_LTC(int i2caddress, int vdd)
 		return -1;
 	}
 
-	vdd_last = read_voltage_from_LTC(i2caddress);
-	if (vdd_last < 0) {
-		printf("VID: Couldn't read sensor abort VID adjust\n");
-		return -1;
-	}
+	/* Wait for the volatge to get to the desired value */
+	do {
+		vdd_last = read_voltage_from_LTC(i2caddress);
+		if (vdd_last < 0) {
+			printf("VID: Couldn't read sensor abort VID adjust\n");
+			return -1;
+		}
+		count--;
+		temp = vdd_last - vdd_target;
+	} while ((abs(temp) > 2)  && (count > 0));
+
 	return vdd_last;
 }
 #endif
