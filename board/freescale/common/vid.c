@@ -339,14 +339,11 @@ static int set_voltage_to_LTC(int i2caddress, int vdd)
 		return -1;
 	}
 
-	/* Wait for the volatge to get to the desired value */
-	do {
-		vdd_last = read_voltage_from_LTC(i2caddress);
-		if (vdd_last < 0) {
-			printf("VID: Couldn't read sensor abort VID adjust\n");
-			return -1;
-		}
-	} while (vdd_last != vdd_target);
+	vdd_last = read_voltage_from_LTC(i2caddress);
+	if (vdd_last < 0) {
+		printf("VID: Couldn't read sensor abort VID adjust\n");
+		return -1;
+	}
 	return vdd_last;
 }
 #endif
