@@ -52,10 +52,9 @@
 #ifdef CS_DONT_USE_STDLIB
 #    define CS_FPRINTF(x) fprintf x
 #    define CS_FLUSH()
-#    define CS_PRINTF(x) printf x
+#    define CS_PRINTF(x) debug x
 #    define CS_SNPRINTF(x) snprintf x
-
-#    define CS_TRACE(x) printf x
+#    define CS_TRACE(x) debug x
 #else
 #    define CS_PRINTF(x)  printf x
 #    define CS_FPRINTF(x) fprintf x
