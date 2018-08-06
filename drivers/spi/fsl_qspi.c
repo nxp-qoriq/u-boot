@@ -28,7 +28,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define OFFSET_BITS_MASK       ((FSL_QSPI_FLASH_SIZE  > SZ_16M) ? \
 					GENMASK(27, 0) : GENMASK(23, 0))
-
+#define OFFSET_BITS_MASK24     GENMASK(23, 0)
 
 #define FLASH_STATUS_WEL	0x02
 
@@ -360,6 +360,8 @@ static void qspi_set_lut(struct fsl_qspi_priv *priv)
 		     OPRND0(8) | PAD0(LUT_PAD1) | INSTR0(LUT_DUMMY) |
 		     OPRND1(1) | PAD1(LUT_PAD1) |
 		     INSTR1(LUT_READ));
+	qspi_write32(priv->flags, &regs->lut[lut_base + 2], 0);
+	qspi_write32(priv->flags, &regs->lut[lut_base + 3], 0);
 
 	/*
 	 * Write any device register.
@@ -370,8 +372,11 @@ static void qspi_set_lut(struct fsl_qspi_priv *priv)
 		     OPRND0(QSPI_CMD_WRAR) | PAD0(LUT_PAD1) |
 		     INSTR0(LUT_CMD) | OPRND1(ADDR24BIT) |
 		     PAD1(LUT_PAD1) | INSTR1(LUT_ADDR));
+	qspi_write32(priv->flags, &regs->lut[lut_base + 1], 0);
 	qspi_write32(priv->flags, &regs->lut[lut_base + 1],
 		     OPRND0(1) | PAD0(LUT_PAD1) | INSTR0(LUT_WRITE));
+	qspi_write32(priv->flags, &regs->lut[lut_base + 2], 0);
+	qspi_write32(priv->flags, &regs->lut[lut_base + 3], 0);
 
 	/* Lock the LUT */
 	qspi_write32(priv->flags, &regs->lutkey, LUT_KEY_VALUE);
@@ -593,7 +598,6 @@ static void qspi_op_read(struct fsl_qspi_priv *priv, u32 *rxbuf, u32 len)
 	qspi_write32(priv->flags, &regs->rbct, QSPI_RBCT_RXBRD_USEIPS);
 
 	to_or_from = priv->sf_addr + priv->cur_amba_base;
-
 	while (len > 0) {
 		WATCHDOG_RESET();
 
@@ -816,16 +820,20 @@ int qspi_xfer(struct fsl_qspi_priv *priv, unsigned int bitlen,
 			return 0;
 		}
 
-		if (priv->cur_seqid == QSPI_CMD_FAST_READ ||
-		    priv->cur_seqid == QSPI_CMD_RDAR) {
+		if (priv->cur_seqid == QSPI_CMD_FAST_READ) {
 			priv->sf_addr = swab32(txbuf) & OFFSET_BITS_MASK;
-		} else if ((priv->cur_seqid == QSPI_CMD_SE) ||
-			   (priv->cur_seqid == QSPI_CMD_BE_4K)) {
+		} else if (priv->cur_seqid == QSPI_CMD_RDAR) {
+			priv->sf_addr = swab32(txbuf) & OFFSET_BITS_MASK24;
+		} else if (priv->cur_seqid == QSPI_CMD_SE) {
 			priv->sf_addr = swab32(txbuf) & OFFSET_BITS_MASK;
 			qspi_op_erase(priv);
-		} else if (priv->cur_seqid == QSPI_CMD_PP ||
-			   priv->cur_seqid == QSPI_CMD_WRAR) {
+		} else if (priv->cur_seqid == QSPI_CMD_BE_4K) {
+			priv->sf_addr = swab32(txbuf) & OFFSET_BITS_MASK24;
+			qspi_op_erase(priv);
+		} else if (priv->cur_seqid == QSPI_CMD_PP ) {
 			wr_sfaddr = swab32(txbuf) & OFFSET_BITS_MASK;
+		} else if (priv->cur_seqid == QSPI_CMD_WRAR) {
+			wr_sfaddr = swab32(txbuf) & OFFSET_BITS_MASK24;
 		} else if ((priv->cur_seqid == QSPI_CMD_BRWR) ||
 			 (priv->cur_seqid == QSPI_CMD_WREAR)) {
 #ifdef CONFIG_SPI_FLASH_BAR
