@@ -1,0 +1,8 @@
+#
+# QUICC Engine Drivers
+#
+config  U_QE
+	bool "Enable support for U QUICC Engine"
+	default y if ARCH_LS1021A && !SD_BOOT && !NAND_BOOT && !QSPI_BOOT
+	help
+	  Choose this option to add support for U QUICC Engine.
