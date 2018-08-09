@@ -8,6 +8,8 @@
 #ifndef _INIT_H_
 #define _INIT_H_
 
+#include <fsl_ddr.h>
+#include <fsl_ddr_sdram.h>
 #include "input.h"
 #include "ddr4u1d.h"
 #include "ddr4u2d.h"
@@ -15,7 +17,6 @@
 #include "ddr4r2d.h"
 #include "ddr4lr1d.h"
 #include "ddr4lr2d.h"
-#include "dimm.h"
 
 #define t_anib				0
 #define t_dbyte				0x10000
@@ -147,8 +148,11 @@ struct impedance_mapping {
 	int code;
 };
 
-struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm,
-			      int freq);
+struct input *phy_gen2_init_input(const unsigned int ctrl_num,
+				  const memctl_options_t *popts,
+				  const dimm_params_t *dimm_param,
+				  fsl_ddr_cfg_regs_t *ddr,
+				  int freq);
 int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 		  struct input *input, size_t *len);
 int c_init_phy_config(const unsigned int ctrl_num, struct input *input,

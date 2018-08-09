@@ -13,7 +13,6 @@
 #include <fsl_ddr.h>
 #include <fsl_immap.h>
 #include "include/init.h"
-#include "include/dimm.h"
 #include "include/phy_gen2_fit.h"
 #include <asm/arch/clock.h>
 
@@ -187,159 +186,34 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 	return 0;
 }
 #else
-static void parase_odt(const unsigned int val,
-		       const bool read,
-		       const int i,
-		       const unsigned int cs_d0,
-		       const unsigned int cs_d1,
-		       unsigned int *odt)
-{
-	int shift = read ? 4 : 0;
-	int j;
-
-	if (i < 0 || i > 3) {
-		printf("Error: invalid chip-select value\n");
-	}
-	switch (val) {
-	case FSL_DDR_ODT_CS:
-		odt[i] |= (1 << i) << shift;
-		break;
-	case FSL_DDR_ODT_ALL_OTHER_CS:
-		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
-			if (i == j)
-				continue;
-			if (!((cs_d0 | cs_d1) & (1 << j)))
-				continue;
-			odt[j] |= (1 << i) << shift;
-		}
-		break;
-	case FSL_DDR_ODT_CS_AND_OTHER_DIMM:
-		odt[i] |= (1 << i) << 4;
-		/* fall through */
-	case FSL_DDR_ODT_OTHER_DIMM:
-		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
-			if (((cs_d0 & (1 << i)) && (cs_d1 & (1 << j))) ||
-			    ((cs_d1 & (1 << i)) && (cs_d0 & (1 << j))))
-				odt[j] |= (1 << i) << shift;
-		}
-		break;
-	case FSL_DDR_ODT_ALL:
-		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
-			if (!((cs_d0 | cs_d1) & (1 << j)))
-				continue;
-			odt[j] |= (1 << i) << shift;
-		}
-		break;
-	case FSL_DDR_ODT_SAME_DIMM:
-		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
-			if (((cs_d0 & (1 << i)) && (cs_d0 & (1 << j))) ||
-			    ((cs_d1 & (1 << i)) && (cs_d1 & (1 << j))))
-				odt[j] |= (1 << i) << shift;
-		}
-		break;
-	case FSL_DDR_ODT_OTHER_CS_ONSAMEDIMM:
-		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
-			if (i == j)
-				continue;
-			if (((cs_d0 & (1 << i)) && (cs_d0 & (1 << j))) ||
-			    ((cs_d1 & (1 << i)) && (cs_d1 & (1 << j))))
-				odt[j] |= (1 << i) << shift;
-		}
-		break;
-	case FSL_DDR_ODT_NEVER:
-		break;
-	default:
-		break;
-	}
-}
-
 int compute_phy_config_regs(const unsigned int ctrl_num,
 			    const memctl_options_t *popts,
 			    const dimm_params_t *dimm_param,
 			    fsl_ddr_cfg_regs_t *ddr)
 {
 	int ret = 0;
-	struct dimm *dimm;
 	struct input *input;
 	void *msg_1d, *msg_2d;
 	size_t len;
-	int i;
-	unsigned int odt_rd, odt_wr;
-
-	dimm = calloc(1, sizeof(struct dimm));
-	if (!dimm) {
-		printf("%s %d: Could not allocate memory\n", __func__, __LINE__);
-		return -ENOMEM;
-	}
 
 	if (dimm_param) {
-		dimm->dramtype = DDR4;
-		/* FIXME: Add condition for LRDIMM */
-		dimm->dimmtype = dimm_param->registered_dimm ? RDIMM : UDIMM;
-		dimm->primary_sdram_width = dimm_param->primary_sdram_width;
-		dimm->ec_sdram_width = dimm_param->ec_sdram_width;
-		dimm->n_ranks = dimm_param->n_ranks;
-		dimm->data_width = dimm_param->device_width;
-		dimm->mirror = dimm_param->mirrored_dimm;
-		dimm->mr[0] = ddr->ddr_sdram_mode & 0xffff;
-		dimm->mr[1] = ddr->ddr_sdram_mode >> 16;
-		dimm->mr[2] = ddr->ddr_sdram_mode_2 >> 16;
-		dimm->mr[3] = ddr->ddr_sdram_mode_2 & 0xffff;
-		dimm->mr[4] = ddr->ddr_sdram_mode_9 >> 16;
-		dimm->mr[5] = ddr->ddr_sdram_mode_9 & 0xffff;
-		dimm->mr[6] = ddr->ddr_sdram_mode_10 >> 16;
-		debug("ddr_sdram_mode = 0x%x\n", ddr->ddr_sdram_mode);
-		debug("ddr_sdram_mode_2 = 0x%x\n", ddr->ddr_sdram_mode_2);
-		debug("ddr_sdram_mode_9 = 0x%x\n", ddr->ddr_sdram_mode_9);
-		debug("ddr_sdram_mode_10 = 0x%x\n", ddr->ddr_sdram_mode_10);
-		dimm->cs_d0 = popts->cs_d0;
-		dimm->cs_d1 = popts->cs_d1;
-		dimm->vref = popts->vref_phy;
-		for (i = 0; i < CONFIG_CHIP_SELECTS_PER_CTRL; i++) {
-			if (!(ddr->cs[i].config & SDRAM_CS_CONFIG_EN))
-				continue;
-			odt_rd = (ddr->cs[i].config >> 20) & 0x7;
-			odt_wr = (ddr->cs[i].config >> 16) & 0x7;
-			parase_odt(odt_rd, true, i, dimm->cs_d0, dimm->cs_d1,
-				   dimm->odt);
-			parase_odt(odt_wr, false, i, dimm->cs_d0, dimm->cs_d1,
-				   dimm->odt);
-		}
-
 		/* Do not set sdram_cfg[RD_EN] or sdram_cfg2[RCW_EN] for RDIMM */
 		if (dimm_param->registered_dimm) {
 			ddr->ddr_sdram_cfg &= ~(1 << 28);
 			ddr->ddr_sdram_cfg_2 &= ~(1 << 2);
-			dimm->rcw[0] = (ddr->ddr_sdram_rcw_1 >> 28) & 0xf;
-			dimm->rcw[1] = (ddr->ddr_sdram_rcw_1 >> 24) & 0xf;
-			dimm->rcw[2] = (ddr->ddr_sdram_rcw_1 >> 20) & 0xf;
-			dimm->rcw[3] = (ddr->ddr_sdram_rcw_1 >> 16) & 0xf;
-			dimm->rcw[4] = (ddr->ddr_sdram_rcw_1 >> 12) & 0xf;
-			dimm->rcw[5] = (ddr->ddr_sdram_rcw_1 >> 8) & 0xf;
-			dimm->rcw[6] = (ddr->ddr_sdram_rcw_1 >> 4) & 0xf;
-			dimm->rcw[7] = (ddr->ddr_sdram_rcw_1 >> 0) & 0xf;
-			dimm->rcw[8] = (ddr->ddr_sdram_rcw_2 >> 28) & 0xf;
-			dimm->rcw[9] = (ddr->ddr_sdram_rcw_2 >> 24) & 0xf;
-			dimm->rcw[10] = (ddr->ddr_sdram_rcw_2 >> 20) & 0xf;
-			dimm->rcw[11] = (ddr->ddr_sdram_rcw_2 >> 16) & 0xf;
-			dimm->rcw[12] = (ddr->ddr_sdram_rcw_2 >> 12) & 0xf;
-			dimm->rcw[13] = (ddr->ddr_sdram_rcw_2 >> 8) & 0xf;
-			dimm->rcw[14] = (ddr->ddr_sdram_rcw_2 >> 4) & 0xf;
-			dimm->rcw[15] = (ddr->ddr_sdram_rcw_2 >> 0) & 0xf;
-			dimm->rcw3x = (ddr->ddr_sdram_rcw_3 >> 8) & 0xff;
 		}
 	} else {
 		printf("Error: empty DIMM parameters.\n");
 		ret = -EINVAL;
-		goto err_dimm;
+		return ret;
 	}
 	debug("Initializing input data structure\n");
-	input = phy_gen2_init_input(ctrl_num, dimm,
+	input = phy_gen2_init_input(ctrl_num, popts, dimm_param, ddr,
 				(get_ddr_freq(ctrl_num) + 1000000) / 2000000);
 	if (!input) {
 		printf("%s %d: Could not allocate memory\n", __func__, __LINE__);
 		ret = -ENOMEM;
-		goto err_dimm;
+		return ret;
 	}
 
 	debug("Initializing message block\n");
@@ -389,10 +263,9 @@ int compute_phy_config_regs(const unsigned int ctrl_num,
 		i_load_pie(ctrl_num, input, msg_1d);
 
 		printf("DDR4(%d) %s with %d-rank %d-bit bus (x%d)\n", ctrl_num,
-		       dimm->dimmtype == RDIMM ? "RDIMM" :
-		       dimm->dimmtype == LRDIMM ? "LRDIMM" : "UDIMM",
-		       dimm->n_ranks, dimm->primary_sdram_width,
-		       dimm->data_width);
+		       dimm_param->registered_dimm ? "RDIMM" : "UDIMM",
+		       dimm_param->n_ranks, dimm_param->primary_sdram_width,
+		       dimm_param->device_width);
 	}
 
 #ifdef CONFIG_ARCH_LX2160A_PXP
@@ -407,8 +280,6 @@ err_msg_block:
 	free(msg_1d);
 err_input:
 	free(input);
-err_dimm:
-	free(dimm);
 
 	return ret;
 }

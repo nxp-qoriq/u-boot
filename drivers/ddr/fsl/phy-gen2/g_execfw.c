@@ -6,7 +6,6 @@
  */
 
 #include <common.h>
-#include "include/dimm.h"
 #include "include/io.h"
 #include "include/init.h"
 

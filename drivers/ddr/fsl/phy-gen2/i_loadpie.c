@@ -6,11 +6,9 @@
  */
 
 #include <common.h>
-#include "include/dimm.h"
 #include "include/pie.h"
 #include "include/io.h"
 #include "include/init.h"
-#include "include/dimm.h"
 
 static void load_pieimage(const unsigned int ctrl_num,
 			  enum dimm_types dimm_type)

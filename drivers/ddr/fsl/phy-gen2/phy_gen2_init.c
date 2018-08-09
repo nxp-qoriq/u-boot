@@ -11,10 +11,80 @@
 #include "include/init.h"
 #include "include/io.h"
 
-struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm,
-			      int freq)
+static void parase_odt(const unsigned int val,
+		       const bool read,
+		       const int i,
+		       const unsigned int cs_d0,
+		       const unsigned int cs_d1,
+		       unsigned int *odt)
+{
+	int shift = read ? 4 : 0;
+	int j;
+
+	if (i < 0 || i > 3) {
+		printf("Error: invalid chip-select value\n");
+	}
+	switch (val) {
+	case FSL_DDR_ODT_CS:
+		odt[i] |= (1 << i) << shift;
+		break;
+	case FSL_DDR_ODT_ALL_OTHER_CS:
+		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
+			if (i == j)
+				continue;
+			if (!((cs_d0 | cs_d1) & (1 << j)))
+				continue;
+			odt[j] |= (1 << i) << shift;
+		}
+		break;
+	case FSL_DDR_ODT_CS_AND_OTHER_DIMM:
+		odt[i] |= (1 << i) << 4;
+		/* fall through */
+	case FSL_DDR_ODT_OTHER_DIMM:
+		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
+			if (((cs_d0 & (1 << i)) && (cs_d1 & (1 << j))) ||
+			    ((cs_d1 & (1 << i)) && (cs_d0 & (1 << j))))
+				odt[j] |= (1 << i) << shift;
+		}
+		break;
+	case FSL_DDR_ODT_ALL:
+		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
+			if (!((cs_d0 | cs_d1) & (1 << j)))
+				continue;
+			odt[j] |= (1 << i) << shift;
+		}
+		break;
+	case FSL_DDR_ODT_SAME_DIMM:
+		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
+			if (((cs_d0 & (1 << i)) && (cs_d0 & (1 << j))) ||
+			    ((cs_d1 & (1 << i)) && (cs_d1 & (1 << j))))
+				odt[j] |= (1 << i) << shift;
+		}
+		break;
+	case FSL_DDR_ODT_OTHER_CS_ONSAMEDIMM:
+		for (j = 0; j < CONFIG_CHIP_SELECTS_PER_CTRL; j++) {
+			if (i == j)
+				continue;
+			if (((cs_d0 & (1 << i)) && (cs_d0 & (1 << j))) ||
+			    ((cs_d1 & (1 << i)) && (cs_d1 & (1 << j))))
+				odt[j] |= (1 << i) << shift;
+		}
+		break;
+	case FSL_DDR_ODT_NEVER:
+		break;
+	default:
+		break;
+	}
+}
+
+struct input *phy_gen2_init_input(const unsigned int ctrl_num,
+				  const memctl_options_t *popts,
+				  const dimm_params_t *dimm_param,
+				  fsl_ddr_cfg_regs_t *ddr,
+				  int freq)
 {
 	struct input *input;
+	unsigned int odt_rd, odt_wr;
 	int i;
 
 	input = calloc(1, sizeof(struct input));
@@ -23,17 +93,17 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 		return NULL;
 	}
 
-	input->basic.dram_type = dimm->dramtype;
-	input->basic.dimm_type = dimm->dimmtype;
+	input->basic.dram_type = DDR4;
+	input->basic.dimm_type = dimm_param->registered_dimm ? RDIMM : UDIMM;
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	input->basic.num_dbyte = 0x9;
 #else
-	input->basic.num_dbyte = dimm->primary_sdram_width / 8 +
-				 dimm->ec_sdram_width / 8;
+	input->basic.num_dbyte = dimm_param->primary_sdram_width / 8 +
+				 dimm_param->ec_sdram_width / 8;
 #endif
-	input->basic.num_rank_dfi0 = dimm->n_ranks;
+	input->basic.num_rank_dfi0 = dimm_param->n_ranks;
 	input->basic.frequency = freq;
-	input->basic.dram_data_width = dimm->data_width;
+	input->basic.dram_data_width = dimm_param->device_width;
 
 	input->basic.hard_macro_ver	= 3;
 	input->basic.num_pstates	= 1;
@@ -77,26 +147,55 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 	debug("input->basic.num_rank_dfi0 = 0x%x\n", input->basic.num_rank_dfi0);
 	debug("input->basic.dram_data_width = 0x%x\n", input->basic.dram_data_width);
 
-	for (i = 0; i < 7; i++) {
-		input->mr[i] = dimm->mr[i];
-		debug("mr[%d] = 0x%x\n", i, input->mr[i]);
-	}
+	input->mr[0] = ddr->ddr_sdram_mode & 0xffff;
+	input->mr[1] = ddr->ddr_sdram_mode >> 16;
+	input->mr[2] = ddr->ddr_sdram_mode_2 >> 16;
+	input->mr[3] = ddr->ddr_sdram_mode_2 & 0xffff;
+	input->mr[4] = ddr->ddr_sdram_mode_9 >> 16;
+	input->mr[5] = ddr->ddr_sdram_mode_9 & 0xffff;
+	input->mr[6] = ddr->ddr_sdram_mode_10 >> 16;
 
-	input->cs_d0 = dimm->cs_d0;
-	input->cs_d1 = dimm->cs_d1;
-	input->mirror = dimm->mirror;
+	for (i = 0; i < 7; i++)
+		debug("mr[%d] = 0x%x\n", i, input->mr[i]);
+
+	input->cs_d0 = popts->cs_d0;
+	input->cs_d1 = popts->cs_d1;
+	input->mirror = dimm_param->mirrored_dimm;
 	debug("input->cs_d0 = 0x%x\n", input->cs_d0);
 	debug("input->cs_d1 = 0x%x\n", input->cs_d1);
 	debug("input->mirror = 0x%x\n", input->mirror);
 
-	for (i = 0; i < 4; i++) {
-		input->odt[i] = dimm->odt[i];
+	for (i = 0; i < CONFIG_CHIP_SELECTS_PER_CTRL; i++) {
+		if (!(ddr->cs[i].config & SDRAM_CS_CONFIG_EN))
+			continue;
+		odt_rd = (ddr->cs[i].config >> 20) & 0x7;
+		odt_wr = (ddr->cs[i].config >> 16) & 0x7;
+		parase_odt(odt_rd, true, i, input->cs_d0, input->cs_d1,
+			   input->odt);
+		parase_odt(odt_wr, false, i, input->cs_d0, input->cs_d1,
+			   input->odt);
 		debug("odt[%d] = 0x%x\n", i, input->odt[i]);
 	}
-	for (i = 0; i < 16; i++)
-		input->rcw[i] = dimm->rcw[i];
-	input->rcw3x = dimm->rcw3x;
-	input->vref = dimm->vref;
+	if (dimm_param->registered_dimm) {
+		input->rcw[0] = (ddr->ddr_sdram_rcw_1 >> 28) & 0xf;
+		input->rcw[1] = (ddr->ddr_sdram_rcw_1 >> 24) & 0xf;
+		input->rcw[2] = (ddr->ddr_sdram_rcw_1 >> 20) & 0xf;
+		input->rcw[3] = (ddr->ddr_sdram_rcw_1 >> 16) & 0xf;
+		input->rcw[4] = (ddr->ddr_sdram_rcw_1 >> 12) & 0xf;
+		input->rcw[5] = (ddr->ddr_sdram_rcw_1 >> 8) & 0xf;
+		input->rcw[6] = (ddr->ddr_sdram_rcw_1 >> 4) & 0xf;
+		input->rcw[7] = (ddr->ddr_sdram_rcw_1 >> 0) & 0xf;
+		input->rcw[8] = (ddr->ddr_sdram_rcw_2 >> 28) & 0xf;
+		input->rcw[9] = (ddr->ddr_sdram_rcw_2 >> 24) & 0xf;
+		input->rcw[10] = (ddr->ddr_sdram_rcw_2 >> 20) & 0xf;
+		input->rcw[11] = (ddr->ddr_sdram_rcw_2 >> 16) & 0xf;
+		input->rcw[12] = (ddr->ddr_sdram_rcw_2 >> 12) & 0xf;
+		input->rcw[13] = (ddr->ddr_sdram_rcw_2 >> 8) & 0xf;
+		input->rcw[14] = (ddr->ddr_sdram_rcw_2 >> 4) & 0xf;
+		input->rcw[15] = (ddr->ddr_sdram_rcw_2 >> 0) & 0xf;
+		input->rcw3x = (ddr->ddr_sdram_rcw_3 >> 8) & 0xff;
+	}
+	input->vref = popts->vref_phy;
 
 	return input;
 }

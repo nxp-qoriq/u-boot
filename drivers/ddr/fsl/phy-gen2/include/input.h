@@ -7,7 +7,22 @@
 
 #ifndef _INPUT_H_
 #define _INPUT_H_
-#include "dimm.h"
+
+enum dram_types {
+	DDR4,
+	DDR3,
+	LPDDR4,
+	LPDDR3,
+	DDR5,
+};
+
+enum dimm_types {
+	UDIMM,
+	SODIMM,
+	RDIMM,
+	LRDIMM,
+	NODIMM,
+};
 
 struct input_basic {
 	enum dram_types dram_type;
