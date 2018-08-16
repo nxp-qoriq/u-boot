@@ -7,8 +7,33 @@
 #ifndef __LS1088A_RDB_PB_H
 #define __LS1088A_RDB_PB_H
 
-#include "ls1088a_common.h"
 #include "ls1088ardb.h"
+
+#ifndef SPL_NO_ENV
+/* Initial environment variables */
+#if defined(CONFIG_QSPI_BOOT)
+#define MC_INIT_CMD				\
+	"mcinitcmd=sf probe 0:0;sf read 0x80000000 0xA00000 0x100000;"	\
+	"sf read 0x80100000 0xE00000 0x100000;"				\
+	"env exists secureboot && "			\
+	"sf read 0x80700000 0x700000 0x40000 && "	\
+	"sf read 0x80740000 0x740000 0x40000 && "	\
+	"esbc_validate 0x80700000 && "			\
+	"esbc_validate 0x80740000 ;"			\
+	"fsl_mc start mc 0x80000000 0x80100000\0"	\
+	"mcmemsize=0x70000000\0"
+#elif defined(CONFIG_SD_BOOT)
+#define MC_INIT_CMD				\
+	"mcinitcmd=mmcinfo;mmc read 0x80000000 0x5000 0x800;"		\
+	"mmc read 0x80100000 0x7000 0x800;"				\
+	"env exists secureboot && "			\
+	"mmc read 0x80700000 0x3800 0x10 && "		\
+	"mmc read 0x80740000 0x3A00 0x10 && "		\
+	"esbc_validate 0x80700000 && "			\
+	"esbc_validate 0x80740000 ;"			\
+	"fsl_mc start mc 0x80000000 0x80100000\0"	\
+	"mcmemsize=0x70000000\0"
+#endif
 
 #undef CONFIG_EXTRA_ENV_SETTINGS
 #define CONFIG_EXTRA_ENV_SETTINGS		\
@@ -84,4 +109,5 @@
 		" && esbc_validate ${kernelheader_addr_r};"	\
 		"bootm $load_addr#ls1088ardb\0"
 
+#endif
 #endif /* __LS1088A_RDB_H */
