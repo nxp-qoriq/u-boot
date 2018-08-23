@@ -92,6 +92,47 @@
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS     3
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 5
 
+/* Initial environment variables */
+#undef CONFIG_EXTRA_ENV_SETTINGS
+#ifdef CONFIG_SD_BOOT
+#define CONFIG_EXTRA_ENV_SETTINGS		\
+	"hwconfig=fsl_ddr:bank_intlv=auto\0"	\
+	"scriptaddr=0x80800000\0"		\
+	"kernel_addr_r=0x81000000\0"		\
+	"pxefile_addr_r=0x81000000\0"		\
+	"fdt_addr_r=0x88000000\0"		\
+	"ramdisk_addr_r=0x89000000\0"		\
+	"loadaddr=0x80100000\0"			\
+	"kernel_addr=0x100000\0"		\
+	"ramdisk_addr=0x800000\0"		\
+	"ramdisk_size=0x2000000\0"		\
+	"fdt_high=0xa0000000\0"			\
+	"initrd_high=0xffffffffffffffff\0"	\
+	"lx2160ardb_vdd_mv=800\0"		\
+	"mcmemsize=0x40000000\0"		\
+	"mcinitcmd=mmc read 0x80000000 0x5000 0x800;"  \
+	"mmc read 0x80100000 0x7000 0x800;" \
+	"fsl_mc start mc 0x80000000 0x80100000\0"
+#else
+#define CONFIG_EXTRA_ENV_SETTINGS		\
+	"hwconfig=fsl_ddr:bank_intlv=auto\0"	\
+	"scriptaddr=0x80800000\0"		\
+	"kernel_addr_r=0x81000000\0"		\
+	"pxefile_addr_r=0x81000000\0"		\
+	"fdt_addr_r=0x88000000\0"		\
+	"ramdisk_addr_r=0x89000000\0"		\
+	"loadaddr=0x80100000\0"			\
+	"kernel_addr=0x100000\0"		\
+	"ramdisk_addr=0x800000\0"		\
+	"ramdisk_size=0x2000000\0"		\
+	"fdt_high=0xa0000000\0"			\
+	"initrd_high=0xffffffffffffffff\0"	\
+	"kernel_start=0x21000000\0"		\
+	"lx2160ardb_vdd_mv=800\0"		\
+	"mcmemsize=0x40000000\0"		\
+	"mcinitcmd=fsl_mc start mc 0x20a00000" \
+	" 0x20e00000 \0"
+#endif
 
 #include <asm/fsl_secure_boot.h>
 
