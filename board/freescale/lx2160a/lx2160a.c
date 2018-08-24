@@ -5,6 +5,8 @@
  */
 
 #include <common.h>
+#include <dm.h>
+#include <dm/platform_data/serial_pl01x.h>
 #include <i2c.h>
 #include <malloc.h>
 #include <errno.h>
@@ -46,6 +48,22 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+static struct pl01x_serial_platdata serial0 = {
+#if CONFIG_CONS_INDEX == 0
+	.base = CONFIG_SYS_SERIAL0,
+#elif CONFIG_CONS_INDEX == 1
+	.base = CONFIG_SYS_SERIAL1,
+#else
+#error "Unsupported console index value."
+#endif
+	.type = TYPE_PL011,
+};
+
+U_BOOT_DEVICE(nxp_serials) = {
+	.name = "serial_pl01x",
+	.platdata = &serial0,
+};
+
 int select_i2c_ch_pca9547(u8 ch)
 {
 	int ret;
@@ -59,8 +77,14 @@ int select_i2c_ch_pca9547(u8 ch)
 	return 0;
 }
 
+static void uart_get_clock(void)
+{
+	serial0.clock = get_serial_clock();
+}
+
 int board_early_init_f(void)
 {
+	uart_get_clock();
 #ifdef CONFIG_SYS_I2C_EARLY_INIT
 	i2c_early_init_f();
 #endif
