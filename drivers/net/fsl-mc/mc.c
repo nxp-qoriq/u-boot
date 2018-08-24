@@ -1,6 +1,6 @@
 /*
  * Copyright 2014 Freescale Semiconductor, Inc.
- * Copyright 2017-2018 NXP
+ * Copyright 2017 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -844,8 +844,6 @@ int get_dpl_apply_status(void)
 u64 mc_get_dram_addr(void)
 {
 	size_t mc_ram_size = mc_get_dram_block_size();
-
-	memset((void *)gd->arch.resv_ram, 0, mc_ram_size);
 
 	return (gd->arch.resv_ram + mc_ram_size - 1) &
 		MC_RAM_BASE_ADDR_ALIGNMENT_MASK;
