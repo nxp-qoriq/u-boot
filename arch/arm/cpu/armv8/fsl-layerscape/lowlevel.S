@@ -99,6 +99,38 @@ ENTRY(lowlevel_init)
         ldr     x0, =CCI_AUX_CONTROL_BASE(17)
         ldr     x1, =0x00000010
         bl      ccn504_set_aux
+
+	/* read the oly_rnf_nodeid_list register for rnf regions */
+	mov  x1, #CCI_MN_BASE
+	ldr  x4, [x1, #CCI_MN_RNF_NODEID_LIST]
+
+	/* read the oly_rnidvm_nodeid_list for dvm domains */
+	mov  x1, #CCI_MN_BASE
+	ldr  x5, [x1, #CCI_MN_RND_NODEID_LIST]
+
+	/* orr the rnf_nodeid values in with the dvm_nodeid values */
+	orr  x5, x5, x4
+
+	mov  x1, #CCI_HN_F_0_BASE
+	mov  x2, #CCN_HN_F_SDCR_CLR_OFFSET
+	mov  x3, #CCN_HN_F_SDCR_SET_OFFSET
+	mov  x6, #CCN_HN_F_SDCR_CLR_L3
+
+	mov  x7, #8
+
+write_sdcr_regs:
+	str  x6, [x1, x2]
+	str  x4, [x1, x3]
+	add  x1, x1, #CCN_HN_F_OFFSET
+	subs x7, x7, #1
+	b.ne write_sdcr_regs
+
+	/* write to dvm_clr, dvm_set regs */
+	ldr  w1, =CCI_MN_BASE
+	str  x6, [x1, x2]
+	str  x5, [x1, x3]
+
+	dsb  #0xf
 #endif
 
 #if defined (CONFIG_SYS_FSL_HAS_CCN504)
