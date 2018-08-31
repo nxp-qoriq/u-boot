@@ -37,6 +37,12 @@ static void serial_find_console_or_panic(void)
 		uclass_first_device(UCLASS_SERIAL, &dev);
 		if (dev) {
 			gd->cur_serial_dev = dev;
+#ifdef CONFIG_SERIAL_PROBE_ALL
+			/* Scanning the uclass is enough to probe all devices */
+			for (;
+			     dev;
+			     uclass_next_device(&dev));
+#endif
 			return;
 		}
 	} else if (CONFIG_IS_ENABLED(OF_CONTROL) && blob) {
@@ -66,6 +72,12 @@ static void serial_find_console_or_panic(void)
 		if (!uclass_get_device_by_of_offset(UCLASS_SERIAL, node,
 						    &dev)) {
 			gd->cur_serial_dev = dev;
+#ifdef CONFIG_SERIAL_PROBE_ALL
+			/* Scanning the uclass is enough to probe all devices */
+			for (;
+			     dev;
+			     uclass_next_device(&dev));
+#endif
 			return;
 		}
 
@@ -78,6 +90,15 @@ static void serial_find_console_or_panic(void)
 				    &dev)) {
 			if (!device_probe(dev)) {
 				gd->cur_serial_dev = dev;
+#ifdef CONFIG_SERIAL_PROBE_ALL
+				/*
+				 * Scanning the uclass is enough to probe all
+				 * the devices
+				 */
+				for (;
+				     dev;
+				     uclass_next_device(&dev));
+#endif
 				return;
 			}
 		}
@@ -100,6 +121,12 @@ static void serial_find_console_or_panic(void)
 		    !uclass_get_device(UCLASS_SERIAL, INDEX, &dev) ||
 		    (!uclass_first_device(UCLASS_SERIAL, &dev) && dev)) {
 			gd->cur_serial_dev = dev;
+#ifdef CONFIG_SERIAL_PROBE_ALL
+			/* Scanning the uclass is enough to probe all the devices */
+			for (;
+			     dev;
+			     uclass_next_device(&dev));
+#endif
 			return;
 		}
 #undef INDEX

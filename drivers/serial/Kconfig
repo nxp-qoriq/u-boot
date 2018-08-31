@@ -64,6 +64,18 @@ config DM_SERIAL
 	  implements serial_putc() etc. The uclass interface is
 	  defined in include/serial.h.
 
+config SERIAL_PROBE_ALL
+	bool "Probe all available serial devices"
+	depends on DM_SERIAL
+	help
+	  EnableThe serial subsystem only probe for single serial
+	  device, but does not probe for other remaining devices.
+	  With this option set,we make probing and searching for
+	  all available devices mandatory.
+
+	  If probing is not required for all remaining available
+	  devices other than default current console device, say N.
+
 config SPL_DM_SERIAL
 	bool "Enable Driver Model for serial drivers in SPL"
 	depends on DM_SERIAL
