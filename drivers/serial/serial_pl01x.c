@@ -180,24 +180,6 @@ static int pl01x_generic_setbrg(struct pl01x_regs *regs, enum pl01x_type type,
 		/* Finally, enable the UART */
 		writel(UART_PL011_CR_UARTEN | UART_PL011_CR_TXE |
 		       UART_PL011_CR_RXE | UART_PL011_CR_RTS, &regs->pl011_cr);
-
-#ifdef CONFIG_ARCH_LX2160A
-		/*
-		 * TODO:Enable support for mutiple UART enablement
-		 * using DM Model
-		 */
-		if (regs == (struct pl01x_regs *)CONFIG_SYS_SERIAL1)
-			regs = (struct pl01x_regs *)CONFIG_SYS_SERIAL0;
-		else
-			regs = (struct pl01x_regs *)CONFIG_SYS_SERIAL1;
-
-		writel(divider, &regs->pl011_ibrd);
-		writel(fraction, &regs->pl011_fbrd);
-
-		pl011_set_line_control(regs);
-		writel(UART_PL011_CR_UARTEN | UART_PL011_CR_TXE |
-		       UART_PL011_CR_RXE | UART_PL011_CR_RTS, &regs->pl011_cr);
-#endif
 		break;
 	}
 	default:
