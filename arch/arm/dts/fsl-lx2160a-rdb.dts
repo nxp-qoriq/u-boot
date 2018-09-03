@@ -21,6 +21,9 @@
 		spi0 = &fspi;
 	};
 
+	chosen {
+		stdout-path = &uart0;
+	};
 };
 
 &fspi {

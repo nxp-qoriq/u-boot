@@ -370,6 +370,7 @@ static const struct udevice_id pl01x_serial_id[] ={
 	{.compatible = "arm,pl010", .data = TYPE_PL010},
 	{}
 };
+
 static int pl01x_serial_ofdata_to_platdata(struct udevice *dev)
 {
 	struct pl01x_serial_platdata *plat = dev_get_platdata(dev);
@@ -380,8 +381,12 @@ static int pl01x_serial_ofdata_to_platdata(struct udevice *dev)
 		return -EINVAL;
 
 	plat->base = addr;
+	#ifndef CONFIG_ARCH_LX2160A
 	plat->clock = fdtdec_get_int(gd->fdt_blob, dev_of_offset(dev), "clock",
 				     1);
+	#else
+	plat->clock = get_serial_clock();
+	#endif
 	plat->type = dev_get_driver_data(dev);
 	plat->skip_init = fdtdec_get_bool(gd->fdt_blob, dev_of_offset(dev),
 	                                  "skip-init");
