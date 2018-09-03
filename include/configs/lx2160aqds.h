@@ -45,7 +45,6 @@
 #define BRDCFG4_EMI2SEL_MASK		0x07
 #define BRDCFG4_EMI2SEL_SHIFT		0
 
-
 /* Initial environment variables */
 #ifdef CONFIG_EXTRA_ENV_SETTINGS
 #undef CONFIG_EXTRA_ENV_SETTINGS
@@ -80,19 +79,43 @@
 	"pxefile_addr_r=0x81000000\0"		\
 	"fdt_addr_r=0x88000000\0"		\
 	"ramdisk_addr_r=0x89000000\0"		\
-	"loadaddr=0x80100000\0"			\
+	"loadaddr=0xa0000000\0"			\
 	"kernel_addr=0x100000\0"		\
+	"kernel_size=0x3000000\0"		\
+	"kernelheader_start=0x600000\0"	\
+	"kernelheader_size=0x4000\0"		\
+	"kernelheader_addr_r=0x80200000\0"	\
 	"ramdisk_addr=0x800000\0"		\
 	"ramdisk_size=0x2000000\0"		\
 	"fdt_high=0xa0000000\0"			\
 	"initrd_high=0xffffffffffffffff\0"	\
-	"kernel_start=0x21000000\0"		\
+	"kernel_start=0x1000000\0"		\
 	"mcmemsize=0x40000000\0"		\
-	"mcinitcmd=fsl_mc start mc 0x20a00000" \
-	" 0x20e00000 \0"		\
+	"flexspinor_bootcmd=echo Trying load from flexspi nor..;"	\
+	"sf probe 0:0 && sf read $loadaddr "	\
+	"$kernel_start $kernel_size ; env exists secureboot &&"	\
+	"sf read $kernelheader_addr_r $kernelheader_start "	\
+	"$kernelheader_size && esbc_validate ${kernelheader_addr_r}; "\
+	" bootm $loadaddr\0"	\
+	"mcinitcmd=echo trying to load mc....;env exists secureboot && "	\
+	"esbc_validate 0x20700000 && "	\
+	"esbc_validate 0x20780000 ;"	\
+	"fsl_mc start mc 0x20a00000 0x20e00000;"	\
 	"dpmac=srds:19_5_2;dpmac2:phy=0x00,mdio=1,io=2;"	\
 	"dpmac3:phy=0x00,mdio=1,io=1;dpmac4:phy=0x01,mdio=1,io=1;"	\
 	"dpmac5:phy=0x00,mdio=1,io=6;dpmac6:phy=0x00,mdio=1,io=6;\0"
+
+#ifdef CONFIG_BOOTCOMMAND
+#undef CONFIG_BOOTCOMMAND
+#endif
+
+#define CONFIG_BOOTCOMMAND                                             \
+                       "env exists mcinitcmd && env exists secureboot "\
+                       "&& esbc_validate 0x207C0000; "                 \
+                       "env exists mcinitcmd && "                      \
+                       "fsl_mc apply dpl 0x20d00000; "         \
+                       "run flexspinor_bootcmd; "              \
+                       "env exists secureboot && esbc_halt;"
 #endif
 
 /*

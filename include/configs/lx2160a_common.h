@@ -348,9 +348,9 @@ unsigned long get_board_ddr_clk(void);
 				"mmc read 0xb0000000 0x8000 0x1d000;" \
 				"bootm 0xb0000000"
 #else
-#define CONFIG_BOOTCOMMAND	"fsl_mc apply dpl 0x20d00000;" \
-				"sf probe 0:0;sf read 0xa0000000 0x1000000 0x3000000;" \
-				"bootm 0xa0000000"
+#define CONFIG_BOOTCOMMAND     "fsl_mc apply dpl 0x20d00000;" \
+                               "sf probe 0:0;sf read 0xa0000000 0x1000000 0x3000000;" \
+                               "bootm 0xa0000000"
 #endif
 
 #ifndef CONFIG_ARCH_LX2160A_EMU_COMMON
