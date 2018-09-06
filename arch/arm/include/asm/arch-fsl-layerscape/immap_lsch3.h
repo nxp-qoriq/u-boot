@@ -1,7 +1,8 @@
 /*
  * LayerScape Internal Memory Map
  *
- * Copyright (C) 2017 NXP Semiconductors
+ * Copyright 2018 NXP
+ * Copyright 2017 NXP
  * Copyright 2014 Freescale Semiconductor, Inc.
  *
  * SPDX-License-Identifier:	GPL-2.0+
