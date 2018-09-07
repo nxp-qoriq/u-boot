@@ -100,7 +100,7 @@
 	"mcinitcmd=echo trying to load mc....;env exists secureboot && "	\
 	"esbc_validate 0x20700000 && "	\
 	"esbc_validate 0x20780000 ;"	\
-	"fsl_mc start mc 0x20a00000 0x20e00000;"	\
+	"fsl_mc start mc 0x20a00000 0x20e00000;\0"	\
 	"dpmac=srds:19_5_2;dpmac2:phy=0x00,mdio=1,io=2;"	\
 	"dpmac3:phy=0x00,mdio=1,io=1;dpmac4:phy=0x01,mdio=1,io=1;"	\
 	"dpmac5:phy=0x00,mdio=1,io=6;dpmac6:phy=0x00,mdio=1,io=6;\0"
