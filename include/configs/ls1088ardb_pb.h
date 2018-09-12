@@ -63,8 +63,8 @@
 	"kernelhdr_size_sd=0x10\0"		\
 	MC_INIT_CMD				\
 	BOOTENV					\
-	"boot_scripts=ls1088ardb_boot.scr\0"	\
-	"boot_script_hdr=hdr_ls1088ardb_bs.out\0"	\
+	"boot_scripts=ls1088ardb_pb_boot.scr\0"	\
+	"boot_script_hdr=hdr_ls1088ardb_pb_bs.out\0"	\
 	"scan_dev_for_boot_part="		\
 		"part list ${devtype} ${devnum} devplist; "	\
 		"env exists devplist || setenv devplist 1; "	\
