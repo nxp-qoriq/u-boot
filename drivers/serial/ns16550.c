@@ -1,4 +1,6 @@
 /*
+ * Copyright 2018 NXP 
+ * 
  * COM1 NS16550 support
  * originally from linux source (arch/powerpc/boot/ns16550.c)
  * modified to use CONFIG_SYS_ISA_MEM and new defines

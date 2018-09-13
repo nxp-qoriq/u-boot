@@ -1,6 +1,7 @@
 /*
  * SPI Flash Core
  *
+ * Copyright 2018 NXP
  * Copyright (C) 2015 Jagan Teki <jteki@openedev.com>
  * Copyright (C) 2013 Jagannadha Sutradharudu Teki, Xilinx Inc.
  * Copyright (C) 2010 Reinhard Meyer, EMK Elektronik

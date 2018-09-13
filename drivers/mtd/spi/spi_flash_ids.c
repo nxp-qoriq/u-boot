@@ -1,6 +1,7 @@
 /*
  * SPI Flash ID's.
  *
+ * Copyright 2018 NXP
  * Copyright (C) 2016 Jagan Teki <jagan@openedev.com>
  * Copyright (C) 2013 Jagannadha Sutradharudu Teki, Xilinx Inc.
  *
