@@ -358,6 +358,16 @@ config QSPI_AHB_INIT
 	  But some QSPI flash size up to 64MBytes, so initialize the QSPI AHB
 	  bus for those flashes to support the full QSPI flash size.
 
+config SYS_FSPI_AHB_INIT
+	bool "Initialize the FlexSPI controller for AHB mode"
+	depends on NXP_FSPI
+	default n
+	help
+	  Initialize the FlexSPI controller for AHB mode and mark default
+	  read mode as AHB mode. In AHB mode, direct memory copying is
+	  performed. Default LUT programmed in AHB mode is Fast Read command
+	  with 4-byte addressing enabled.
+
 config SYS_CCI400_OFFSET
 	hex "Offset for CCI400 base"
 	depends on SYS_FSL_HAS_CCI400
