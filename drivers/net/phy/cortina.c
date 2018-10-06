@@ -306,6 +306,7 @@ int cs4223_phy_cx1_to_cx1_setup(struct phy_device *phydev)
 
     status |= cs4224_rules_set_default(CS4224_TARGET_APPLICATION_10G, &rules);
 
+    rules.mseq_dyn_reconfig                = TRUE;
     rules.rx_if.dplx_line_edc_mode         = CS_HSIO_EDC_MODE_CX1;
     rules.rx_if.dplx_line_eq.traceloss     = CS_HSIO_TRACE_LOSS_4dB;
     rules.tx_if.dplx_line_driver.traceloss = CS_HSIO_TRACE_LOSS_4dB;
