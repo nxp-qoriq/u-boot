@@ -616,13 +616,13 @@ enum boot_src __get_boot_src(u32 porsr1)
 {
 	enum boot_src src = BOOT_SOURCE_RESERVED;
 	uint32_t rcw_src = (porsr1 & RCW_SRC_MASK) >> RCW_SRC_BIT;
-#if !defined(CONFIG_FSL_LSCH3_2)
+#if !defined(CONFIG_NXP_LSCH3_2)
 	uint32_t val;
 #endif
 	debug("%s: rcw_src 0x%x\n", __func__, rcw_src);
 
 #if defined(CONFIG_FSL_LSCH3)
-#if defined(CONFIG_FSL_LSCH3_2)
+#if defined(CONFIG_NXP_LSCH3_2)
 	switch (rcw_src) {
 	case RCW_SRC_SDHC1_VAL:
 		src = BOOT_SOURCE_SD_MMC;
