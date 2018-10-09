@@ -475,6 +475,9 @@ void dcache_disable(void)
 {
 	uint32_t sctlr;
 
+#ifdef CONFIG_ARCH_LX2160A
+	flush_dcache_all();
+#endif
 	sctlr = get_sctlr();
 
 	/* if cache isn't enabled no need to disable */
