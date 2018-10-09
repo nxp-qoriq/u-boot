@@ -362,7 +362,7 @@ hnf_pstate_poll:
 	mov	x1, x0
 	mov	x7, #0			/* flag for timeout */
 	mrs	x3, cntpct_el0		/* read timer */
-	add	x3, x3, #1200		/* timeout after 100 microseconds */
+	add	x3, x3, #4000		/* timeout after 100 microseconds */
 	mov	x0, #0x18
 	movk	x0, #0x420, lsl #16	/* HNF0_PSTATE_STATUS */
 	mov	w6, #8			/* HN-F node count */
@@ -409,25 +409,32 @@ ENTRY(__asm_flush_l3_dcache)
 	 */
 	mov	x29, lr
 	mov	x8, #0
+	mov	x9, #10
+	mov	x10, #10
 
+1:
 	dsb	sy
 	mov	x0, #0x1		/* HNFPSTAT_SFONLY */
 	bl	hnf_set_pstate
 
 	mov	x0, #0x4		/* SFONLY status */
 	bl	hnf_pstate_poll
-	cbz	x0, 1f
+	cbz	x0, 2f
+	subs	x9, x9, #1
+	cbnz	x9, 1b
 	mov	x8, #1			/* timeout */
-1:
+2:
 	dsb	sy
 	mov	x0, #0x3		/* HNFPSTAT_FAM */
 	bl	hnf_set_pstate
 
 	mov	x0, #0xc		/* FAM status */
 	bl	hnf_pstate_poll
-	cbz	x0, 1f
+	cbz	x0, 3f
+	subs	x10, x10, #1
+	cbnz	x10, 2b
 	add	x8, x8, #0x2
-1:
+3:
 	mov	x0, x8
 	mov	lr, x29
 	ret
