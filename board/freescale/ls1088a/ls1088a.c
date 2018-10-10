@@ -88,6 +88,9 @@ int fixup_ls1088ardb_pb_banner(void *fdt)
 #if !defined(CONFIG_SPL_BUILD)
 int checkboard(void)
 {
+#ifdef CONFIG_TFABOOT
+	enum boot_src src = get_boot_src();
+#endif
 	char buf[64];
 	u8 sw;
 	static const char *const freq[] = {"100", "125", "156.25",
@@ -117,9 +120,14 @@ int checkboard(void)
 	sw = QIXIS_READ(brdcfg[0]);
 	sw = (sw & QIXIS_LBMAP_MASK) >> QIXIS_LBMAP_SHIFT;
 
+#ifdef CONFIG_TFABOOT
+	if (src == BOOT_SOURCE_SD_MMC)
+		puts("SD card\n");
+#else
 #ifdef CONFIG_SD_BOOT
 	puts("SD card\n");
 #endif
+#endif /* CONFIG_TFABOOT */
 	switch (sw) {
 #ifdef CONFIG_TARGET_LS1088AQDS
 	case 0:
@@ -613,3 +621,10 @@ int ft_board_setup(void *blob, bd_t *bd)
 }
 #endif
 #endif /* defined(CONFIG_SPL_BUILD) */
+
+#ifdef CONFIG_TFABOOT
+void *env_sf_get_env_addr(void)
+{
+	return (void *)(CONFIG_SYS_FSL_QSPI_BASE + CONFIG_ENV_OFFSET);
+}
+#endif
