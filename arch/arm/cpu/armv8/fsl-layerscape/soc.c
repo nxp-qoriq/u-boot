@@ -684,7 +684,7 @@ int qspi_ahb_init(void)
 #endif
 
 #ifdef CONFIG_TFABOOT
-#define MAX_BOOTCMD_SIZE	256
+#define MAX_BOOTCMD_SIZE	512
 
 int fsl_setenv_bootcmd(void)
 {
