@@ -42,6 +42,7 @@ int checkboard(void)
 	puts("Board: LS1012AFRDM ");
 #else
 	int rev;
+	const char *b_name, *board;
 
 	rev = get_board_version();
 
@@ -60,6 +61,14 @@ int checkboard(void)
 		puts(": unknown");
 		break;
 	}
+
+	board = env_get("board");
+	if (strncmp(board, "ls1012afrwy", strlen("ls1012afrwy")) != 0)
+		env_set("board", "ls1012afrwy");
+
+	b_name = env_get("board_name");
+	if (strncmp(b_name, "ls1012afrwy", strlen("ls1012afrwy")) != 0)
+		env_set("board_name", "ls1012afrwy");
 #endif
 
 	return 0;
