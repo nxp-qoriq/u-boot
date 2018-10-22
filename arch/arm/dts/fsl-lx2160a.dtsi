@@ -117,4 +117,15 @@
 		interrupts = <0 81 0x4>; /* Level high type */
 		dr_mode = "host";
 	};
+
+	fspi: flexspi@20c0000 {
+		compatible = "nxp,lx2160a-fspi";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x0 0x20C0000 0x0 0x10000>,
+			<0x0 0x20000000 0x0 0x10000000>; /* 256MB Region */
+		reg-names = "FSPI", "FSPI-memory";
+		num-cs = <4>;
+		status = "disabled";
+	};
 };
