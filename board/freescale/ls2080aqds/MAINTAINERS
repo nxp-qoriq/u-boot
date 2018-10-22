@@ -8,6 +8,7 @@ F:	configs/ls2080aqds_defconfig
 F:	configs/ls2080aqds_nand_defconfig
 F:	configs/ls2080aqds_qspi_defconfig
 F:	configs/ls2080aqds_sdcard_defconfig
+F:	configs/ls2080aqds_tfa_defconfig
 
 LS2080A_SECURE_BOOT BOARD
 #M:	Saksham Jain <saksham.jain@nxp.freescale.com>
