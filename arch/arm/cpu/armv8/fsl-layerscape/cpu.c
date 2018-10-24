@@ -798,17 +798,7 @@ enum env_location env_get_location(enum env_operation op, int prio)
 	case BOOT_SOURCE_QSPI_NOR:
 		/* FALLTHROUGH */
 	case BOOT_SOURCE_XSPI_NOR:
-/*
- * LX2160A Flexspi u-boot driver is not yet part of u-boot
- * Use env_loc as MMC as workaround till then
- * TODO: Update bootlocation to Flexspi flash once
- * flexspi driver is available
- */
-#ifdef CONFIG_ARCH_LX2160A
-		env_loc =  ENVL_MMC;
-#else
 		env_loc = ENVL_SPI_FLASH;
-#endif
 		break;
 	case BOOT_SOURCE_IFC_NAND:
 		/* FALLTHROUGH */
