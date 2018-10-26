@@ -251,6 +251,13 @@ config ZYNQMP_GQSPI
 	  This option is used to enable ZynqMP QSPI controller driver which
 	  is used to communicate with qspi flash devices.
 
+config NXP_FSPI
+	bool "NXP FLEXSPI driver"
+	help
+	  Enable the NXP Flex-SPI (FSPI) driver. This driver can be used to
+	  access SPI NOR flash on platforms embedding this NXP IP code.
+	  This driver support SPI flash read, write and erase.
+
 endif # if DM_SPI
 
 config SOFT_SPI
