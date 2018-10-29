@@ -70,7 +70,7 @@ int select_i2c_ch_pca9547(u8 ch)
 static void uart_get_clock(void)
 {
 	serial0.clock = get_serial_clock();
-	serial0.clock = get_serial_clock();
+	serial1.clock = get_serial_clock();
 }
 
 int board_early_init_f(void)
