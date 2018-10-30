@@ -43,6 +43,8 @@
 #define PCIE_LUT_LDR(n)				(0x804 + (n) * 8)
 #define PCIE_LUT_ENABLE				BIT(31)
 #define PCIE_LUT_ENTRY_COUNT			32
+#define PCIE_LUT_GCR				(0x28)
+#define PCIE_LUT_GCR_RRE			(0)
 
 /* GPEX CSR */
 #define GPEX_CLASSCODE				0x474
