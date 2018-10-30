@@ -391,6 +391,12 @@ static void lx_pcie_ep_set_bar_size(struct lx_pcie *pcie, int bar, u64 size)
 	u32 mask_l = lower_32_bits(~(size - 1));
 	u32 mask_h = upper_32_bits(~(size - 1));
 
+	/* WA for TKT382295: set the BAR1 for all VFs to 8MB */
+	if (bar == 13 || bar == 9) {
+		mask_l = lower_32_bits(~((8 * 1024 * 1024) - 1));
+		mask_h = upper_32_bits(~((8 * 1024 * 1024) - 1));
+	}
+
 	ccsr_writel(pcie, GPEX_BAR_SELECT, bar);
 	ccsr_writel(pcie, GPEX_BAR_SIZE_LDW, mask_l);
 	ccsr_writel(pcie, GPEX_BAR_SIZE_UDW, mask_h);
