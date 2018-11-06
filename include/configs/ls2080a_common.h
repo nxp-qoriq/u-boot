@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * Copyright 2017 NXP
  * Copyright (C) 2014 Freescale Semiconductor
+ * Copyright 2017-2018 NXP
  */
 
 #ifndef __LS2_COMMON_H
@@ -141,6 +141,8 @@ unsigned long long get_qixis_addr(void);
 #define CONFIG_SYS_LS_MC_DRAM_DPC_OFFSET    0x00F00000
 #define CONFIG_SYS_LS_MC_DPL_MAX_LENGTH	    0x20000
 #define CONFIG_SYS_LS_MC_DRAM_DPL_OFFSET    0x00F20000
+#define CONFIG_SYS_LS_MC_SPB_MAX_LENGTH	    0x20000
+#define CONFIG_SYS_LS_MC_DRAM_SPB_OFFSET    0x00F40000
 /* For LS2085A */
 #define CONFIG_SYS_LS_MC_AIOP_IMG_MAX_LENGTH	0x200000
 #define CONFIG_SYS_LS_MC_DRAM_AIOP_IMG_OFFSET	0x07000000
