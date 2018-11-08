@@ -272,6 +272,7 @@ int phy_broadcom_init(void);
 int phy_cortina_init(void);
 int phy_davicom_init(void);
 int phy_et1011c_init(void);
+int phy_in112525_init(void);
 int phy_lxt_init(void);
 int phy_marvell_init(void);
 int phy_micrel_init(void);
