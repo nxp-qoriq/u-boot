@@ -36,6 +36,8 @@ int board_init(void)
 	ppa_init();
 #endif
 
+	pci_init();
+
 	return 0;
 }
 
