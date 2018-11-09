@@ -1,7 +1,7 @@
 /*
  * ENETC ethernet controller driver
  *
- * Copyright 2017 NXP
+ * Copyright 2017-2018 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -45,7 +45,7 @@
 #define PCI_CFC_EA_CAP_ID 0x14
 #define PCI_CFC_EA_CAP 0x9e
 /* number of BARs of PF for ENETC ports */
-#define ENETC_PF_HDR_T0_NUM_BAR 4
+#define ENETC_PF_HDR_T0_NUM_BAR 2
 
 /* BAR 0 ID for device regs. access */
 #define PCI_EA_PF_BEI_BAR0 0
