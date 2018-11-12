@@ -46,8 +46,10 @@ static int read_ar(struct spi_slave *spi, u32 ar)
 	cmd[3] = ar >> 0;
 
 	ret = spi_flash_cmd_read(spi, cmd, 4, &reg_value, 1);
-	if (ret)
+	if (ret) {
+		printf("read_ar: unable to read register\n");
 		return -EIO;
+	}
 
 	return reg_value;
 }
@@ -64,8 +66,10 @@ static int write_ar(struct spi_slave *spi, u32 ar, u8 value)
 	cmd[3] = ar >> 0;
 
 	ret = spi_flash_cmd_write(spi, cmd, 4, &value, 1);
-	if (ret)
+	if (ret) {
+		printf("write_ar: unable to write to register\n");
 		return -EIO;
+	}
 
 	return 0;
 }
@@ -1179,6 +1183,39 @@ int spi_flash_decode_fdt(struct spi_flash *flash)
 }
 #endif /* CONFIG_IS_ENABLED(OF_CONTROL) */
 
+#ifdef CONFIG_SPI_FLASH_SPANSION
+static int spansion_s25fss_disable_hybrid_mode(struct spi_slave *spi)
+{
+	u32 offset = 0x800004; /* CR3V register offset */
+	u8 cr3v;
+	int ret;
+
+	ret = read_ar(spi, offset);
+	if (ret < 0)
+		return -EIO;
+
+	cr3v = ret;
+	/* CR3V bit3: 4-KB Erase */
+	if (cr3v & 0x8)
+		return 0;
+
+	cr3v |= 0x8;
+	ret = write_ar(spi, offset, cr3v);
+	if (ret < 0)
+		return -EIO;
+
+	ret = read_ar(spi, offset);
+	if (ret < 0)
+		return -EIO;
+
+	cr3v = ret;
+	if (!(cr3v & 0x8))
+		return -EFAULT;
+
+	return 0;
+}
+#endif
+
 int spi_flash_scan(struct spi_flash *flash)
 {
 	struct spi_slave *spi = flash->spi;
@@ -1287,6 +1324,32 @@ int spi_flash_scan(struct spi_flash *flash)
 	/* Now erase size becomes valid sector size */
 	flash->sector_size = flash->erase_size;
 
+#ifdef CONFIG_SPI_FLASH_SPANSION
+	/*
+	 * The S25FS-S family physical sectors may be configured as a
+	 * hybrid combination of eight 4-kB parameter sectors
+	 * at the top or bottom of the address space with all
+	 * but one of the remaining sectors being uniform size.
+	 * The Parameter Sector Erase commands (20h or 21h) must
+	 * be used to erase the 4-kB parameter sectors individually.
+	 * The Sector (uniform sector) Erase commands (D8h or DCh)
+	 * must be used to erase any of the remaining
+	 * sectors, including the portion of highest or lowest address
+	 * sector that is not overlaid by the parameter sectors.
+	 * The uniform sector erase command has no effect on parameter sectors.
+	 * The following code removes the 4-kB parameter sectors from the
+	 * address map i.e. it disables the hybrid mode so that all sectors are
+	 * uniform size.
+	 */
+
+	if ((JEDEC_ID(info) == 0x0219 || JEDEC_ID(info) == 0x0220) &&
+	    (JEDEC_EXT(info) & 0xff00) == 0x4d00 &&
+	    JEDEC_FAM_ID(info) == 0x81) {
+		ret = spansion_s25fss_disable_hybrid_mode(spi);
+		if (ret)
+			return ret;
+	}
+#endif
 	/* Look for read commands */
 	flash->read_cmd = CMD_READ_ARRAY_FAST;
 	if (spi->mode & SPI_RX_SLOW)
