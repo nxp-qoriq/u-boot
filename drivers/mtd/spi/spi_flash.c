@@ -32,6 +32,45 @@ static void spi_flash_addr(struct spi_flash *flash, u32 addr, u8 *cmd)
 
 }
 
+#ifdef CONFIG_SPI_FLASH_SPANSION
+/* Read any register */
+static int read_ar(struct spi_slave *spi, u32 ar)
+{
+	u8 cmd[4];
+	u8 reg_value;
+	int ret;
+
+	cmd[0] = CMD_RDAR;
+	cmd[1] = ar >> 16;
+	cmd[2] = ar >> 8;
+	cmd[3] = ar >> 0;
+
+	ret = spi_flash_cmd_read(spi, cmd, 4, &reg_value, 1);
+	if (ret)
+		return -EIO;
+
+	return reg_value;
+}
+
+/* Write any register */
+static int write_ar(struct spi_slave *spi, u32 ar, u8 value)
+{
+	u8 cmd[4];
+	int ret;
+
+	cmd[0] = CMD_WRAR;
+	cmd[1] = ar >> 16;
+	cmd[2] = ar >> 8;
+	cmd[3] = ar >> 0;
+
+	ret = spi_flash_cmd_write(spi, cmd, 4, &value, 1);
+	if (ret)
+		return -EIO;
+
+	return 0;
+}
+#endif
+
 static int read_sr(struct spi_flash *flash, u8 *rs)
 {
 	int ret;

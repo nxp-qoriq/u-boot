@@ -87,6 +87,12 @@ enum spi_nor_option_flags {
 #define SPI_FLASH_PAGE_ERASE_TIMEOUT	(5 * CONFIG_SYS_HZ)
 #define SPI_FLASH_SECTOR_ERASE_TIMEOUT	(10 * CONFIG_SYS_HZ)
 
+/* Spansion flash commands */
+#ifdef CONFIG_SPI_FLASH_SPANSION
+#define CMD_RDAR		0x65
+#define CMD_WRAR		0x71
+#endif
+
 /* SST specific */
 #ifdef CONFIG_SPI_FLASH_SST
 #define SST26_CMD_READ_BPR		0x72
