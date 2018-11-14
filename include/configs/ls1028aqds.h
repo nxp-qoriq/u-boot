@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 NXP
- * Copyright 2017 NXP
+ * Copyright 2017-2018 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -87,7 +86,11 @@
 
 /* Store environment at top of flash */
 #define CONFIG_ENV_IS_NOWHERE		1
+#ifdef CONFIG_EMU_PXP
+#define CONFIG_ENV_SIZE			0x1000
+#else
 #define CONFIG_ENV_SIZE			0x200000
+#endif
 
 #ifdef CONFIG_SPL_BUILD
 #define CONFIG_SYS_MONITOR_BASE CONFIG_SPL_TEXT_BASE
