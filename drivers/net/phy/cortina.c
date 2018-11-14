@@ -15,6 +15,7 @@
 #include <linux/err.h>
 #include <phy.h>
 #include <cortina.h>
+#include <cortina_api.h>
 #ifdef CONFIG_SYS_CORTINA_FW_IN_NAND
 #include <nand.h>
 #elif defined(CONFIG_SYS_CORTINA_FW_IN_SPIFLASH)
@@ -26,6 +27,10 @@
 #ifndef CONFIG_PHYLIB_10G
 #error The Cortina PHY needs 10G support
 #endif
+
+/* Cortina CS4223 EQ & driver traceloss defaults */
+#define CS4223_LINE_DEFAULT_TRACELOSS CS_HSIO_TRACE_LOSS_4dB
+#define CS4223_HOST_DEFAULT_TRACELOSS CS_HSIO_TRACE_LOSS_4dB
 
 #ifndef CORTINA_NO_FW_UPLOAD
 struct cortina_reg_config cortina_reg_cfg[] = {
@@ -284,14 +289,82 @@ int cs4340_startup(struct phy_device *phydev)
 	return 0;
 }
 
+int cs4223_phy_cx1_to_cx1_setup(struct phy_device *phydev)
+{
+	int status = CS_OK;
+	struct cs4224_rules_t rules;
+	unsigned int slice = 0;
+	char *env_host_traceloss_ptr = env_get("cs4223_host_traceloss");
+	char *env_line_traceloss_ptr = env_get("cs4223_line_traceloss");
+	unsigned int host_dB_settings = CS4223_HOST_DEFAULT_TRACELOSS;
+	unsigned int line_dB_settings = CS4223_LINE_DEFAULT_TRACELOSS;
+
+	cs4223_glue_phydev_set(phydev);
+
+	status |= cs4224_hard_reset(slice);
+	if (status != CS_OK) {
+		printf("error trying to reset the device\n");
+		return status;
+	}
+
+	if (env_host_traceloss_ptr)
+		host_dB_settings =
+			simple_strtoul(env_host_traceloss_ptr, NULL, 10);
+
+	if (env_line_traceloss_ptr)
+		line_dB_settings =
+			simple_strtoul(env_line_traceloss_ptr, NULL, 10);
+
+	if ((host_dB_settings < CS_HSIO_TRACE_LOSS_0dB) ||
+	    (host_dB_settings > CS_HSIO_TRACE_LOSS_6dB)) {
+		printf("CS4223: Host traceloss (%ddB) ", host_dB_settings);
+		printf("not supported. Using default\n");
+		host_dB_settings = CS4223_HOST_DEFAULT_TRACELOSS;
+	}
+
+	if ((line_dB_settings < CS_HSIO_TRACE_LOSS_0dB) ||
+	    (line_dB_settings > CS_HSIO_TRACE_LOSS_6dB)) {
+		printf("CS4223: Line traceloss (%ddB) ", line_dB_settings);
+		printf("not supported. Using default\n");
+		line_dB_settings = CS4223_LINE_DEFAULT_TRACELOSS;
+	}
+
+	printf("CS4223: traceloss/eq settings: host[%d dB], line[%d dB]\n",
+	       host_dB_settings, line_dB_settings);
+
+	status |= cs4224_rules_set_default(CS4224_TARGET_APPLICATION_10G,
+					   &rules);
+
+	rules.mseq_dyn_reconfig = CS_TRUE;
+
+	rules.rx_if.dplx_line_edc_mode = CS_HSIO_EDC_MODE_CX1;
+	rules.rx_if.dplx_line_eq.traceloss = host_dB_settings;
+	rules.tx_if.dplx_line_driver.traceloss = host_dB_settings;
+
+	rules.rx_if.dplx_host_edc_mode = CS_HSIO_EDC_MODE_CX1;
+	rules.rx_if.dplx_host_eq.traceloss = line_dB_settings;
+	rules.tx_if.dplx_host_driver.traceloss = line_dB_settings;
+
+	for (slice = 0; slice < CS4224_MAX_NUM_SLICES(0); slice++)
+		status |= cs4224_slice_enter_operational_state(slice, &rules);
+
+	return status;
+}
+
 int cs4223_phy_init(struct phy_device *phydev)
 {
 	int reg_value;
+	int status;
 
 	reg_value = phy_read(phydev, 0x00, CS4223_EEPROM_STATUS);
 	if (!(reg_value & CS4223_EEPROM_FIRMWARE_LOADDONE)) {
-		printf("%s CS4223 Firmware not present in EERPOM\n", __func__);
-		return -ENOSYS;
+		printf("\nCS4223: Using software initialization...\n");
+		status = cs4223_phy_cx1_to_cx1_setup(phydev);
+		if (status != CS_OK)
+			printf("CS4223: Softare initialization failed\n");
+	} else {
+		printf("\nCS4223: WARNING: Using EEPROM configuration...\n");
+		printf("CS4223: WARNING: Change SW2[2] for software config\n");
 	}
 
 	return 0;
