@@ -15,8 +15,10 @@
 #include <spi_flash.h>
 #include <mmc.h>
 /* required to include IFC and QSPI base address */
+#ifdef CONFIG_ARM64
 #include <asm/armv8/mmu.h>
 #include <asm/arch/cpu.h>
+#endif
 #include <environment.h>
 
 struct fm_muram muram[CONFIG_SYS_NUM_FMAN];
