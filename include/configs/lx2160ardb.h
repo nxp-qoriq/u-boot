@@ -87,21 +87,8 @@
 
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
-	"hwconfig=fsl_ddr:bank_intlv=auto\0"	\
-	"scriptaddr=0x80800000\0"		\
-	"kernel_addr_r=0x81000000\0"		\
-	"pxefile_addr_r=0x81000000\0"		\
-	"fdt_addr_r=0x88000000\0"		\
-	"ramdisk_addr_r=0x89000000\0"		\
-	"loadaddr=0x80100000\0"			\
-	"kernel_addr=0x100000\0"		\
-	"ramdisk_addr=0x800000\0"		\
-	"ramdisk_size=0x2000000\0"		\
-	"fdt_high=0xa0000000\0"			\
-	"initrd_high=0xffffffffffffffff\0"	\
-	"kernel_start=0x21000000\0"		\
-	"lx2160ardb_vdd_mv=800\0"		\
-	"mcmemsize=0x40000000\0"
+	EXTRA_ENV_SETTINGS			\
+	"lx2160ardb_vdd_mv=800\0"
 
 #include <asm/fsl_secure_boot.h>
 
