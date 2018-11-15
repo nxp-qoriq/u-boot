@@ -20,8 +20,10 @@
 #ifdef CONFIG_TFABOOT
 #include <mmc.h>
 /* required to include IFC and QSPI base address */
+#ifdef CONFIG_ARM64
 #include <asm/armv8/mmu.h>
 #include <asm/arch/cpu.h>
+#endif
 #include <environment.h>
 #else
 #ifdef CONFIG_SYS_QE_FMAN_FW_IN_MMC
