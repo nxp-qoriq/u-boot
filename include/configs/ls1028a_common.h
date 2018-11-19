@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 NXP
+ * Copyright 2017-2018 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0
  */
@@ -77,6 +77,9 @@
 #define CFG_ENETC_PHYS_SIZE 0x10000000UL
 #define CONFIG_FSL_MEMAC
 #endif
+
+/* required for MDIO muxing */
+#define CONFIG_LAST_STAGE_INIT
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LOAD_ADDR	(CONFIG_SYS_DDR_SDRAM_BASE + 0x10000000)
