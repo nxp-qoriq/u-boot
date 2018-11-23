@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 NXP
+ * Copyright 2017-2018 NXP
  * Copyright 2014-2015 Freescale Semiconductor, Inc.
  * Layerscape PCIe driver
  *
@@ -459,12 +459,17 @@ static int ls_pcie_probe(struct udevice *dev)
 
 	list_add(&pcie->list, &ls_pcie_list);
 
+/*
+ * FIXME: Need to rootcause why is_serdes_configured() is not returning 1
+ */
+	pcie->enabled = 1;
+#if 0
 	pcie->enabled = is_serdes_configured(PCIE_SRDS_PRTCL(pcie->idx));
 	if (!pcie->enabled) {
 		printf("PCIe%d: %s disabled\n", pcie->idx, dev->name);
 		return 0;
 	}
-
+#endif
 	pcie->dbi = map_physmem(pcie->dbi_res.start,
 				fdt_resource_size(&pcie->dbi_res),
 				MAP_NOCACHE);
