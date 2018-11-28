@@ -530,7 +530,7 @@ unsigned long get_board_sys_clk(void);
 #endif
 
 #ifdef CONFIG_TFABOOT
-#define QSPI_BOOTCOMMAND						\
+#define QSPI_NOR_BOOTCOMMAND						\
 			"env exists mcinitcmd && env exists secureboot "\
 			"&& esbc_validate 0x20780000; "			\
 			"env exists mcinitcmd && "			\
