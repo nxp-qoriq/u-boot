@@ -238,4 +238,41 @@
 		bus-range = <0x0 0xff>;
 		ranges = <0x82000000 0x0 0x40000000 0xa8 0x40000000 0x0 0x40000000>; /* non-prefetchable memory */
 	};
+
+	sata0: sata@3200000 {
+			compatible = "fsl,ls2080a-ahci";
+			reg = <0x0 0x3200000 0x0 0x10000>;
+			interrupts = <0 133 4>;
+			clocks = <&clockgen 4 3>;
+			status = "disabled";
+
+	};
+
+	sata1: sata@3210000 {
+			compatible = "fsl,ls2080a-ahci";
+			reg = <0x0 0x3210000 0x0 0x10000>;
+			interrupts = <0 136 4>;
+			clocks = <&clockgen 4 3>;
+			status = "disabled";
+
+	};
+
+	sata2: sata@3220000 {
+			compatible = "fsl,ls2080a-ahci";
+			reg = <0x0 0x3220000 0x0 0x10000>;
+			interrupts = <0 97 4>;
+			clocks = <&clockgen 4 3>;
+			status = "disabled";
+
+	};
+
+	sata3: sata@3230000 {
+			compatible = "fsl,ls2080a-ahci";
+			reg = <0x0 0x3230000 0x0 0x10000>;
+			interrupts = <0 100 4>;
+			clocks = <&clockgen 4 3>;
+			status = "disabled";
+
+	};
+
 };
