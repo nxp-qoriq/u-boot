@@ -72,14 +72,14 @@ unsigned long get_board_sys_clk(void);
 #ifdef CONFIG_TFABOOT
 #define CONFIG_SYS_MMC_ENV_DEV         0
 
-#define CONFIG_ENV_SIZE			0x20000
+#define CONFIG_ENV_SIZE			0x2000
 #define CONFIG_ENV_OFFSET		0x500000	/* 5MB */
 #define CONFIG_ENV_ADDR			(CONFIG_SYS_FLASH_BASE + \
 					 CONFIG_ENV_OFFSET)
-#define CONFIG_ENV_SECT_SIZE		0x20000
+#define CONFIG_ENV_SECT_SIZE		0x40000
 #endif
 
-#ifndef CONFIG_FSL_QSPI
+#if !defined(CONFIG_FSL_QSPI) || defined(CONFIG_TFABOOT)
 /* undefined CONFIG_FSL_DDR_SYNC_REFRESH for simulator */
 
 #define CONFIG_SYS_NOR0_CSPR_EXT	(0x0)
