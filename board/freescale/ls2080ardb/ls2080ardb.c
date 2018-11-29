@@ -347,11 +347,43 @@ void fsl_fdt_fixup_flash(void *fdt)
 {
 	int offset;
 
+
 /*
  * IFC and QSPI are muxed on board.
  * So disable IFC node in dts if QSPI is enabled or
  * disable QSPI node in dts in case QSPI is not enabled.
  */
+#ifdef CONFIG_TFABOOT
+	char *env_hwconfig = env_get("hwconfig");
+	enum boot_src src = get_boot_src();
+	bool disable_ifc = false;
+
+	switch (src) {
+	case BOOT_SOURCE_IFC_NOR:
+		disable_ifc = false;
+		break;
+	case BOOT_SOURCE_QSPI_NOR:
+		disable_ifc = true;
+		break;
+	default:
+		if (hwconfig_f("qspi", env_hwconfig))
+			disable_ifc = true;
+		break;
+	}
+
+	if (disable_ifc == true) {
+		offset = fdt_path_offset(fdt, "/soc/ifc");
+
+		if (offset < 0)
+			offset = fdt_path_offset(fdt, "/ifc");
+	} else {
+		offset = fdt_path_offset(fdt, "/soc/quadspi");
+
+		if (offset < 0)
+			offset = fdt_path_offset(fdt, "/quadspi");
+	}
+
+#else
 #ifdef CONFIG_FSL_QSPI
 	offset = fdt_path_offset(fdt, "/soc/ifc");
 
@@ -363,6 +395,8 @@ void fsl_fdt_fixup_flash(void *fdt)
 	if (offset < 0)
 		offset = fdt_path_offset(fdt, "/quadspi");
 #endif
+#endif
+
 	if (offset < 0)
 		return;
 
