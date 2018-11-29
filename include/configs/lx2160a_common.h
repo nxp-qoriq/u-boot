@@ -264,20 +264,7 @@ unsigned long get_board_ddr_clk(void);
 			"${devnum}:${distro_bootpart} "		\
 			"${scripthdraddr} ${prefix}${boot_script_hdr} "	\
 			"&& esbc_validate ${scripthdraddr};"	\
-		"source ${scriptaddr}\0"			\
-	"xspi_bootcmd=echo Trying load from flexspi..;"		\
-		"sf probe 0:0 && sf read $load_addr "		\
-		"$kernel_start $kernel_size ; env exists secureboot &&"	\
-		"sf read $kernelheader_addr_r $kernelheader_start "	\
-		"$kernelheader_size && esbc_validate ${kernelheader_addr_r}; "\
-		" bootm $load_addr#$board\0"			\
-	"sd_bootcmd=echo Trying load from sd card..;"		\
-		"mmcinfo; mmc read $load_addr "			\
-		"$kernel_addr_sd $kernel_size_sd ;"		\
-		"env exists secureboot && mmc read $kernelheader_addr_r "\
-		"$kernelhdr_addr_sd $kernelhdr_size_sd "	\
-		" && esbc_validate ${kernelheader_addr_r};"	\
-		"bootm $load_addr#$BOARD\0"
+		"source ${scriptaddr}\0"
 
 #define XSPI_NOR_BOOTCOMMAND						\
 			"env exists mcinitcmd && env exists secureboot "\
