@@ -738,6 +738,33 @@ int ft_board_setup(void *blob, bd_t *bd)
 #endif /* defined(CONFIG_SPL_BUILD) */
 
 #ifdef CONFIG_TFABOOT
+#ifdef CONFIG_MTD_NOR_FLASH
+int is_flash_available(void)
+{
+	char *env_hwconfig = env_get("hwconfig");
+	enum boot_src src = get_boot_src();
+	int is_nor_flash_available = 1;
+
+	switch (src) {
+	case BOOT_SOURCE_IFC_NOR:
+		is_nor_flash_available = 1;
+		break;
+	case BOOT_SOURCE_QSPI_NOR:
+		is_nor_flash_available = 0;
+		break;
+	/*
+	 * In Case of SD boot,if qspi is defined in env_hwconfig
+	 * disable nor flash probe.
+	 */
+	default:
+		if (hwconfig_f("qspi", env_hwconfig))
+			is_nor_flash_available = 0;
+		break;
+	}
+	return is_nor_flash_available;
+}
+#endif
+
 void *env_sf_get_env_addr(void)
 {
 	return (void *)(CONFIG_SYS_FSL_QSPI_BASE + CONFIG_ENV_OFFSET);
