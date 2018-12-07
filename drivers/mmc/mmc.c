@@ -2296,6 +2296,7 @@ static int mmc_startup(struct mmc *mmc)
 	if (err)
 		return err;
 
+#ifndef CONFIG_TARGET_LS1028AQDS
 	if (IS_SD(mmc)) {
 		err = sd_get_capabilities(mmc);
 		if (err)
@@ -2310,6 +2311,7 @@ static int mmc_startup(struct mmc *mmc)
 
 	if (err)
 		return err;
+#endif
 
 	mmc->best_mode = mmc->selected_mode;
 
