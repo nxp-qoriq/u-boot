@@ -417,11 +417,17 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 #endif
 	board_boot_order(spl_boot_list);
 
+#ifndef CONFIG_EMU
 	if (boot_from_devices(&spl_image, spl_boot_list,
 			      ARRAY_SIZE(spl_boot_list))) {
 		puts("SPL: failed to boot from all boot devices\n");
 		hang();
 	}
+#else
+	spl_set_header_raw_uboot(&spl_image);
+
+	printf("Skipping MMC init..\n");
+#endif
 
 #ifdef CONFIG_CPU_V7M
 	spl_image.entry_point |= 0x1;
