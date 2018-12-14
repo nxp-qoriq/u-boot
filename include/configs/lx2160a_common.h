@@ -221,7 +221,7 @@ unsigned long get_board_ddr_clk(void);
 	"initrd_high=0xffffffffffffffff\0"	\
 	"fdt_addr=0x64f00000\0"			\
 	"kernel_start=0x1000000\0"		\
-	"kernelheader_start=0x800000\0"		\
+	"kernelheader_start=0x7C0000\0"		\
 	"scriptaddr=0x80000000\0"		\
 	"scripthdraddr=0x80080000\0"		\
 	"fdtheader_addr_r=0x80100000\0"		\
@@ -232,7 +232,7 @@ unsigned long get_board_ddr_clk(void);
 	"load_addr=0xa0000000\0"		\
 	"kernel_size=0x2800000\0"		\
 	"kernel_addr_sd=0x8000\0"		\
-	"kernelhdr_addr_sd=0x4000\0"            \
+	"kernelhdr_addr_sd=0x3E00\0"            \
 	"kernel_size_sd=0x1d000\0"              \
 	"kernelhdr_size_sd=0x10\0"              \
 	"console=ttyAMA0,38400n8\0"		\
