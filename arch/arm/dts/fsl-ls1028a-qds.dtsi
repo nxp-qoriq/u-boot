@@ -186,4 +186,12 @@
 			reg = <0x70>;
 		};
 	};
- };
+};
+
+&sata {
+	status = "okay";
+};
+
+&lpuart0 {
+	status = "okay";
+};
