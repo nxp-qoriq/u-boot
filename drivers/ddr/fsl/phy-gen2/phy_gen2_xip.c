@@ -14,7 +14,8 @@ static int xip_memmove(void *dst, ulong src, int len)
 	return 0;
 }
 
-static int xip_load_image(const unsigned int ctrl_num, image_info_t *img)
+static int xip_load_image(const unsigned int ctrl_num, image_info_t *img,
+				uint16_t *msg, size_t len)
 {
 	int i;
 	u16 *src;
@@ -26,9 +27,18 @@ static int xip_load_image(const unsigned int ctrl_num, image_info_t *img)
 	printf("PHY_GEN2 FW: Load firmware from: %p to 0x%x (len = 0x%lx)..", src,
 	       dst, img->image_len);
 
-	for (i = 0; i < (img->image_len / 2); i++)
-		phy_io_write16(ctrl_num, dst + i, *(src + i));
+	if (msg == NULL) { /* write IMEM image */
+		for (i = 0; i < (img->image_len / 2); i++)
+			phy_io_write16(ctrl_num, dst + i, *(src + i));
+	} else { /* write DMEM image */
+		/* write the message block */
+		for (i = 0; i < (len / 2); i++)
+			phy_io_write16(ctrl_num, dst + i, *msg++);
 
+		/* continue to write DMEM image where message block ends */
+		for (; i < (img->image_len / 2); i++)
+			phy_io_write16(ctrl_num, dst + i, *(src + i));
+	}
 	printf("..Done\n");
 
 	return 0;

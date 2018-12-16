@@ -91,7 +91,8 @@ static void *phy_gen2_phy_prep_img(const unsigned int ctrl_num,
 }
 
 static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
-					struct phy_gen2_fw_info *fw, int train2d)
+					struct phy_gen2_fw_info *fw, int train2d,
+					void *msg, size_t len)
 {
 	void *fit;
 	ulong fit_size;
@@ -229,15 +230,15 @@ static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
 	debug("PHY_GEN2 FW: data-offset = 0x%lx, size = 0x%lx\n",
 	      fw->dmem->image_start, fw->dmem->image_len);
 
-	ret = fw->dev->load_image(ctrl_num, fw->imem);
+	ret = fw->dev->load_image(ctrl_num, fw->imem, NULL, 0);
 	if (!ret)
-		ret = fw->dev->load_image(ctrl_num, fw->dmem);
+		ret = fw->dev->load_image(ctrl_num, fw->dmem, msg, len);
 
 	return ret;
 }
 
 unsigned int phy_gen2_dimm_train(const unsigned int ctrl_num, struct input *input,
-		int train2d)
+		int train2d, void *msg, size_t len)
 {
 	int ret;
 	void *blob;
@@ -275,7 +276,7 @@ unsigned int phy_gen2_dimm_train(const unsigned int ctrl_num, struct input *inpu
 	 * Now that we have simple-FIT structure in OCRAM
 	 * parse and load
 	 */
-	ret = phy_gen2_phy_image_load(ctrl_num, info, train2d);
+	ret = phy_gen2_phy_image_load(ctrl_num, info, train2d, msg, len);
 	if (ret)
 		goto dimm_train_failed;
 

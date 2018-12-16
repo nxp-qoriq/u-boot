@@ -228,7 +228,7 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 		return ret;
 	}
 
-	ret = phy_gen2_dimm_train(ctrl_num, input, 0); /* train 1D first */
+	ret = phy_gen2_dimm_train(ctrl_num, input, 0, msg_1d, len); /* train 1D first */
 	if (ret)
 		return ret;
 
@@ -238,7 +238,7 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 	h_readmsgblock(ctrl_num);
 
 	if (input->basic.train2d) {		/* 2D training starts here */
-		ret = phy_gen2_dimm_train(ctrl_num, input, 0); /* train 1D first */
+		ret = phy_gen2_dimm_train(ctrl_num, input, 1, msg_2d, len); /* train 2D */
 			if (ret)
 				return ret;
 		g_exec_fw(ctrl_num);

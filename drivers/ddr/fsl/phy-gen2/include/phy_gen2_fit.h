@@ -44,7 +44,7 @@ struct phy_gen2_image_loader {
 	 * len: number of bytes to read.
 	 */
 	int (*memmove)(void *dst, ulong src, int len);
-	int (*load_image)(const unsigned int ctrl_num, image_info_t *);
+	int (*load_image)(const unsigned int ctrl_num, image_info_t *, uint16_t *msg, size_t len);
 };
 
 #define PHY_GEN2_LOAD_IMAGE(__name)                                  \
@@ -58,5 +58,5 @@ struct phy_gen2_image_loader {
 		.load_image = _load, \
 	}
 unsigned int phy_gen2_dimm_train(const unsigned int ctrl_num, struct input *input,
-		int train2d);
+		int train2d, void *msg, size_t len);
 #endif
