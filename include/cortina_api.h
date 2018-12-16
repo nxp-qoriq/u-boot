@@ -21,11 +21,11 @@
 #define CS_LITTLE_ENDIAN
 
 /* Things that can be tweaked */
-#define CS_PRINTF(x)	printf x
+#define CS_PRINTF(x)	debug x
 #define CS_FPRINTF(x)	fprintf x
 #define CS_FLUSH()	fflush(stdout)
 #define CS_SNPRINTF(x)	snprintf x
-#define CS_TRACE(x)	printf x
+#define CS_TRACE(x)	debug x
 #define CS_UDELAY(x)	udelay((x))
 #define CS_MDELAY(x)	udelay((x)*1000)
 

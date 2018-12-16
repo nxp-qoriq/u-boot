@@ -7319,65 +7319,58 @@ int cs4224_slice_enter_operational_state(unsigned int slice,
 
 	cs4224_lock(slice);
 
-	/* do not coarse tune VCOs if running KR w ref clock at 106.25Mhz,
-	 * let the ucode take of it
-	 */
-	if (rules->kran.advanced.ref106 == CS_FALSE) {
-		/* Enable then trigger VCO coarse tuning */
-		if (cs4224_is_hw_duplex(slice) || cs4224_line_rx_to_host_tx_dir(
-			slice)) {
-			status |= cs4224_reg_get_channel(
-				slice,
+	/* coarse tune VCOs because ref clock is not at 106.25Mhz */
+
+	/* Enable then trigger VCO coarse tuning */
+	if (cs4224_is_hw_duplex(slice) ||
+	    cs4224_line_rx_to_host_tx_dir(slice)) {
+		status |= cs4224_reg_get_channel(slice,
 				CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB,
 				&data);
-			status |= cs4224_reg_set_channel(
-				slice,
+		status |= cs4224_reg_set_channel(slice,
 				CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB,
 				0x01e7);
-			CS_MDELAY(1);
-			/* init_vco has built-in delays after coarse tuning */
-			status |= cs4224_init_vco(
-				slice,
+		CS_MDELAY(1);
+
+		/* init_vco has built-in delays after coarse tuning */
+		status |= cs4224_init_vco(slice,
 				CS4224_PP_LINE_SDS_COMMON_RXVCO0_CONTROL);
-			if ((data & 0x1c0) != 0x1c0) {
-				/* demux enabled, needs staggered power up */
-				status |= cs4224_reg_set_channel(
-				slice,
-				CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB,
-				(data | 0x1f));
-			}
-			status |= cs4224_reg_set_channel(
-				slice,
-				CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB,
-				data);
+
+		if ((data & 0x1c0) != 0x1c0) {
+			/* demux enabled, needs staggered power up */
+			status |= cs4224_reg_set_channel(slice,
+				    CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB,
+				    (data | 0x1f));
 		}
-		if (cs4224_is_hw_duplex(slice) ||
-		    !cs4224_line_rx_to_host_tx_dir(slice)) {
-			status |= cs4224_reg_get_channel(
-				slice,
+		status |= cs4224_reg_set_channel(slice,
+				    CS4224_PP_LINE_SDS_DSP_MSEQ_POWER_DOWN_LSB,
+				    data);
+	}
+
+	if (cs4224_is_hw_duplex(slice) ||
+	    !cs4224_line_rx_to_host_tx_dir(slice)) {
+		status |= cs4224_reg_get_channel(slice,
 				CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB,
 				&data);
-			status |= cs4224_reg_set_channel(
-				slice,
+		status |= cs4224_reg_set_channel(slice,
 				CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB,
 				0x01e7);
-			CS_MDELAY(1);
-			/* init_vco has built-in delays after coarse tuning */
-			status |= cs4224_init_vco(
-				slice,
+		CS_MDELAY(1);
+
+		/* init_vco has built-in delays after coarse tuning */
+		status |= cs4224_init_vco(slice,
 				CS4224_PP_HOST_SDS_COMMON_RXVCO0_CONTROL);
-			if ((data & 0x1c0) != 0x1c0) {
-				/* demux enabled, needs staggered power up */
-				status |= cs4224_reg_set_channel(
-				slice,
+
+		if ((data & 0x1c0) != 0x1c0) {
+			/* demux enabled, needs staggered power up */
+			status |= cs4224_reg_set_channel(slice,
 				CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB,
 				(data | 0x1f));
-			}
-			status |= cs4224_reg_set_channel(
-				slice,
+		}
+
+		status |= cs4224_reg_set_channel(slice,
 				CS4224_PP_HOST_SDS_DSP_MSEQ_POWER_DOWN_LSB,
 				data);
-		}
 	}
 
 	if (cs4224_is_hw_duplex(slice) ||
