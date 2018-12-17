@@ -346,7 +346,10 @@ void board_quiesce_devices(void)
 void fsl_fdt_fixup_flash(void *fdt)
 {
 	int offset;
-
+#ifdef CONFIG_TFABOOT
+	u32 __iomem *dcfg_ccsr = (u32 __iomem *)DCFG_BASE;
+	u32 val;
+#endif
 
 /*
  * IFC and QSPI are muxed on board.
@@ -354,7 +357,6 @@ void fsl_fdt_fixup_flash(void *fdt)
  * disable QSPI node in dts in case QSPI is not enabled.
  */
 #ifdef CONFIG_TFABOOT
-	char *env_hwconfig = env_get("hwconfig");
 	enum boot_src src = get_boot_src();
 	bool disable_ifc = false;
 
@@ -366,7 +368,8 @@ void fsl_fdt_fixup_flash(void *fdt)
 		disable_ifc = true;
 		break;
 	default:
-		if (hwconfig_f("qspi", env_hwconfig))
+		val = in_le32(dcfg_ccsr + DCFG_RCWSR15 / 4);
+		if (DCFG_RCWSR15_IFCGRPABASE_QSPI == (val & (u32)0x3))
 			disable_ifc = true;
 		break;
 	}
