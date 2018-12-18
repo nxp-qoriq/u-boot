@@ -131,20 +131,38 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 		break;
 	}
 	msg_blk->pstate			= 0;
+#ifdef CONFIG_ARCH_LX2160A_PXP
+		msg_blk->sequence_ctrl	= 0x1;
+#else
 	if (input->basic.dimm_type == LRDIMM)
 		msg_blk->sequence_ctrl	= 0x3f1f;
 	else
 		msg_blk->sequence_ctrl	= 0x031f;
+#endif
 	msg_blk->phy_config_override	= 0;
 	msg_blk->hdt_ctrl		= 0xff;
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	msg_blk->msg_misc		= 0x0;
+#else
 	msg_blk->msg_misc		= 0x6;
+#endif
 	msg_blk->dfimrlmargin		= 0x1;
 	msg_blk->phy_vref		= 0x56;
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	msg_blk->cs_present		= 3;
+	/* FIXME: bit mask for chip-select */
+	msg_blk->cs_present_d0		= 3;
+#else
 	msg_blk->cs_present		= 1;
 	/* FIXME: bit mask for chip-select */
 	msg_blk->cs_present_d0		= 1;
+#endif
 	msg_blk->cs_present_d1		= 0;
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	msg_blk->addr_mirror		= 0;
+#else
 	msg_blk->addr_mirror		= 0x0a;	/* odd CS are mirrored */
+#endif
 	msg_blk->acsm_odt_ctrl0		= WRODTPAT_RANK0 | RDODTPAT_RANK0;
 	/* FIXME */
 	msg_blk->acsm_odt_ctrl1		= WRODTPAT_RANK1 | RDODTPAT_RANK1;
@@ -169,6 +187,16 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	msg_blk->rtt_nom_wr_park5	= 0;
 	msg_blk->rtt_nom_wr_park6	= 0;
 	msg_blk->rtt_nom_wr_park7	= 0;
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	msg_blk->mr0			= 0x44;
+	/* FIXME: shouldn't be fixed value */
+	msg_blk->mr1			= 0x1;
+	msg_blk->mr2			= 0x28;
+	msg_blk->mr3			= 0;
+	msg_blk->mr4			= 0;
+	msg_blk->mr5			= 0x0400;
+	msg_blk->mr6			= 0x0400;
+#else
 	msg_blk->mr0			= 0x0630;
 	/* FIXME: shouldn't be fixed value */
 	msg_blk->mr1			= 0x0201;
@@ -177,6 +205,7 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	msg_blk->mr4			= 0;
 	msg_blk->mr5			= 0x0480;
 	msg_blk->mr6			= 0x0800 | 0x0018;
+#endif
 	msg_blk->alt_cas_l		= 0;
 	msg_blk->alt_wcas_l		= 0;
 
@@ -185,6 +214,10 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	msg_blk->dfi_freq_ratio		= input->basic.dfi_freq_ratio == 0 ? 1
 					: input->basic.dfi_freq_ratio == 1 ? 2
 					: 4;
+#ifdef CONFIG_ARCH_LX2160A_PXP
+	msg_blk->phy_odt_impedance = 0;
+	msg_blk->phy_drv_impedance = 0;
+#else
 	if (input->basic.hard_macro_ver == 4) {
 		msg_blk->phy_odt_impedance = 0;
 		msg_blk->phy_drv_impedance = 0;
@@ -197,6 +230,7 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 		msg_blk->phy_drv_impedance = input->adv.tx_impedance;
 #endif
 	}
+#endif
 	msg_blk->bpznres_val		= input->adv.ext_cal_res_val;
 	msg_blk->enabled_dqs		= input->basic.num_active_dbyte_dfi0 *
 						8;
