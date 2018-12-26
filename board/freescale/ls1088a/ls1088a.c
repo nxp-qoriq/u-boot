@@ -699,15 +699,15 @@ void fsl_fdt_fixup_flash(void *fdt)
         }
 
         if (disable_ifc == true) {
-                offset = fdt_path_offset(fdt, "/soc/ifc");
+		offset = fdt_path_offset(fdt, "/soc/ifc/nor");
 
-                if (offset < 0)
-                        offset = fdt_path_offset(fdt, "/ifc");
+		if (offset < 0)
+			offset = fdt_path_offset(fdt, "/ifc/nor");
         } else {
-                offset = fdt_path_offset(fdt, "/soc/quadspi");
+		offset = fdt_path_offset(fdt, "/soc/quadspi");
 
-                if (offset < 0)
-                        offset = fdt_path_offset(fdt, "/quadspi");
+		if (offset < 0)
+			offset = fdt_path_offset(fdt, "/quadspi");
         }
 
 #else
