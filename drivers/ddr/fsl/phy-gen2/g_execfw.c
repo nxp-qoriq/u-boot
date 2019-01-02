@@ -26,6 +26,7 @@ static int wait_fw_done(const unsigned int ctrl_num)
 		timeout = TIMEOUTDEFAULT;
 		while (--timeout && (phy_io_read16(ctrl_num, t_apbonly |
 		       csr_uct_shadow_regs) & uct_write_prot_shadow_mask)) {
+			mdelay(10);
 		}
 		if (!timeout)
 			return -ETIME;
@@ -33,7 +34,7 @@ static int wait_fw_done(const unsigned int ctrl_num)
 		mail = phy_io_read16(ctrl_num, t_apbonly |
 				     csr_uct_write_only_shadow);
 
-		printf("PHY_GEN2 FW: mail = 0x%x\n", mail);
+		debug("PHY_GEN2 FW: mail = 0x%x\n", mail);
 
 		if (!(mail == 0x07 || mail == 0xff))
 			mail = 0x0;

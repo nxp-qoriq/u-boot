@@ -85,7 +85,7 @@ uint16_t phy_io_read16(const unsigned int ctrl_num, uint32_t addr)
 {
 	u16 reg = in_le16((u16 *)(uintptr_t) phy_io_addr(ctrl_num, addr));
 
-	printf("R: 0x%x (0x%x) -> 0x%x\n", addr, phy_io_addr(ctrl_num, addr),
+	debug("R: 0x%x (0x%x) -> 0x%x\n", addr, phy_io_addr(ctrl_num, addr),
 	       reg);
 	return reg;
 }

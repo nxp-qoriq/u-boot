@@ -264,34 +264,97 @@ static void ddr_cntlr_fixed_settings(void)
 #else
 static void ddr_cntlr_fixed_settings(void)
 {
-	puts("Setting Hardcoded values for DDRC for 1600 frequency\n");
-	out_le32(0x01080000,0x000000ff);	/* CS0_BNDS */
-	out_le32(0x01080008,0x010001ff);	/* CS1_BNDS */
-	out_le32(0x01080010,0x00000000);	/* CS2_BNDS */
-	out_le32(0x01080018,0x00000000);	/* CS3_BNDS */
-	out_le32(0x01080080,0x80020322);	/* CS0_CONFIG */
-	out_le32(0x01080084,0x80020322);	/* CS1_CONFIG */
-	out_le32(0x01080088,0x00000000);	/* CS2_CONFIG */
-	out_le32(0x0108008C,0x00000000);	/* CS3_CONFIG */
-	out_le32(0x01080100,0x010c1000);	/* TIMING_CFG_3 */
-	out_le32(0x01080104,0xfa550018);	/* TIMING_CFG_0 */
-	out_le32(0x01080108,0xbab48c42);	/* TIMING_CFG_1 */
-	out_le32(0x0108010C,0x0058c111);	/* TIMING_CFG_2 */
-	out_le32(0x01080110,0xe5040001);	/* DDR_SDRAM_CFG */
-	out_le32(0x01080114,0x00401101);	/* DDR_SDRAM_CFG_2 */
-	out_le32(0x01080124,0x18600100);	/* DDR_SDRAM_INTERVAL */
-	out_le32(0x01080160,0x00000002);	/* TIMING_CFG_4 */
-	out_le32(0x01080164,0x03401400);	/* TIMING_CFG_5 */
-	out_le32(0x01080168,0x00000000);	/* TIMING_CFG_6 */
-	out_le32(0x0108016C,0x13300000);	/* TIMING_CFG_7 */
-	out_le32(0x01080170,0x8a090705);	/* DDR_ZQ_CNTL */
-	out_le32(0x01080250,0x00004600);	/* TIMING_CFG_8 */
-	out_le32(0x01080254,0x00000000);	/* TIMING_CFG_9 */
-	out_le32(0x01080260,0x00000001);	/* DDR_SDRAM_CFG_3 */
-	out_le32(0x01080400,0x32C57554);	/* DQ_MAPPING_0 */
-	out_le32(0x01080404,0xD4BB0BD4);	/* DQ_MAPPING_1 */
-	out_le32(0x01080408,0x2EC2F554);	/* DQ_MAPPING_2 */
-	out_le32(0x0108040C,0xD95D4001);	/* DQ_MAPPING_3 */
+	puts("DDRC: 1600 MT/s\n");
+	out_le32(0x01080000,0x000001ff);
+	out_le32(0x01080008,0x000001ff);
+	out_le32(0x01080010,0x020002ff);
+	out_le32(0x01080018,0x030003ff);
+	out_le32(0x01080080,0x80040322);
+	out_le32(0x01080088,0x80000322);
+	out_le32(0x0108008C,0x00000322);
+	out_le32(0x01080104,0xff550018);
+	out_le32(0x01080108,0xbab48c42);
+	out_le32(0x0108010C,0x0058c111);
+	out_le32(0x01080100,0x010c1000);
+	out_le32(0x01080160,0x00000002);
+	out_le32(0x01080164,0x03401400);
+	out_le32(0x01080168,0x00000000);
+	out_le32(0x0108016C,0x13300000);
+	out_le32(0x01080250,0x00004600);
+	out_le32(0x01080260,0x00000001);
+	out_le32(0x01080170,0x8a090705);
+	out_le32(0x0108017C,0x00000000);
+	out_le32(0x01080114,0x00401101);
+	out_le32(0x01080124,0x163c0000);
+	out_le32(0x01080128,0xa5a55a5a);
+	out_le32(0x01080E44,0x00000000);
+	out_le32(0x01080E48,0x00000000);
+	out_le32(0x01080E58,0x00ba0000);
+	out_le32(0x01080400,0x32c57554);
+	out_le32(0x01080404,0xd4bb0bd4);
+	out_le32(0x01080408,0x2ec2f554);
+	out_le32(0x0108040c,0xd95d4001);
+	out_le32(0x01080D20,0xAA55AA55);
+	out_le32(0x01080D24,0x11331133);
+	out_le32(0x01080D28,0x00000000);
+	out_le32(0x01080D2c,0xFFFFFFFF);
+	out_le32(0x01080D30,0x12345678);
+	out_le32(0x01080D34,0xdeadbeef);
+	out_le32(0x01080D38,0xbbeebbee);
+	out_le32(0x01080D3c,0xccddccdd);
+	out_le32(0x01080D40,0xcdaccdac);
+	out_le32(0x01080D44,0x11223344);
+	out_le32(0x01080110,0xc5044001);
+	out_le32(0x01100004,0x1);
+	out_le32(0x01100110,0xc0000000);
+	out_le32(0x01100114,0xffffffff);
+	out_le32(0x01100128,0xfffff000);
+	out_le32(0x0110012C,0xff);
+	out_le32(0x01100130,0xc0000001);
+	out_le32(0x01100134,0xffffffff);
+	out_le32(0x01100008,0x1);
+	out_le32(0x01110004,0x1);
+	out_le32(0x01110110,0xc0000000);
+	out_le32(0x01110114,0xffffffff);
+	out_le32(0x01110128,0xfffff000);
+	out_le32(0x0111012C,0xff);
+	out_le32(0x01110130,0xc0000001);
+	out_le32(0x01110134,0xffffffff);
+	out_le32(0x01110008,0x1);
+	out_le32(0x01120004,0x1);
+	out_le32(0x01120110,0xc0000000);
+	out_le32(0x01120114,0xffffffff);
+	out_le32(0x01120128,0xfffff000);
+	out_le32(0x0112012C,0xff);
+	out_le32(0x01120130,0xc0000001);
+	out_le32(0x01120134,0xffffffff);
+	out_le32(0x01120008,0x1);
+	out_le32(0x01130004,0x1);
+	out_le32(0x01130110,0xc0000000);
+	out_le32(0x01130114,0xffffffff);
+	out_le32(0x01130128,0xfffff000);
+	out_le32(0x0113012C,0xff);
+	out_le32(0x01130130,0xc0000001);
+	out_le32(0x01130134,0xffffffff);
+	out_le32(0x01130008,0x1);
+	out_le32(0x04200008,0x8);
+	out_le32(0x04210008,0x8);
+	out_le32(0x04220008,0x8);
+	out_le32(0x04230008,0x8);
+	out_le32(0x04240008,0x8);
+	out_le32(0x04250008,0x8);
+	out_le32(0x04260008,0x8);
+	out_le32(0x04270008,0x8);
+	out_le32(0x80000000,0xabcd1234);
+	out_le32(0x80000010,0xabcd1234);
+	out_le32(0x80000000,0x56789abc);
+	out_le32(0x80000010,0x56789abc);
+	out_le32(0x80000004,0xabcd1234);
+	out_le32(0x80000014,0xabcd1234);
+	out_le32(0x80000004,0x56789abc);
+	out_le32(0x80000014,0x56789abc);
+	out_le32(0x80000100,0xabcd1234);
+	out_le32(0x80001000,0xabcd1234);
 }
 #endif
 #endif

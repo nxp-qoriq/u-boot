@@ -59,7 +59,7 @@ void load_image(const unsigned int ctrl_num, enum image_types image_type)
 	const struct pie *pie_image = NULL;
 	const struct overrides *overrides_image = NULL;
 
-	printf("Load Image-%d..\n", image_type);
+	debug("Load Image-%d..\n", image_type);
 	switch (image_type) {
 	case CSR:
 		csr_image = phy_csr;
@@ -124,14 +124,14 @@ void load_image(const unsigned int ctrl_num, enum image_types image_type)
 		printf("Unsupported Image type\n");
 		break;
 	}
-	printf("Load Image-%d..Done\n", image_type);
+	debug("Load Image-%d..Done\n", image_type);
 }
 
 unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 		const memctl_options_t *popts,
 		fsl_ddr_cfg_regs_t *ddr)
 {
-	printf("DDR PHY Debug Path\n");
+	debug("DDR PHY Debug Path\n");
 
 #ifdef CONFIG_FSL_PHY_GEN2_PHY_A2017_11
 	printf("PHY_GEN2 FW Version: A2017.11\n");
@@ -175,10 +175,12 @@ unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
 
 #if defined(CONFIG_ARCH_LX2160A_PXP) || defined(CONFIG_DDR_FIXED_SETTINGS)
 	phy_io_write16(ctrl_num, 0x0d0000, 0);
+	phy_io_write16(ctrl_num, 0x0c0080, 3);
 	load_image(ctrl_num, OVERRIDES);
+	phy_io_write16(ctrl_num, 0x0c0080, 3);
 	phy_io_write16(ctrl_num, 0x0d0000, 1);
 #endif
-	printf("DDR PHY Debug Path.. Done\n");
+	debug("DDR PHY Debug Path.. Done\n");
 	return 0;
 
 }
