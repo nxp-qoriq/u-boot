@@ -192,7 +192,26 @@ static void fdt_fixup_pcie(void *blob)
 }
 #endif
 
-static void ft_pcie_lx_setup(void *blob, struct lx_pcie *pcie)
+static void ft_pcie_ep_lx_fix(void *blob, struct lx_pcie *pcie)
+{
+	int off;
+
+	off = fdt_node_offset_by_compat_reg(blob, "fsl,lx2160a-pcie-ep",
+					    pcie->ccsr_res.start);
+
+	if (off < 0) {
+		debug("%s: ERROR: failed to find pcie compatiable\n",
+		      __func__);
+		return;
+	}
+
+	if (pcie->enabled && pcie->mode == PCI_HEADER_TYPE_NORMAL)
+		fdt_set_node_status(blob, off, FDT_STATUS_OKAY, 0);
+	else
+		fdt_set_node_status(blob, off, FDT_STATUS_DISABLED, 0);
+}
+
+static void ft_pcie_rc_lx_fix(void *blob, struct lx_pcie *pcie)
 {
 	int off;
 
@@ -208,10 +227,16 @@ static void ft_pcie_lx_setup(void *blob, struct lx_pcie *pcie)
 		return;
 	}
 
-	if (pcie->enabled)
+	if (pcie->enabled && pcie->mode == PCI_HEADER_TYPE_BRIDGE)
 		fdt_set_node_status(blob, off, FDT_STATUS_OKAY, 0);
 	else
 		fdt_set_node_status(blob, off, FDT_STATUS_DISABLED, 0);
+}
+
+static void ft_pcie_lx_setup(void *blob, struct ls_pcie *pcie)
+{
+	ft_pcie_ep_lx_fix(blob, pcie);
+	ft_pcie_rc_lx_fix(blob, pcie);
 }
 
 /* Fixup Kernel DT for PCIe */
