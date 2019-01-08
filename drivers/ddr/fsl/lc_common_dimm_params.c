@@ -24,7 +24,7 @@ static unsigned int get_speed_bin_caslat(unsigned int tckmin_ps,
 		const struct cas *cl;
 		const unsigned taamin_ps[4];
 	};
-	const struct cas const cl_3200[] = {
+	const struct cas cl_3200[] = {
 		{625,	{0x1500000, 0x1400000, 0x1000000,} },
 		{750,	{ 0x1c0000,  0x180000,  0x100000,} },
 		{833,	{  0x70000,   0x60000,   0x40000,} },
@@ -33,7 +33,7 @@ static unsigned int get_speed_bin_caslat(unsigned int tckmin_ps,
 		{1250,	{   0x1800,    0x1800,    0x1000,} },
 		{1500,	{    0x600,         0,     0x400,} },
 	};
-	const struct cas const cl_2933[] = {
+	const struct cas cl_2933[] = {
 		{682,	{0x780000, 0x700000, 0x600000, 0x400000} },
 		{750,	{0x1c0000, 0x180000, 0x180000, 0x100000} },
 		{833,	{ 0x70000,  0x60000,  0x60000,  0x40000} },
@@ -42,7 +42,7 @@ static unsigned int get_speed_bin_caslat(unsigned int tckmin_ps,
 		{1250,	{  0x1800,   0x1800,   0x1800,   0x1000} },
 		{1500,	{   0x600,    0x400,    0x400,    0x400} },
 	};
-	const struct cas const cl_2666[] = {
+	const struct cas cl_2666[] = {
 		{750,	{0x1e0000, 0x1c0000, 0x180000, 0x100000} },
 		{833,	{ 0x70000,  0x60000,  0x60000,  0x40000} },
 		{937,	{ 0x18000,  0x18000,  0x18000,  0x10000} },
@@ -50,25 +50,25 @@ static unsigned int get_speed_bin_caslat(unsigned int tckmin_ps,
 		{1250,	{  0x1800,   0x1800,   0x1800,   0x1000} },
 		{1500,	{   0x600,    0x600,    0x400,    0x400} },
 	};
-	const struct cas const cl_2400[] = {
+	const struct cas cl_2400[] = {
 		{833,	{ 0x78000,  0x70000,  0x60000,  0x40000} },
 		{937,	{ 0x10000,  0x18000,  0x18000,  0x10000} },
 		{1071,	{  0x4000,   0x6000,   0x6000,   0x4000} },
 		{1250,	{  0x1000,   0x1800,   0x1800,   0x1000} },
 		{1500,	{   0x600,    0x200,    0x400,    0x400} },
 	};
-	const struct cas const cl_2133[] = {
+	const struct cas cl_2133[] = {
 		{937,	{ 0x1c000,  0x18000,  0x10000,} },
 		{1071,	{  0x4000,   0x6000,   0x4000,} },
 		{1250,	{  0x1000,   0x1800,   0x1000,} },
 		{1500,	{   0x600,    0x200,    0x400,} },
 	};
-	const struct cas const cl_1866[] = {
+	const struct cas cl_1866[] = {
 		{1071,	{  0x7000,   0x6000,   0x4000,} },
 		{1250,	{  0x1000,   0x1800,   0x1000,} },
 		{1500,	{   0x600,    0x200,    0x400,} },
 	};
-	const struct cas const cl_1600[] = {
+	const struct cas cl_1600[] = {
 		{1250,	{  0x1c00,   0x1800,   0x1000,} },
 		{1500,	{   0x600,    0x200,    0x400,} },
 	};
