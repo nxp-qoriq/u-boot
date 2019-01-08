@@ -2,6 +2,7 @@
 /*
  * SPI Flash Core
  *
+ * Copyright 2018 NXP
  * Copyright (C) 2015 Jagan Teki <jteki@openedev.com>
  * Copyright (C) 2013 Jagannadha Sutradharudu Teki, Xilinx Inc.
  * Copyright (C) 2010 Reinhard Meyer, EMK Elektronik
@@ -1402,11 +1403,20 @@ int spi_flash_scan(struct spi_flash *flash)
 		flash->flags |= SNOR_F_USE_FSR;
 #endif
 
+	spi_flash_cmd_enter_4byte(flash);
+
 	/* Configure the BAR - discover bank cmds and read current bank */
 #ifdef CONFIG_SPI_FLASH_BAR
 	ret = read_bar(flash, info);
 	if (ret < 0)
 		return ret;
+#endif
+
+#if 0
+	/* MT35x flash supports enter 4 byte cmd. */
+	if ((JEDEC_MFR(info) == SPI_FLASH_CFI_MFR_MICRON) &&
+			(JEDEC_ID(info) == 0x5b1a))
+		spi_flash_cmd_enter_4byte(flash);
 #endif
 
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
