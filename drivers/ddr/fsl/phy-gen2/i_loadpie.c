@@ -122,6 +122,9 @@ void i_load_pie(const unsigned int ctrl_num, const struct input *input,
 
 	load_pieimage(ctrl_num, input->basic.dimm_type);
 
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
+	prog_seq0bdly0(ctrl_num, input);
+#endif
 	phy_io_write16(ctrl_num, t_initeng | csr_seq0bdisable_flag0_addr,
 		       0x0000);
 	phy_io_write16(ctrl_num, t_initeng | csr_seq0bdisable_flag1_addr,
@@ -142,15 +145,17 @@ void i_load_pie(const unsigned int ctrl_num, const struct input *input,
 		       0x6152);
 	prog_acsm_playback(ctrl_num, input, msg);		/* rdimm */
 	prog_acsm_ctr(ctrl_num, input);				/* rdimm */
-#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
-	prog_seq0bdly0(ctrl_num, input);
 
+#if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
 	phy_io_write16(ctrl_num, t_master | csr_cal_zap_addr, 0x1);
 	prog_cal_rate(ctrl_num, input);
 #endif
 	phy_io_write16(ctrl_num, t_drtub | csr_ucclk_hclk_enables_addr,
-		       input->basic.dimm_type == RDIMM ? 0x2 : 0);
+		       input->basic.dimm_type == RDIMM ? 0x2 : 0x3);
 
 	phy_io_write16(ctrl_num, t_apbonly | csr_micro_cont_mux_sel_addr, 1);
+
+	phy_io_write16(ctrl_num, t_drtub | csr_ucclk_hclk_enables_addr,
+		       input->basic.dimm_type == RDIMM ? 0x2 : 0);
 
 }

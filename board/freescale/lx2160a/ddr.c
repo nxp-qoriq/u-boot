@@ -368,7 +368,7 @@ int fsl_initdram(void)
 #ifndef CONFIG_DDR_BOOT
 #if defined(CONFIG_ARCH_LX2160A_PXP) || defined(CONFIG_DDR_FIXED_SETTINGS)
 	puts("Initializing DDR....using fixed timing\n");
-	compute_phy_config_regs(0, NULL, NULL);
+	compute_phy_config_regs(0, NULL, NULL, NULL);
 	ddr_cntlr_fixed_settings();
 	gd->ram_size = CONFIG_SYS_SDRAM_SIZE;
 #else

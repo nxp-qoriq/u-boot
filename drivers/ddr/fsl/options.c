@@ -766,12 +766,15 @@ unsigned int populate_memctl_options(const common_timing_params_t *common_dimm,
 	switch (pdimm[0].n_ranks) {
 	case 1:
 		pdodt = single_S;
+		popts->cs_d0 = 0x1;
 		break;
 	case 2:
 		pdodt = single_D;
+		popts->cs_d0 = 0x3;
 		break;
 	case 4:
 		pdodt = single_Q;
+		popts->cs_d0 = 0xf;
 		break;
 	}
 #elif (CONFIG_DIMM_SLOTS_PER_CTLR == 2)
@@ -784,12 +787,15 @@ unsigned int populate_memctl_options(const common_timing_params_t *common_dimm,
 		break;
 #endif
 	case 2:
+		popts->cs_d0 = 0x3;
 		switch (pdimm[1].n_ranks) {
 		case 2:
 			pdodt = dual_DD;
+			popts->cs_d1 = 0xc;
 			break;
 		case 1:
 			pdodt = dual_DS;
+			popts->cs_d1 = 0x4;
 			break;
 		case 0:
 			pdodt = dual_D0;
@@ -797,12 +803,15 @@ unsigned int populate_memctl_options(const common_timing_params_t *common_dimm,
 		}
 		break;
 	case 1:
+		popts->cs_d0 = 0x1;
 		switch (pdimm[1].n_ranks) {
 		case 2:
 			pdodt = dual_SD;
+			popts->cs_d1 = 0xc;
 			break;
 		case 1:
 			pdodt = dual_SS;
+			popts->cs_d1 = 0x4;
 			break;
 		case 0:
 			pdodt = dual_S0;
@@ -813,9 +822,11 @@ unsigned int populate_memctl_options(const common_timing_params_t *common_dimm,
 		switch (pdimm[1].n_ranks) {
 		case 2:
 			pdodt = dual_0D;
+			popts->cs_d1 = 0xc;
 			break;
 		case 1:
 			pdodt = dual_0S;
+			popts->cs_d1 = 0x4;
 			break;
 		}
 		break;

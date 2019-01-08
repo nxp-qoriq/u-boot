@@ -139,15 +139,18 @@ static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
 
 	fit = fw->hdr;
 
-	if (train2d == 0)
-		phy_io_write16(ctrl_num, t_master | csr_mem_reset_l_addr,
-			       csr_protect_mem_reset_mask);
-
 
 	/* Initilaizing firmware mailbox */
 	phy_io_write16(ctrl_num, t_apbonly | csr_dct_write_prot, 0x1);
 	phy_io_write16(ctrl_num, t_drtub | csr_uct_write_prot, 0x1);
 
+	/* Enable access to the internal CSRs */
+	phy_io_write16(ctrl_num, t_apbonly | csr_micro_cont_mux_sel_addr, 0);
+
+	if (train2d == 0) {
+		phy_io_write16(ctrl_num, t_master | csr_mem_reset_l_addr,
+			       csr_protect_mem_reset_mask);
+	}
 	switch (fw->input->basic.dimm_type) {
 	case UDIMM:
 	case SODIMM:
@@ -165,9 +168,10 @@ static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
 		break;
 	default:
 		pr_err("Unsupported DIMM type\n");
-		return -EINVAL;
+		ret = -EINVAL;
+		goto out;
 	}
-	printf("PHY_GEN2 FW: selected configuration: %s, %s\n",
+	debug("PHY_GEN2 FW: selected configuration: %s, %s\n",
 	       imem_fit_uname, dmem_fit_uname);
 
 	/*
@@ -182,7 +186,8 @@ static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
 	images = fdt_path_offset(fit, FIT_IMAGES_PATH);
 	if (images < 0) {
 		pr_err("PHY_GEN2 phy FW: /images not found\n");
-		return -EINVAL;
+		ret = -EINVAL;
+		goto out;
 	}
 	debug("PHY_GEN2 FW: images found at: 0x%x\n", images);
 
@@ -191,14 +196,16 @@ static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
 
 	if (!fw->imem || !fw->dmem) {
 		pr_err("PHY_GEN2 FW: unable allocate memory from OCRAM\n");
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto out;
 	}
 
 	/* find imem_* subnode */
 	noffset = fdt_subnode_offset(fit, images, imem_fit_uname);
 	if (noffset < 0) {
 		pr_err("PHY_GEN2 phy FW: imem not found\n");
-		return -EINVAL;
+		ret = -EINVAL;
+		goto out;
 	}
 	debug("PHY_GEN2 FW: imem noffset = 0x%x\n", noffset);
 
@@ -216,7 +223,8 @@ static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
 	noffset = fdt_subnode_offset(fit, images, dmem_fit_uname);
 	if (noffset < 0) {
 		pr_err("PHY_GEN2 phy FW: dmem not found\n");
-		return -EINVAL;
+		ret = -EINVAL;
+		goto out;
 	}
 	debug("PHY_GEN2 FW: dmem noffset = 0x%x\n", noffset);
 
@@ -233,6 +241,9 @@ static unsigned int phy_gen2_phy_image_load(const unsigned int ctrl_num,
 	ret = fw->dev->load_image(ctrl_num, fw->imem, NULL, 0);
 	if (!ret)
 		ret = fw->dev->load_image(ctrl_num, fw->dmem, msg, len);
+out:
+	/* Isolate the APB access from the internal CSRs */
+	phy_io_write16(ctrl_num, t_apbonly | csr_micro_cont_mux_sel_addr, 1);
 
 	return ret;
 }
@@ -286,5 +297,6 @@ unsigned int phy_gen2_dimm_train(const unsigned int ctrl_num, struct input *inpu
 	return 0;
 
 dimm_train_failed:
-	hang();
+
+	return -EINVAL;
 }

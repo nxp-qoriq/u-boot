@@ -175,7 +175,9 @@ compute_fsl_phy_config_regs(const memctl_options_t *popts,
 
 unsigned int
 compute_phy_config_regs(const unsigned int ctrl_num,
-			const memctl_options_t *popts, fsl_ddr_cfg_regs_t *ddr)
+			const memctl_options_t *popts,
+			const dimm_params_t *dimm_parameters,
+			fsl_ddr_cfg_regs_t *ddr)
 {
 	compute_fsl_phy_config_regs(popts, ddr);
 	return 0;

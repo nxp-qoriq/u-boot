@@ -75,6 +75,10 @@ struct input_advanced {
 struct input {
 	struct input_basic basic;
 	struct input_advanced adv;
+	unsigned int mr[7];
+	unsigned int cs_d0;
+	unsigned int cs_d1;
+	unsigned int odt[4];
 };
 
 #endif

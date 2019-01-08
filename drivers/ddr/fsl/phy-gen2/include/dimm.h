@@ -30,6 +30,11 @@ struct dimm {
 	unsigned int	n_ranks;
 	unsigned int	data_width;
 	unsigned int	primary_sdram_width;
+	unsigned int	ec_sdram_width;
+	unsigned int	mr[7];
+	unsigned int	cs_d0;
+	unsigned int	cs_d1;
+	unsigned int	odt[4];
 };
 
 #endif /* _DIMM_H_ */

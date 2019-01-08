@@ -24,7 +24,7 @@ static int xip_load_image(const unsigned int ctrl_num, image_info_t *img,
 	src = (u16 *)(uintptr_t)(img->image_start + img->start);
 	dst = img->load;
 
-	printf("PHY_GEN2 FW: Load firmware from: %p to 0x%x (len = 0x%lx)..", src,
+	debug("PHY_GEN2 FW: Load firmware from: %p to 0x%x (len = 0x%lx)..", src,
 	       dst, img->image_len);
 
 	if (msg == NULL) { /* write IMEM image */
@@ -39,7 +39,7 @@ static int xip_load_image(const unsigned int ctrl_num, image_info_t *img,
 		for (; i < (img->image_len / 2); i++)
 			phy_io_write16(ctrl_num, dst + i, *(src + i));
 	}
-	printf("..Done\n");
+	debug("..Done\n");
 
 	return 0;
 }

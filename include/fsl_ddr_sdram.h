@@ -340,6 +340,9 @@ typedef struct memctl_options_s {
 		unsigned int odt_rtt_wr;
 	} cs_local_opts[CONFIG_CHIP_SELECTS_PER_CTRL];
 
+	unsigned int cs_d0;	/* chip-select bitmask on DIMM slot 0 */
+	unsigned int cs_d1;	/* chip-select bitmask on DIMM slot 1 */
+
 	/* Special configurations for chip select */
 	unsigned int memctl_interleaving;
 	unsigned int memctl_interleaving_mode;

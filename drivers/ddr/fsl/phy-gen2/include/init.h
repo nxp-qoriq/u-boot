@@ -17,16 +17,6 @@
 #include "ddr4lr2d.h"
 #include "dimm.h"
 
-/* FIXME: This shouldn't be static */
-#define WRODTPAT_RANK0	0x01
-#define WRODTPAT_RANK1	0x02
-#define WRODTPAT_RANK2	0x00
-#define WRODTPAT_RANK3	0x00
-#define RDODTPAT_RANK0	0x20
-#define RDODTPAT_RANK1	0x10
-#define RDODTPAT_RANK2	0x00
-#define RDODTPAT_RANK3	0x00
-
 #define t_anib				0
 #define t_dbyte				0x10000
 #define t_master				0x20000

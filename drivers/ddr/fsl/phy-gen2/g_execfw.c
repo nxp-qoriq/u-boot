@@ -24,8 +24,9 @@ static int wait_fw_done(const unsigned int ctrl_num)
 
 	while (mail == 0x0) {
 		timeout = TIMEOUTDEFAULT;
-		while (--timeout && (phy_io_read16(ctrl_num, t_apbonly |
-		       csr_uct_shadow_regs) & uct_write_prot_shadow_mask)) {
+		while (--timeout &&
+		       (phy_io_read16(ctrl_num, t_apbonly | csr_uct_shadow_regs)
+			& uct_write_prot_shadow_mask)) {
 			mdelay(10);
 		}
 		if (!timeout)
@@ -43,8 +44,10 @@ static int wait_fw_done(const unsigned int ctrl_num)
 			       csr_dct_write_prot, 0);	/* Ack */
 
 		timeout = TIMEOUTDEFAULT;
-		while (--timeout && !(phy_io_read16(ctrl_num, t_apbonly |
-		       csr_uct_shadow_regs) & uct_write_prot_shadow_mask)) {
+		while (--timeout &&
+		       !(phy_io_read16(ctrl_num, t_apbonly | csr_uct_shadow_regs)
+			 & uct_write_prot_shadow_mask)) {
+			mdelay(1);
 		}
 		if (!timeout)
 			return -ETIME;
@@ -76,7 +79,7 @@ void g_exec_fw(const unsigned int ctrl_num)
 	ret = wait_fw_done(ctrl_num);
 	if (ret == -ETIME)
 		printf("Timed out while waiting for firmware execution\n");
-	else if (ret == 0xff)
+	else if (ret == -EIO)
 		printf("Training failed\n");
 	else if (ret)
 		printf("Unknown error\n");

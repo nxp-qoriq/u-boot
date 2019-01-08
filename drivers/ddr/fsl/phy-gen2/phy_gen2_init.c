@@ -15,6 +15,7 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 			      int freq)
 {
 	struct input *input;
+	int i;
 
 	input = calloc(1, sizeof(struct input));
 	if (!input) {
@@ -27,14 +28,12 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	input->basic.num_dbyte = 0x9;
 #else
-	input->basic.num_dbyte = dimm->primary_sdram_width / 8;
+	input->basic.num_dbyte = dimm->primary_sdram_width / 8 +
+				 dimm->ec_sdram_width / 8;
 #endif
-	/* FIXME, is this right? */
 	input->basic.num_rank_dfi0 = dimm->n_ranks;
 	input->basic.frequency = freq;
 	input->basic.dram_data_width = dimm->data_width;
-	/* FIXME, is this right? */
-
 
 	input->basic.hard_macro_ver	= 3;
 	input->basic.num_pstates	= 1;
@@ -47,19 +46,13 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 #endif
 #endif
 	input->basic.num_active_dbyte_dfi0 = input->basic.num_dbyte;
-	/* FIXME */
-#ifdef CONFIG_ARCH_LX2160A_PXP
 	input->basic.num_anib		= 0xc;
-#else
-	input->basic.num_anib		= 0xa;
-#endif
-	/* FIXME */
+
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	input->basic.train2d		= 0;
 #else
 	input->basic.train2d		= 1;
 #endif
-	/* FIXME: always enable 1D and 2D? */
 
 	input->adv.dram_byte_swap		= 0;
 	input->adv.ext_cal_res_val		= 0;
@@ -68,8 +61,8 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 	input->adv.tx_slew_rise_ac		= 0xf;
 	input->adv.tx_slew_fall_ac		= 0xf;
 	input->adv.odtimpedance		= 60;
-	input->adv.tx_impedance		= 60;
-	input->adv.atx_impedance		= 20;
+	input->adv.tx_impedance		= 28;
+	input->adv.atx_impedance		= 30;
 	input->adv.mem_alert_en		= 0;
 	input->adv.mem_alert_puimp	= 5;
 	input->adv.mem_alert_vref_level	= 0x29;
@@ -78,13 +71,33 @@ struct input *phy_gen2_init_input(const unsigned int ctrl_num, struct dimm *dimm
 	input->adv.cal_once		= 0;
 	input->adv.dis_dyn_adr_tri		= 0;
 	input->adv.is2ttiming		= 0;
-	input->adv.d4rx_preamble_length	= 1;
+	input->adv.d4rx_preamble_length	= 0;
 	input->adv.d4tx_preamble_length	= 0;
+
+	debug("input->basic.num_rank_dfi0 = 0x%x\n", input->basic.num_rank_dfi0);
+	debug("input->basic.dram_data_width = 0x%x\n", input->basic.dram_data_width);
+
+	for (i = 0; i < 6; i++) {
+		input->mr[i] = dimm->mr[i];
+		debug("mr[%d] = 0x%x\n", i, input->mr[i]);
+	}
+	input->mr[6] = dimm->mr[6] & ~0x7f;	/* force to range 1 */
+	input->mr[6] |= 0x24;	/* force Vref value to 83.4% */
+	debug("mr[6] = 0x%x\n", input->mr[6]);
+
+	input->cs_d0 = dimm->cs_d0;
+	input->cs_d1 = dimm->cs_d1;
+	debug("input->cs_d0 = 0x%x\n", input->cs_d0);
+	debug("input->cs_d1 = 0x%x\n", input->cs_d1);
+
+	for (i = 0; i < 4; i++) {
+		input->odt[i] = dimm->odt[i];
+		debug("odt[%d] = 0x%x\n", i, input->odt[i]);
+	}
 
 	return input;
 }
 
-/* FIXME: Below parameters shouldn't be static! */
 /*
  * All protocols share the same base structure of mesage block.
  * RDIMM and LRDIMM have more entries defined than UDIMM.
@@ -144,18 +157,17 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	msg_blk->msg_misc		= 0x0;
 #else
-	msg_blk->msg_misc		= 0x6;
+	msg_blk->msg_misc		= 0x0;
 #endif
 	msg_blk->dfimrlmargin		= 0x1;
-	msg_blk->phy_vref		= 0x56;
+	msg_blk->phy_vref		= 0x61;
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	msg_blk->cs_present		= 3;
-	/* FIXME: bit mask for chip-select */
 	msg_blk->cs_present_d0		= 3;
 #else
-	msg_blk->cs_present		= 1;
-	/* FIXME: bit mask for chip-select */
-	msg_blk->cs_present_d0		= 1;
+	msg_blk->cs_present		= input->cs_d0 | input->cs_d1;
+	msg_blk->cs_present_d0		= input->cs_d0;
+	msg_blk->cs_present_d1		= input->cs_d1;
 #endif
 	msg_blk->cs_present_d1		= 0;
 #ifdef CONFIG_ARCH_LX2160A_PXP
@@ -163,18 +175,18 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 #else
 	msg_blk->addr_mirror		= 0x0a;	/* odd CS are mirrored */
 #endif
-	msg_blk->acsm_odt_ctrl0		= WRODTPAT_RANK0 | RDODTPAT_RANK0;
-	/* FIXME */
-	msg_blk->acsm_odt_ctrl1		= WRODTPAT_RANK1 | RDODTPAT_RANK1;
-	msg_blk->acsm_odt_ctrl2		= WRODTPAT_RANK2 | RDODTPAT_RANK2;
-	msg_blk->acsm_odt_ctrl3		= WRODTPAT_RANK3 | RDODTPAT_RANK3;
+
+	msg_blk->acsm_odt_ctrl0		= input->odt[0];
+	msg_blk->acsm_odt_ctrl1		= input->odt[1];
+	msg_blk->acsm_odt_ctrl2		= input->odt[2];
+	msg_blk->acsm_odt_ctrl3		= input->odt[3];
 #if defined(CONFIG_FSL_PHY_GEN2_PHY_A2017_11)
 	msg_blk->enabled_dqs = (input->basic.num_active_dbyte_dfi0 +
 			input->basic.num_active_dbyte_dfi1) * 8;
 #else
 	msg_blk->enabled_dqs		= 0;	/* FIXME: 0? */
 #endif
-	msg_blk->phy_cfg			= input->adv.is2ttiming;
+	msg_blk->phy_cfg		= input->adv.is2ttiming;
 	msg_blk->x16present		= input->basic.dram_data_width == 0x10
 						? msg_blk->cs_present : 0;
 	msg_blk->d4misc			= 0x1;
@@ -189,7 +201,6 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	msg_blk->rtt_nom_wr_park7	= 0;
 #ifdef CONFIG_ARCH_LX2160A_PXP
 	msg_blk->mr0			= 0x44;
-	/* FIXME: shouldn't be fixed value */
 	msg_blk->mr1			= 0x1;
 	msg_blk->mr2			= 0x28;
 	msg_blk->mr3			= 0;
@@ -197,14 +208,13 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	msg_blk->mr5			= 0x0400;
 	msg_blk->mr6			= 0x0400;
 #else
-	msg_blk->mr0			= 0x0630;
-	/* FIXME: shouldn't be fixed value */
-	msg_blk->mr1			= 0x0201;
-	msg_blk->mr2			= 0x0020;
-	msg_blk->mr3			= 0x0400;
-	msg_blk->mr4			= 0;
-	msg_blk->mr5			= 0x0480;
-	msg_blk->mr6			= 0x0800 | 0x0018;
+	msg_blk->mr0			= input->mr[0];
+	msg_blk->mr1			= input->mr[1];
+	msg_blk->mr2			= input->mr[2];
+	msg_blk->mr3			= input->mr[3];
+	msg_blk->mr4			= input->mr[4];
+	msg_blk->mr5			= input->mr[5];
+	msg_blk->mr6			= input->mr[6];
 #endif
 	msg_blk->alt_cas_l		= 0;
 	msg_blk->alt_wcas_l		= 0;
@@ -232,13 +242,24 @@ int phy_gen2_msg_init(const unsigned int ctrl_num, void **msg_1d, void **msg_2d,
 	}
 #endif
 	msg_blk->bpznres_val		= input->adv.ext_cal_res_val;
-	msg_blk->enabled_dqs		= input->basic.num_active_dbyte_dfi0 *
-						8;
-	msg_blk->phy_cfg			= input->adv.is2ttiming;
 	msg_blk->disabled_dbyte		= 0;
-	/* fIME: get map from board file */
-	msg_blk->x16present		= input->basic.dram_data_width == 0x10
-						? msg_blk->cs_present : 0;
+
+	debug("msg_blk->dram_type = 0x%x\n", msg_blk->dram_type);
+	debug("msg_blk->sequence_ctrl = 0x%x\n", msg_blk->sequence_ctrl);
+	debug("msg_blk->phy_cfg = 0x%x\n", msg_blk->phy_cfg);
+	debug("msg_blk->x16present = 0x%x\n", msg_blk->x16present);
+	debug("msg_blk->dramfreq = 0x%x\n", msg_blk->dramfreq);
+	debug("msg_blk->pll_bypass_en = 0x%x\n", msg_blk->pll_bypass_en);
+	debug("msg_blk->dfi_freq_ratio = 0x%x\n", msg_blk->dfi_freq_ratio);
+	debug("msg_blk->phy_odt_impedance = 0x%x\n", msg_blk->phy_odt_impedance);
+	debug("msg_blk->phy_drv_impedance = 0x%x\n", msg_blk->phy_drv_impedance);
+	debug("msg_blk->bpznres_val = 0x%x\n", msg_blk->bpznres_val);
+	debug("msg_blk->enabled_dqs = 0x%x\n", msg_blk->enabled_dqs);
+	debug("msg_blk->phy_cfg = 0x%x\n", msg_blk->phy_cfg);
+	debug("msg_blk->acsm_odt_ctrl0 = 0x%x\n", msg_blk->acsm_odt_ctrl0);
+	debug("msg_blk->acsm_odt_ctrl1 = 0x%x\n", msg_blk->acsm_odt_ctrl1);
+	debug("msg_blk->acsm_odt_ctrl2 = 0x%x\n", msg_blk->acsm_odt_ctrl2);
+	debug("msg_blk->acsm_odt_ctrl3 = 0x%x\n", msg_blk->acsm_odt_ctrl3);
 
 	/* RDIMM only */
 	if (input->basic.dimm_type == RDIMM || input->basic.dimm_type ==

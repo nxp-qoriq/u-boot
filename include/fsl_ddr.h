@@ -97,6 +97,11 @@ unsigned int compute_fsl_memctl_config_regs(const unsigned int ctrl_num,
 			       unsigned int size_only);
 unsigned int compute_phy_config_regs(const unsigned int ctrl_num,
                                const memctl_options_t *popts,
+			       const dimm_params_t *dimm_params,
+			       fsl_ddr_cfg_regs_t *ddr);
+unsigned int compute_phy_gen2_phy_config_regs(const unsigned int ctrl_num,
+                               const memctl_options_t *popts,
+			       const dimm_params_t *dimm_params,
 			       fsl_ddr_cfg_regs_t *ddr);
 unsigned int compute_lowest_common_dimm_parameters(
 				const unsigned int ctrl_num,

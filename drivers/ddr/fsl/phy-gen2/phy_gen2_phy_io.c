@@ -20,25 +20,26 @@ uint32_t map_phy_addr_space(uint32_t addr)
 	int instance =   (addr & 0x00f000) >> 12; /* bit 15:12 */
 	int offset =     (addr & 0x000fff);       /* bit 11:0 */
 
+/*
 	debug("addr = 0x%0x\n", addr);
 	debug("pstate = %d, block_type = 0x%x, instance = %d, offset 0x%x\n",
 	      pstate, block_type, instance, offset);
-
+*/
 	switch (block_type) {
 	case 0x0: /* 0x0 : ANIB */
 		return MAP_PHY_ADDR(pstate, 12, instance, offset, 0);
 	case 0x1: /* 0x1 : DBYTE */
 		return MAP_PHY_ADDR(pstate, 10, instance, offset, 0x30);
 	case 0x2: /* 0x2 : MASTER */
-		return MAP_PHY_ADDR(pstate, 1, instance, offset, 0x58);
+		return MAP_PHY_ADDR(pstate, 1, 0, offset, 0x58);
 	case 0x4: /* 0x4 : ACSM */
-		return MAP_PHY_ADDR(pstate, 1, instance, offset, 0x5c);
+		return MAP_PHY_ADDR(pstate, 1, 0, offset, 0x5c);
 	case 0x5: /* 0x5 : μCTL Memory */
 		return MAP_PHY_ADDR(pstate, 0, instance, offset, 0x60);
 	case 0x7: /* 0x7 : PPGC */
 		return MAP_PHY_ADDR(pstate, 0, 0, offset, 0x68);
 	case 0x9: /* 0x9 : INITENG */
-		return MAP_PHY_ADDR(pstate, 1, instance, offset, 0x69);
+		return MAP_PHY_ADDR(pstate, 1, 0, offset, 0x69);
 	case 0xc: /* 0xC : DRTUB */
 		return MAP_PHY_ADDR(pstate, 0, 0, offset, 0x6d);
 	case 0xd: /* 0xD : APB Only */

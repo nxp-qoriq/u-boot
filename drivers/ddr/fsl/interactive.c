@@ -532,6 +532,8 @@ static void fsl_ddr_options_edit(fsl_ddr_info_t *pinfo,
 		CTRL_OPTIONS_CS(3, odt_rtt_wr),
 #endif
 #endif
+		CTRL_OPTIONS(cs_d0),
+		CTRL_OPTIONS(cs_d1),
 		CTRL_OPTIONS(memctl_interleaving),
 		CTRL_OPTIONS(memctl_interleaving_mode),
 		CTRL_OPTIONS(ba_intlv_ctl),
@@ -822,6 +824,8 @@ static void print_memctl_options(const memctl_options_t *popts)
 		CTRL_OPTIONS_CS(3, odt_rtt_wr),
 #endif
 #endif
+		CTRL_OPTIONS(cs_d0),
+		CTRL_OPTIONS(cs_d1),
 		CTRL_OPTIONS(memctl_interleaving),
 		CTRL_OPTIONS(memctl_interleaving_mode),
 		CTRL_OPTIONS_HEX(ba_intlv_ctl),
