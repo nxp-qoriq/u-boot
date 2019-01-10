@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 NXP
+ * Copyright 2017-2018 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -24,7 +24,7 @@ static struct serdes_config serdes1_cfg_tbl[] = {
 	{0xB5CC, {PCIE1, QSGMII_B, PCIE2, PCIE2} },
 	{0x83BB, {SGMII_T1, QXGMII2, PCIE2, PCIE1} },
 	{0x83CC, {SGMII_T1, QXGMII2, PCIE2, PCIE2} },
-	{0x85BB, {SGMII_T1, QSGMII_B, PCIE2, PCIE1} },
+	{0xBB58, {SGMII_T1, QSGMII_B, PCIE2, PCIE1} },
 	{0x85CC, {SGMII_T1, QSGMII_B, PCIE2, PCIE2} },
 	{0xB8CC, {PCIE1, SGMII_T1, PCIE2, PCIE2} },
 	{0x9999, {SGMII1, SGMII2, SGMII3, SGMII4} },
