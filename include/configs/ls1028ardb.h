@@ -32,7 +32,6 @@
 #endif
 
 /* Store environment at top of flash */
-#define CONFIG_ENV_IS_NOWHERE		1
 #define CONFIG_ENV_SIZE			0x2000
 
 #ifdef CONFIG_SPL_BUILD
