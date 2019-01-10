@@ -2311,6 +2311,7 @@ static int mmc_startup(struct mmc *mmc)
 	mmc_select_mode(mmc, IS_SD(mmc) ? SD_LEGACY : MMC_LEGACY);
 	mmc_set_bus_width(mmc, 1);
 #else
+#if 0
 	if (IS_SD(mmc)) {
 		err = sd_get_capabilities(mmc);
 		if (err)
@@ -2322,6 +2323,7 @@ static int mmc_startup(struct mmc *mmc)
 			return err;
 		mmc_select_mode_and_width(mmc, mmc->card_caps);
 	}
+#endif
 #endif
 	if (err)
 		return err;

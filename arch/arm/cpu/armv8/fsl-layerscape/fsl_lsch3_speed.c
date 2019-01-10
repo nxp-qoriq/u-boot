@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2014-2015, Freescale Semiconductor, Inc.
+ * Copyright 2017-2018 NXP
  *
  * Derived from arch/power/cpu/mpc85xx/speed.c
  */
@@ -212,12 +213,13 @@ unsigned int mxc_get_clock(enum mxc_clock clk)
 	switch (clk) {
 	case MXC_I2C_CLK:
 		return get_i2c_freq(0);
-#if defined(CONFIG_FSL_ESDHC)
-	case MXC_ESDHC_CLK:
-		return get_sdhc_freq(0);
-#endif
 	case MXC_DSPI_CLK:
 		return get_dspi_freq(0);
+#if defined(CONFIG_FSL_ESDHC)
+	case MXC_ESDHC_CLK:
+	case MXC_ESDHC2_CLK:
+		return get_sdhc_freq(0);
+#endif
 	default:
 		printf("Unsupported clock\n");
 	}

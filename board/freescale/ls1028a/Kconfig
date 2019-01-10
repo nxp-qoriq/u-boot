@@ -12,13 +12,19 @@ config SYS_SOC
 config SYS_CONFIG_NAME
 	default "ls1028aqds"
 
+config EMMC_BOOT
+	bool "Support for booting from EMMC"
+	default n
+
 config SYS_TEXT_BASE
+	default 0x96000000 if SD_BOOT || EMMC_BOOT
 	default 0x20100000
 
 if FSL_LS_PPA
 config SYS_LS_PPA_FW_ADDR
 	hex "PPA Firmware Addr"
 	default 0x20400000 if SYS_LS_PPA_FW_IN_XIP && ARCH_LS1028A
+	default 0x400000 if SYS_LS_PPA_FW_IN_MMC && ARCH_LS1028A
 endif
 
 source "board/freescale/common/Kconfig"
@@ -39,13 +45,19 @@ config SYS_SOC
 config SYS_CONFIG_NAME
 	default "ls1028ardb"
 
+config EMMC_BOOT
+	bool "Support for booting from EMMC"
+	default n
+
 config SYS_TEXT_BASE
+	default 0x96000000 if SD_BOOT || EMMC_BOOT
 	default 0x20100000
 
 if FSL_LS_PPA
 config SYS_LS_PPA_FW_ADDR
 	hex "PPA Firmware Addr"
 	default 0x20400000 if SYS_LS_PPA_FW_IN_XIP && ARCH_LS1028A
+	default 0x400000 if SYS_LS_PPA_FW_IN_MMC && ARCH_LS1028A
 endif
 
 source "board/freescale/common/Kconfig"
