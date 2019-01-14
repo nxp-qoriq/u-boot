@@ -62,6 +62,9 @@ void detail_board_ddr_info(void)
 }
 
 #ifdef CONFIG_OF_BOARD_SETUP
+#ifdef CONFIG_FSL_ENETC
+extern void enetc_setup(void *blob);
+#endif
 int ft_board_setup(void *blob, bd_t *bd)
 {
 	u64 base[CONFIG_NR_DRAM_BANKS];
@@ -87,6 +90,9 @@ int ft_board_setup(void *blob, bd_t *bd)
 
 	fdt_fixup_memory_banks(blob, base, size, 2);
 
+#ifdef CONFIG_FSL_ENETC
+	enetc_setup(blob);
+#endif
 	return 0;
 }
 #endif
