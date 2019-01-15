@@ -706,6 +706,45 @@ int fspi_ahb_init(void)
 }
 #endif
 
+#ifdef CONFIG_FSPI_AHB_EN_4BYTE
+int fspi_ahb_init(void)
+{
+	/* Enable 4bytes address support and fast read */
+	u32 *fspi_lut, lut_key, *fspi_key;
+
+	fspi_key = (void *)SYS_FSL_FSPI_ADDR + 0x18;
+	fspi_lut = (void *)SYS_FSL_FSPI_ADDR + 0x200;
+
+	lut_key = in_be32(fspi_key);
+
+	if (lut_key == 0x5af05af0) {
+		/* That means the register is BE */
+		out_be32(fspi_key, 0x5af05af0);
+		/* Unlock the lut table */
+		out_be32(fspi_key + 1, 0x00000002);
+		out_be32(fspi_lut, 0x0820040c);
+		out_be32(fspi_lut + 1, 0x24003008);
+		out_be32(fspi_lut + 2, 0x00000000);
+		/* Lock the lut table */
+		out_be32(fspi_key, 0x5af05af0);
+		out_be32(fspi_key + 1, 0x00000001);
+	} else {
+		/* That means the register is LE */
+		out_le32(fspi_key, 0x5af05af0);
+		/* Unlock the lut table */
+		out_le32(fspi_key + 1, 0x00000002);
+		out_le32(fspi_lut, 0x0820040c);
+		out_le32(fspi_lut + 1, 0x24003008);
+		out_le32(fspi_lut + 2, 0x00000000);
+		/* Lock the lut table */
+		out_le32(fspi_key, 0x5af05af0);
+		out_le32(fspi_key + 1, 0x00000001);
+	}
+
+	return 0;
+}
+#endif
+
 #ifdef CONFIG_QSPI_AHB_INIT
 /* Enable 4bytes address support and fast read */
 int qspi_ahb_init(void)
@@ -743,6 +782,9 @@ int qspi_ahb_init(void)
 
 	return 0;
 }
+#endif
+#ifdef CONFIG_FSPI_AHB_EN_4BYTE
+	fspi_ahb_init();
 #endif
 
 #ifdef CONFIG_TFABOOT
