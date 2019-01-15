@@ -953,6 +953,7 @@ config TARGET_LS2080A_SIMU
 	select ARCH_MISC_INIT
 	select ARM64
 	select ARMV8_MULTIENTRY
+	select ARCH_MISC_INIT
 	help
 	  Support for Freescale LS2080A_SIMU platform
 	  The LS2080A Development System (QDS) is a pre silicon
