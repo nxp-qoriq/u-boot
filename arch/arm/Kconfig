@@ -1126,6 +1126,7 @@ config TARGET_LS1028AQDS
 	select ARCH_LS1028A
 	select ARM64
 	select ARMV8_MULTIENTRY
+	select BOARD_LATE_INIT
 	select SUPPORT_SPL
 	help
 	  Support for Freescale LS1028AQDS platform
@@ -1138,6 +1139,7 @@ config TARGET_LS1028ARDB
 	select ARCH_LS1028A
 	select ARM64
 	select ARMV8_MULTIENTRY
+	select BOARD_LATE_INIT
 	select SUPPORT_SPL
 	help
 	  Support for Freescale LS1028ARDB platform

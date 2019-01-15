@@ -59,7 +59,6 @@ DECLARE_GLOBAL_DATA_PTR;
 #define FSPI_CMD_WREN		0x06	/* Write enable */
 #define FSPI_CMD_READ		0x03	/* Read data bytes */
 #define FSPI_CMD_FAST_READ	0x0b	/* Read data bytes (high frequency) */
-#define FSPI_CMD_OCTAL_READ	0x8b	/* Octal Read (CMD-ADDR-DATA : 1-1-8) */
 #define FSPI_CMD_BE_4K		0x20    /* 4K erase */
 #define FSPI_CMD_CHIP_ERASE	0xc7	/* Erase whole flash chip */
 #define FSPI_CMD_SE		0xd8	/* Sector erase (usually 64KiB) */
