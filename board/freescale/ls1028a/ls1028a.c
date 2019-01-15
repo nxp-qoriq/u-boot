@@ -21,6 +21,7 @@
 #endif
 #include <fsl_immap.h>
 #include <netdev.h>
+#include <video_fb.h>
 
 #include <fdtdec.h>
 #include <miiphy.h>
@@ -425,6 +426,7 @@ void setup_QSGMII(void)
 			PCS_ERR("PHY[%d] reset timeout\n", i);
 
 
+
 		ext_bus->write(ext_bus, i, MDIO_DEVAD_NONE, 0x1f, 0x0000);
 		value = ext_bus->read(ext_bus, i, MDIO_DEVAD_NONE, 0x17);
 		value = (value & 0xf8ff);
@@ -815,6 +817,11 @@ int checkboard(void)
 	return 0;
 }
 #endif
+
+void *video_hw_init(void)
+{
+	return;
+}
 
 #ifdef CONFIG_EMMC_BOOT
 void *esdhc_get_base_addr(void)
