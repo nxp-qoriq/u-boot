@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+ OR X11
 /*
- * Copyright 2018 NXP
+ * Copyright 2018-2019 NXP
  *
  * PCIe driver for NXP LX SoCs
  * Author: Hou Zhiqiang <Minder.Hou@gmail.com>
