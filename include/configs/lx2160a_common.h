@@ -285,6 +285,7 @@ unsigned long get_board_ddr_clk(void);
 		"env exists secureboot && esbc_halt;"
 
 #define BOOT_TARGET_DEVICES(func) \
+	func(USB, usb, 0) \
 	func(MMC, mmc, 0) \
 	func(SCSI, scsi, 0)
 #include <config_distro_bootcmd.h>
