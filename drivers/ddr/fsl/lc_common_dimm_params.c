@@ -12,9 +12,9 @@
 
 #if defined(CONFIG_SYS_FSL_DDR3) || defined(CONFIG_SYS_FSL_DDR4)
 #ifdef CONFIG_SYS_FSL_DDR4
-static unsigned int get_speed_bin_caslat(unsigned int tckmin_ps,
-					 unsigned int taamin_ps,
-					 unsigned int mclk_ps)
+static unsigned int skip_caslat(unsigned int tckmin_ps,
+				unsigned int taamin_ps,
+				unsigned int mclk_ps)
 {
 	int i, j, k;
 	struct cas {
@@ -26,52 +26,52 @@ static unsigned int get_speed_bin_caslat(unsigned int tckmin_ps,
 		const unsigned taamin_ps[4];
 	};
 	const struct cas cl_3200[] = {
-		{625,	{0x1500000, 0x1400000, 0x1000000,} },
-		{750,	{ 0x1c0000,  0x180000,  0x100000,} },
-		{833,	{  0x70000,   0x60000,   0x40000,} },
-		{937,	{  0x18000,   0x18000,   0x10000,} },
-		{1071,	{   0x6000,    0x6000,    0x4000,} },
-		{1250,	{   0x1800,    0x1800,    0x1000,} },
-		{1500,	{    0x600,         0,     0x400,} },
+		{625,	{0xa00000, 0xb00000, 0xf000000,} },
+		{750,	{ 0x20000,  0x60000,  0xe00000,} },
+		{833,	{  0x8000,  0x18000,   0x38000,} },
+		{937,	{  0x4000,   0x4000,    0xc000,} },
+		{1071,	{  0x1000,   0x1000,    0x3000,} },
+		{1250,	{   0x400,    0x400,     0xc00,} },
+		{1500,	{       0,    0x600,     0x200,} },
 	};
 	const struct cas cl_2933[] = {
-		{682,	{0x780000, 0x700000, 0x600000, 0x400000} },
-		{750,	{0x1c0000, 0x180000, 0x180000, 0x100000} },
-		{833,	{ 0x70000,  0x60000,  0x60000,  0x40000} },
-		{937,	{ 0x18000,  0x18000,  0x18000,  0x10000} },
-		{1071,	{  0x6000,   0x6000,   0x6000,   0x4000} },
-		{1250,	{  0x1800,   0x1800,   0x1800,   0x1000} },
-		{1500,	{   0x600,    0x400,    0x400,    0x400} },
+		{682,	{       0,  0x80000, 0x180000, 0x380000} },
+		{750,	{ 0x20000,  0x60000,  0x60000,  0xe0000} },
+		{833,	{  0x8000,  0x18000,  0x18000,  0x38000} },
+		{937,	{  0x4000,   0x4000,   0x4000,   0xc000} },
+		{1071,	{  0x1000,   0x1000,   0x1000,   0x3000} },
+		{1250,	{   0x400,    0x400,    0x400,    0xc00} },
+		{1500,	{       0,    0x200,    0x200,    0x200} },
 	};
 	const struct cas cl_2666[] = {
-		{750,	{0x1e0000, 0x1c0000, 0x180000, 0x100000} },
-		{833,	{ 0x70000,  0x60000,  0x60000,  0x40000} },
-		{937,	{ 0x18000,  0x18000,  0x18000,  0x10000} },
-		{1071,	{  0x6000,   0x6000,   0x6000,   0x4000} },
-		{1250,	{  0x1800,   0x1800,   0x1800,   0x1000} },
-		{1500,	{   0x600,    0x600,    0x400,    0x400} },
+		{750,	{       0,  0x20000,  0x60000,  0xe0000} },
+		{833,	{  0x8000,  0x18000,  0x18000,  0x38000} },
+		{937,	{  0x4000,   0x4000,   0x4000,   0xc000} },
+		{1071,	{  0x1000,   0x1000,   0x1000,   0x3000} },
+		{1250,	{   0x400,    0x400,    0x400,    0xc00} },
+		{1500,	{       0,        0,    0x200,    0x200} },
 	};
 	const struct cas cl_2400[] = {
-		{833,	{ 0x78000,  0x70000,  0x60000,  0x40000} },
-		{937,	{ 0x10000,  0x18000,  0x18000,  0x10000} },
-		{1071,	{  0x4000,   0x6000,   0x6000,   0x4000} },
-		{1250,	{  0x1000,   0x1800,   0x1800,   0x1000} },
-		{1500,	{   0x600,    0x200,    0x400,    0x400} },
+		{833,	{       0,   0x8000,  0x18000,  0x38000} },
+		{937,	{  0xc000,   0x4000,   0x4000,   0xc000} },
+		{1071,	{  0x3000,   0x1000,   0x1000,   0x3000} },
+		{1250,	{   0xc00,    0x400,    0x400,    0xc00} },
+		{1500,	{       0,    0x400,    0x200,    0x200} },
 	};
 	const struct cas cl_2133[] = {
-		{937,	{ 0x1c000,  0x18000,  0x10000,} },
-		{1071,	{  0x4000,   0x6000,   0x4000,} },
-		{1250,	{  0x1000,   0x1800,   0x1000,} },
-		{1500,	{   0x600,    0x200,    0x400,} },
+		{937,	{       0,   0x4000,   0xc000,} },
+		{1071,	{  0x2000,        0,   0x2000,} },
+		{1250,	{   0x800,        0,    0x800,} },
+		{1500,	{       0,    0x400,    0x200,} },
 	};
 	const struct cas cl_1866[] = {
-		{1071,	{  0x7000,   0x6000,   0x4000,} },
-		{1250,	{  0x1000,   0x1800,   0x1000,} },
-		{1500,	{   0x600,    0x200,    0x400,} },
+		{1071,	{       0,   0x1000,   0x3000,} },
+		{1250,	{   0xc00,    0x400,    0xc00,} },
+		{1500,	{       0,    0x400,    0x200,} },
 	};
 	const struct cas cl_1600[] = {
-		{1250,	{  0x1c00,   0x1800,   0x1000,} },
-		{1500,	{   0x600,    0x200,    0x400,} },
+		{1250,	{       0,    0x400,    0xc00,} },
+		{1500,	{       0,    0x400,    0x200,} },
 	};
 	const struct speed bin[] = {
 		{cl_3200, {12500, 13750, 15000,} },
@@ -114,7 +114,7 @@ static unsigned int get_speed_bin_caslat(unsigned int tckmin_ps,
 	if (bin[i].cl[k].tckmin_ps > mclk_ps && k > 0)
 		k--;
 
-	debug("Valid CL mask for this speed 0x%x\n", bin[i].cl[k].caslat[j]);
+	debug("Skip CL mask for this speed 0x%x\n", bin[i].cl[k].caslat[j]);
 
 	return bin[i].cl[k].caslat[j];
 }
@@ -146,9 +146,9 @@ compute_cas_latency(const unsigned int ctrl_num,
 #ifdef CONFIG_SYS_FSL_DDR4
 	/* remove unsupported caslat from speed bin tables */
 	common_caslat = tmp &
-			get_speed_bin_caslat(outpdimm->tckmin_x_ps,
-					     outpdimm->taamin_ps,
-					     mclk_ps);
+			~skip_caslat(outpdimm->tckmin_x_ps,
+				     outpdimm->taamin_ps,
+				     mclk_ps);
 #else
 	common_caslat = tmp;
 #endif
