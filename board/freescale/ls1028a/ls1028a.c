@@ -900,7 +900,7 @@ void qixis_dump_switch(void)
 
 void *video_hw_init(void)
 {
-	return;
+	return NULL;
 }
 
 #ifdef CONFIG_EMMC_BOOT
