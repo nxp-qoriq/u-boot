@@ -1118,7 +1118,7 @@ static const struct dm_spi_ops nxp_fspi_ops = {
 };
 
 static const struct udevice_id nxp_fspi_ids[] = {
-	{ .compatible = "nxp,lx2160a-fspi" },
+	{ .compatible = "nxp,dn-fspi" },
 	{ }
 };
 
