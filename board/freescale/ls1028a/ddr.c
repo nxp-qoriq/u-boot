@@ -246,6 +246,20 @@ static phys_size_t fixed_sdram(void)
 #endif	/* CONFIG_SYS_DDR_RAW_TIMING */
 #endif
 
+#ifdef CONFIG_TFABOOT
+int fsl_initdram(void)
+{
+	gd->ram_size = tfa_get_dram_size();
+
+	if (!gd->ram_size)
+#ifdef CONFIG_TARGET_LS1028ARDB
+		gd->ram_size = 1ULL << 32;
+#else
+		gd->ram_size = fsl_ddr_sdram_size();
+#endif
+	return 0;
+}
+#else
 int fsl_initdram(void)
 {
 #ifdef CONFIG_TARGET_LS1028ARDB
@@ -270,4 +284,4 @@ int fsl_initdram(void)
 #endif /* !CONFIG_TARGET_LS1028ARDB */
 	return 0;
  }
-
+#endif	/* CONFIG_TFABOOT */

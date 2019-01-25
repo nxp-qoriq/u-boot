@@ -791,6 +791,9 @@ int last_stage_init(void)
 #ifdef CONFIG_FSL_QIXIS
 int checkboard(void)
 {
+#ifdef CONFIG_TFABOOT
+	enum boot_src src = get_boot_src();
+#endif
 	u8 sw;
 
 	int clock;
@@ -825,6 +828,13 @@ int checkboard(void)
 	sw = QIXIS_READ(brdcfg[0]);
 	sw = (sw & QIXIS_LBMAP_MASK) >> QIXIS_LBMAP_SHIFT;
 
+#ifdef CONFIG_TFABOOT
+	if (src == BOOT_SOURCE_SD_MMC)
+		puts("SD\n");
+	else if (src == BOOT_SOURCE_SD_MMC2)
+		puts("eMMC \n");
+	else {
+#endif
 #ifdef CONFIG_SD_BOOT
 	puts("SD \n");
 #elif defined(CONFIG_EMMC_BOOT)
@@ -843,7 +853,9 @@ int checkboard(void)
 		break;
 	}
 #endif
-
+#ifdef CONFIG_TFABOOT
+	}
+#endif
 	printf("FPGA: v%d (%s: %s_%s)\n", QIXIS_READ(scver),
 	       !qixis_read_released()  ? "INTERIM" : "RELEASED",
 			board, qixis_read_date(buf));

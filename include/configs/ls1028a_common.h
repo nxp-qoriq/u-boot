@@ -35,7 +35,11 @@
 #include <asm/arch/soc.h>
 
 /* Link Definitions */
+#ifdef CONFIG_TFABOOT
+#define CONFIG_SYS_INIT_SP_ADDR		CONFIG_SYS_TEXT_BASE
+#else
 #define CONFIG_SYS_INIT_SP_ADDR		(CONFIG_SYS_FSL_OCRAM_BASE + 0xfff0)
+#endif
 
 #define CONFIG_SKIP_LOWLEVEL_INIT
 
@@ -188,6 +192,14 @@
 		"&& hdp load $load_addr 0x2000\0"
 
 #undef CONFIG_BOOTCOMMAND
+#ifdef CONFIG_TFABOOT
+#define XSPI_NOR_BOOTCOMMAND	"run qspi_hdploadcmd; run distro_bootcmd; run qspi_bootcmd; " \
+				"env exists secureboot && esbc_halt;;"
+#define SD_BOOTCOMMAND		"run sd_hdploadcmd; run distro_bootcmd;run sd_bootcmd; " \
+				"env exists secureboot && esbc_halt;"
+#define SD2_BOOTCOMMAND		"run emmc_hdploadcmd; run distro_bootcmd;run emmc_bootcmd; " \
+				"env exists secureboot && esbc_halt;"
+#else
 #if defined(CONFIG_SD_BOOT)
 #define CONFIG_BOOTCOMMAND "run sd_hdploadcmd; run distro_bootcmd;run sd_bootcmd; "	\
 			   "env exists secureboot && esbc_halt;"
@@ -198,6 +210,7 @@
 #define CONFIG_BOOTCOMMAND "run qspi_hdploadcmd; run distro_bootcmd; run qspi_bootcmd; "	\
 			   "env exists secureboot && esbc_halt;"
 #endif
+#endif	/* CONFIG_TFABOOT */
 #endif
 
 /* Monitor Command Prompt */
@@ -244,6 +257,16 @@
 #define CONFIG_ENV_SIZE			0x2000          /* 8KB */
 #define CONFIG_SYS_MMC_ENV_DEV         0
 #else
+#ifdef CONFIG_TFABOOT
+#define CONFIG_SYS_MMC_ENV_DEV         0
+#define CONFIG_TZPC_OCRAM_BSS_HEAP_NS
+#define OCRAM_NONSECURE_SIZE		0x00010000
+#define CONFIG_ENV_OFFSET              0x500000        /* 5MB */
+#define CONFIG_SYS_FSL_QSPI_BASE	0x20000000
+#define CONFIG_ENV_ADDR			CONFIG_SYS_FSL_QSPI_BASE + CONFIG_ENV_OFFSET
+#define CONFIG_ENV_SIZE			0x2000          /* 8KB */
+#define CONFIG_ENV_SECT_SIZE           0x40000
+#else
 #if defined(CONFIG_SD_BOOT) || defined(CONFIG_EMMC_BOOT)
 #define CONFIG_SYS_MMC_ENV_DEV         0
 #define CONFIG_ENV_OFFSET              0x300000        /* 3MB */
@@ -256,6 +279,7 @@
 #define CONFIG_ENV_ADDR			CONFIG_SYS_FSL_QSPI_BASE + CONFIG_ENV_OFFSET
 #define CONFIG_ENV_SIZE			0x2000          /* 8KB */
 #define CONFIG_ENV_SECT_SIZE           0x40000
+#endif
 #endif
 #endif
 
