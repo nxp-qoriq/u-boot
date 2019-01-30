@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2016 Freescale Semiconductor, Inc.
- * Copyright 2018 NXP
+ * Copyright 2018-2019 NXP
  */
 
 #include <common.h>
@@ -154,8 +154,8 @@ void board_ft_fman_fixup_port(void *fdt, char *compat, phys_addr_t addr,
 			      enum fm_port port, int offset)
 {
 	struct fixed_link f_link;
-	u32 *handle;
-	char *prop = NULL;
+	const u32 *handle;
+	const char *prop = NULL;
 	int off;
 
 	if (fm_info_get_enet_if(port) == PHY_INTERFACE_MODE_SGMII) {
