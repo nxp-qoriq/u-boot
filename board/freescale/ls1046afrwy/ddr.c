@@ -97,6 +97,69 @@ found:
 	popts->cpo_sample = 0x61;
 }
 
+static phys_size_t fixed_sdram(void)
+{
+        size_t ddr_size;
+
+	fsl_ddr_cfg_regs_t ddr_cfg_regs = {
+                .cs[0].bnds             = 0x000000ff,
+                .cs[0].config           = 0x80010412,
+                .cs[0].config_2         = 0,
+                .cs[1].bnds             = 0,
+                .cs[1].config           = 0,
+                .cs[1].config_2         = 0,
+
+                .timing_cfg_3           = 0x01111000,
+                .timing_cfg_0           = 0xFA550018,
+                .timing_cfg_1           = 0xBAB40C52,
+                .timing_cfg_2           = 0x0048C11C,
+                .ddr_sdram_cfg          = 0xC5040008,
+		.ddr_sdram_cfg_2        = 0x00401010,
+                .ddr_sdram_mode         = 0x01010210,
+                .ddr_sdram_mode_2       = 0x0,
+
+                //.ddr_sdram_md_cntl      = 0x0600001f,
+                .ddr_sdram_interval     = 0x18600618,
+                .ddr_data_init          = 0xdeadbeef,
+
+                .ddr_sdram_clk_cntl     = 0x02000000,
+                .ddr_init_addr          = 0,
+                .ddr_init_ext_addr      = 0,
+
+                .timing_cfg_4           = 0x00000002,
+                .timing_cfg_5           = 0x03401400,
+                .timing_cfg_6           = 0x0,
+                .timing_cfg_7           = 0x23300000,
+
+                .ddr_zq_cntl            = 0x8A090705,
+                .ddr_wrlvl_cntl         = 0x86550607,
+                //.ddr_sr_cntr            = 0,
+                .ddr_sdram_rcw_1        = 0,
+                .ddr_sdram_rcw_2        = 0,
+                .ddr_wrlvl_cntl_2       = 0x07070708,
+                .ddr_wrlvl_cntl_3       = 0x0808088,
+
+                .ddr_sdram_mode_9       = 0x00000500,
+                .ddr_sdram_mode_10      = 0x04000000,
+
+                .timing_cfg_8           = 0x02116600,
+		.ddr_sdram_cfg_3        = 0x00000001,
+
+                .dq_map_0               = 0,
+                .dq_map_1               = 0,
+                .dq_map_2               = 0,
+                .dq_map_3               = 0,
+
+                .ddr_cdr1               = 0x80040000,
+                .ddr_cdr2               = 0x000000C1
+        };
+
+	fsl_ddr_set_memctl_regs(&ddr_cfg_regs, 0, 0);
+        ddr_size = 1ULL << 32;
+
+	return ddr_size;
+}
+
 #ifdef CONFIG_TFABOOT
 int fsl_initdram(void)
 {
@@ -113,13 +176,14 @@ int fsl_initdram(void)
 	phys_size_t dram_size;
 
 #if defined(CONFIG_SPL) && !defined(CONFIG_SPL_BUILD)
-	gd->ram_size = fsl_ddr_sdram_size();
+	gd->ram_size = 1ULL << 32;
+	//gd->ram_size = fsl_ddr_sdram_size();
 
 	return 0;
 #else
 	puts("Initializing DDR....using SPD\n");
-
-	dram_size = fsl_ddr_sdram();
+	dram_size = fixed_sdram();
+	//dram_size = fsl_ddr_sdram();
 #endif
 
 	erratum_a008850_post();
