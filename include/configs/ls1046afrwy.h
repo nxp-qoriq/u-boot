@@ -182,23 +182,8 @@
 /* FMan */
 #ifndef SPL_NO_FMAN
 
-#ifdef CONFIG_NET
-#define CONFIG_PHY_REALTEK
-#endif
-
 #ifdef CONFIG_SYS_DPAA_FMAN
 #define CONFIG_FMAN_ENET
-#define CONFIG_PHY_AQUANTIA
-#define CONFIG_PHYLIB_10G
-#define RGMII_PHY1_ADDR			0x1
-#define RGMII_PHY2_ADDR			0x2
-
-#define SGMII_PHY1_ADDR			0x3
-#define SGMII_PHY2_ADDR			0x4
-
-#define FM1_10GEC1_PHY_ADDR		0x0
-
-#define FDT_SEQ_MACADDR_FROM_ENV
 
 #define CONFIG_ETHPRIME			"FM1@DTSEC3"
 #endif
