@@ -139,6 +139,7 @@ const struct spi_flash_info spi_flash_ids[] = {
 	{"n25q128a",	   INFO(0x20bb18, 0x0,  64 * 1024,   256, RD_FULL | WR_QPP) },
 	{"n25q256",	   INFO(0x20ba19, 0x0,  64 * 1024,   512, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
 	{"n25q256a",	   INFO(0x20bb19, 0x0,  64 * 1024,   512, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
+	{"mt25qu512a",     INFO6(0x20bb20, 0x104400, 64 * 1024, 1024, RD_FULL | WR_QPP | ADDR_4B) },
 	{"n25q512",	   INFO(0x20ba20, 0x0,  64 * 1024,  1024, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
 	{"n25q512a",	   INFO(0x20bb20, 0x0,  64 * 1024,  1024, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
 	{"n25q1024",	   INFO(0x20ba21, 0x0,  64 * 1024,  2048, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
