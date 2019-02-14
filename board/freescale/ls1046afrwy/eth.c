@@ -34,7 +34,7 @@ int board_eth_init(bd_t *bis)
 	fm_memac_mdio_init(bis, &dtsec_mdio_info);
 
 	switch (srds_s1) {
-	case 0x1133:
+	case 0x3040:
 		break;
 	default:
 		printf("Invalid SerDes protocol 0x%x for LS1046AFRWY\n",
