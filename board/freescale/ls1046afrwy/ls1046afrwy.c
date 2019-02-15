@@ -60,8 +60,6 @@ int checkboard(void)
 
 int board_init(void)
 {
-	struct ccsr_scfg *scfg = (struct ccsr_scfg *)CONFIG_SYS_FSL_SCFG_ADDR;
-
 #ifdef CONFIG_SECURE_BOOT
 	/*
 	 * In case of Secure Boot, the IBR configures the SMMU
@@ -83,9 +81,6 @@ val = (in_le32(SMMU_SCR0) | SCR0_CLIENTPD_MASK) & ~(SCR0_USFCFG_MASK);
 #ifdef CONFIG_FSL_LS_PPA
 	ppa_init();
 #endif
-
-	/* invert AQR105 IRQ pins polarity */
-	out_be32(&scfg->intpcr, AQR105_IRQ_MASK);
 
 	return 0;
 }
