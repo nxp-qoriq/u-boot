@@ -33,6 +33,12 @@ int board_eth_init(bd_t *bis)
 	/* Register the 1G MDIO bus */
 	fm_memac_mdio_init(bis, &dtsec_mdio_info);
 
+	/* QSGMII on lane B, MAC 6/5/10/1 */
+	fm_info_set_phy_address(FM1_DTSEC6, QSGMII_PORT1_PHY_ADDR);
+	fm_info_set_phy_address(FM1_DTSEC5, QSGMII_PORT2_PHY_ADDR);
+	fm_info_set_phy_address(FM1_DTSEC10, QSGMII_PORT3_PHY_ADDR);
+	fm_info_set_phy_address(FM1_DTSEC1, QSGMII_PORT4_PHY_ADDR);
+
 	switch (srds_s1) {
 	case 0x3040:
 		break;
