@@ -15,7 +15,6 @@
 int board_eth_init(bd_t *bis)
 {
 #ifdef CONFIG_FMAN_ENET
-	int i;
 	struct memac_mdio_info dtsec_mdio_info;
 	struct mii_dev *dev;
 	u32 srds_s1;
@@ -49,8 +48,10 @@ int board_eth_init(bd_t *bis)
 	}
 
 	dev = miiphy_get_dev_by_name(DEFAULT_FM_MDIO_NAME);
-	for (i = FM1_DTSEC1; i < FM1_DTSEC1 + CONFIG_SYS_NUM_FM1_DTSEC; i++)
-		fm_info_set_mdio(i, dev);
+	fm_info_set_mdio(FM1_DTSEC6, dev);
+	fm_info_set_mdio(FM1_DTSEC5, dev);
+	fm_info_set_mdio(FM1_DTSEC10, dev);
+	fm_info_set_mdio(FM1_DTSEC1, dev);
 
 	cpu_eth_init(bis);
 #endif
