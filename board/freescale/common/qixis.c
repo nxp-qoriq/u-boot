@@ -200,7 +200,7 @@ static void __maybe_unused set_lbmap(int lbmap)
 
 static void __maybe_unused set_rcw_src(int rcw_src)
 {
-#ifndef CONFIG_FSL_LSCH3_2
+#ifndef CONFIG_NXP_LSCH3_2
 	u8 reg;
 
 	reg = QIXIS_READ(dutcfg[1]);
