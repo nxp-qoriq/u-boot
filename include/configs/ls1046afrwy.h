@@ -66,10 +66,10 @@
 #define CONFIG_SYS_NAND_AMASK	IFC_AMASK(64 * 1024)
 #define CONFIG_SYS_NAND_CSOR	(CSOR_NAND_ECC_ENC_EN	/* ECC on encode */ \
 				| CSOR_NAND_ECC_DEC_EN	/* ECC on decode */ \
-				| CSOR_NAND_ECC_MODE_8	/* 8-bit ECC */ \
+				| CSOR_NAND_ECC_MODE_4	/* 4-bit ECC */ \
 				| CSOR_NAND_RAL_3	/* RAL = 3 Bytes */ \
-				| CSOR_NAND_PGS_4K	/* Page Size = 4K */ \
-				| CSOR_NAND_SPRZ_224	/* Spare size = 224 */ \
+				| CSOR_NAND_PGS_2K	/* Page Size = 2K */ \
+				| CSOR_NAND_SPRZ_128	/* Spare size = 128 */ \
 				| CSOR_NAND_PB(64))	/* 64 Pages Per Block */
 
 #define CONFIG_SYS_NAND_ONFI_DETECTION
