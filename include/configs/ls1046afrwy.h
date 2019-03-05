@@ -147,6 +147,17 @@
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS	5
 #define I2C_RETIMER_ADDR			0x18
 
+/* I2C bus multiplexer */
+#define I2C_MUX_PCA_ADDR_PRI			0x77 /* Primary Mux*/
+#define I2C_MUX_CH_DEFAULT			0x1 /* Channel 0*/
+#define I2C_MUX_CH_RTC				0x1 /* Channel 0*/
+
+/* RTC */
+#define RTC
+#define CONFIG_RTC_PCF2127
+#define CONFIG_SYS_I2C_RTC_ADDR		0x51  /* Channel 0 I2C bus 0*/
+#define CONFIG_SYS_RTC_BUS_NUM			0
+
 /* PMIC */
 #define CONFIG_POWER
 #ifdef CONFIG_POWER
