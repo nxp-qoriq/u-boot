@@ -33,6 +33,19 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+int select_i2c_ch_pca9547(u8 ch)
+{
+	int ret;
+
+	ret = i2c_write(I2C_MUX_PCA_ADDR_PRI, 0, 1, &ch, 1);
+	if (ret) {
+		puts("PCA: failed to select proper channel\n");
+		return ret;
+	}
+
+	return 0;
+}
+
 int board_early_init_f(void)
 {
 	fsl_lsch2_early_init_f();
