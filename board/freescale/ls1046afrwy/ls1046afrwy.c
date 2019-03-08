@@ -25,6 +25,7 @@
 #define LS1046A_PORSR1_REG 0x1EE0000
 #define BOOT_SRC_SD        0x20000000
 #define BOOT_SRC_MASK	   0xFF800000
+#define BOARD_REV_GPIO		13
 
 #define BYTE_SWAP_32(word)  ((((word) & 0xff000000) >> 24) |  \
 (((word) & 0x00ff0000) >>  8) | \
@@ -54,12 +55,34 @@ int board_early_init_f(void)
 }
 
 #ifndef CONFIG_SPL_BUILD
+static inline uint8_t get_board_version(void)
+{
+	uint8_t val;
+	struct ccsr_gpio *pgpio = (void *)(GPIO2_BASE_ADDR);
+
+	val = (in_le32(&pgpio->gpdat) >> BOARD_REV_GPIO) & 0x03;
+
+	return val;
+}
+
 int checkboard(void)
 {
 	static const char *freq[2] = {"100.00MHZ", "100.00MHZ"};
 	u32 boot_src;
+	uint8_t rev;
 
-	puts("Board: LS1046AFRWY, boot from ");
+	rev = get_board_version();
+	switch (rev) {
+	case 0x00:
+		puts("Board: LS1046AFRWY, Rev: A, boot from ");
+		break;
+	case 0x01:
+		puts("Board: LS1046AFRWY, Rev: B, boot from ");
+		break;
+	default:
+		puts("Board: LS1046AFRWY, Rev: Unknown, boot from ");
+		break;
+	}
 	boot_src = BYTE_SWAP_32(readl(LS1046A_PORSR1_REG));
 
 	if ((boot_src & BOOT_SRC_MASK) == BOOT_SRC_SD)
@@ -70,6 +93,7 @@ int checkboard(void)
 
 	return 0;
 }
+
 
 int board_init(void)
 {
