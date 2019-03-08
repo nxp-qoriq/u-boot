@@ -532,8 +532,15 @@ void board_quiesce_devices(void)
 int ft_board_setup(void *blob, bd_t *bd)
 {
 	int i;
+	bool mc_memory_bank = false;
+
+#ifdef CONFIG_FSL_MC_ENET
+	u64 base[CONFIG_NR_DRAM_BANKS + 1];
+	u64 size[CONFIG_NR_DRAM_BANKS + 1];
+#else
 	u64 base[CONFIG_NR_DRAM_BANKS];
 	u64 size[CONFIG_NR_DRAM_BANKS];
+#endif
 
 	ft_cpu_setup(blob, bd);
 
@@ -556,7 +563,26 @@ int ft_board_setup(void *blob, bd_t *bd)
 		size[2] = gd->arch.resv_ram - base[2];
 #endif
 
-	fdt_fixup_memory_banks(blob, base, size, CONFIG_NR_DRAM_BANKS);
+#ifdef CONFIG_FSL_MC_ENET
+	fdt_fixup_mc_ddr(&base[3], &size[3]);
+
+	if (base[3] != 0) {
+		for (i = 0; i <= CONFIG_NR_DRAM_BANKS; i++) {
+			if (base[i] == 0 && size[i] == 0) {
+				base[i] = base[3];
+				size[i] = size[3];
+				break;
+			}
+		}
+		if (i == CONFIG_NR_DRAM_BANKS)
+			mc_memory_bank = true;
+	}
+#endif
+	if (mc_memory_bank)
+		fdt_fixup_memory_banks(
+			 blob, base, size, CONFIG_NR_DRAM_BANKS + 1);
+	else
+		fdt_fixup_memory_banks(blob, base, size, CONFIG_NR_DRAM_BANKS);
 
 #ifdef CONFIG_USB
 	fsl_fdt_fixup_dr_usb(blob, bd);
