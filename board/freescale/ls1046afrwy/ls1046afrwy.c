@@ -26,6 +26,7 @@
 #define BOOT_SRC_SD        0x20000000
 #define BOOT_SRC_MASK	   0xFF800000
 #define BOARD_REV_GPIO		13
+#define USB2_SEL_MASK	   0x00000100
 
 #define BYTE_SWAP_32(word)  ((((word) & 0xff000000) >> 24) |  \
 (((word) & 0x00ff0000) >>  8) | \
@@ -45,6 +46,20 @@ int select_i2c_ch_pca9547(u8 ch)
 	}
 
 	return 0;
+}
+
+static inline void demux_select_usb2(void)
+{
+	uint32_t val;
+	struct ccsr_gpio *pgpio = (void *)(GPIO3_BASE_ADDR);
+
+	val = in_be32(&pgpio->gpdir);
+	val |=  USB2_SEL_MASK;
+	out_be32(&pgpio->gpdir, val);
+
+	val = in_be32(&pgpio->gpdat);
+	val |=  USB2_SEL_MASK;
+	out_be32(&pgpio->gpdat, val);
 }
 
 int board_early_init_f(void)
@@ -155,9 +170,15 @@ void config_board_mux(void)
 #ifdef CONFIG_HAS_FSL_XHCI_USB
 	struct ccsr_scfg *scfg = (struct ccsr_scfg *)CONFIG_SYS_FSL_SCFG_ADDR;
 	u32 usb_pwrfault;
-
-	/* USB3 is not used, configure mux to IIC4_SCL/IIC4_SDA */
+	/*
+	 * USB2 is used, configure mux to USB2_DRVVBUS/USB2_PWRFAULT
+	 * USB3 is not used, configure mux to IIC4_SCL/IIC4_SDA
+	 */
 	out_be32(&scfg->rcwpmuxcr0, 0x3300);
+#ifdef CONFIG_HAS_FSL_IIC3
+	/* IIC3 is used, configure mux to use IIC3_SCL/IIC3/SDA */
+	out_be32(&scfg->rcwpmuxcr0, 0x0000);
+#endif
 	out_be32(&scfg->usbdrvvbus_selcr, SCFG_USBDRVVBUS_SELCR_USB1);
 	usb_pwrfault = (SCFG_USBPWRFAULT_DEDICATED <<
 			SCFG_USBPWRFAULT_USB3_SHIFT) |
@@ -166,6 +187,16 @@ void config_board_mux(void)
 			(SCFG_USBPWRFAULT_SHARED <<
 			SCFG_USBPWRFAULT_USB1_SHIFT);
 	out_be32(&scfg->usbpwrfault_selcr, usb_pwrfault);
+#ifndef CONFIG_HAS_FSL_IIC3
+	/*
+	 * LS1046A FRWY board has demultiplexer NX3DV42GU with GPIO3_23 as input
+	 * to select I2C3_USB2_SEL_IO
+	 * I2C3_USB2_SEL = 0: I2C3_SCL/SDA signals are routed to I2C3 header (default)
+	 * I2C3_USB2_SEL = 1: USB2_DRVVBUS/PWRFAULT signals are routed to USB2 port
+	 * programmed to select USB2 by setting GPIO3_23 output to one
+	 */
+	demux_select_usb2();
+#endif
 #endif
 }
 
