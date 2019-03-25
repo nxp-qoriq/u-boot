@@ -1,6 +1,8 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright 2011 Freescale Semiconductor, Inc.
+ * Copyright 2018-2019 NXP
+ *
  *	Andy Fleming <afleming@gmail.com>
  *
  * This file pretty much stolen from Linux's mii.h/ethtool.h/phy.h

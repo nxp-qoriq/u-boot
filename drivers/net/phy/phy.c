@@ -3,6 +3,8 @@
  * Generic PHY Management code
  *
  * Copyright 2011 Freescale Semiconductor, Inc.
+ * Copyright 2018-2019 NXP
+ *
  * author Andy Fleming
  *
  * Based loosely off of Linux's PHY Lib
