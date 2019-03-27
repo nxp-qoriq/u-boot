@@ -50,7 +50,7 @@ int select_i2c_ch_pca9547(u8 ch)
 
 static inline void demux_select_usb2(void)
 {
-	uint32_t val;
+	u32 val;
 	struct ccsr_gpio *pgpio = (void *)(GPIO3_BASE_ADDR);
 
 	val = in_be32(&pgpio->gpdir);
@@ -72,7 +72,7 @@ int board_early_init_f(void)
 #ifndef CONFIG_SPL_BUILD
 static inline uint8_t get_board_version(void)
 {
-	uint8_t val;
+	u8 val;
 	struct ccsr_gpio *pgpio = (void *)(GPIO2_BASE_ADDR);
 
 	val = (in_le32(&pgpio->gpdat) >> BOARD_REV_GPIO) & 0x03;
@@ -84,7 +84,7 @@ int checkboard(void)
 {
 	static const char *freq[2] = {"100.00MHZ", "100.00MHZ"};
 	u32 boot_src;
-	uint8_t rev;
+	u8 rev;
 
 	rev = get_board_version();
 	switch (rev) {
@@ -109,7 +109,6 @@ int checkboard(void)
 	return 0;
 }
 
-
 int board_init(void)
 {
 #ifdef CONFIG_SECURE_BOOT
@@ -133,7 +132,7 @@ val = (in_le32(SMMU_SCR0) | SCR0_CLIENTPD_MASK) & ~(SCR0_USFCFG_MASK);
 #ifdef CONFIG_FSL_LS_PPA
 	ppa_init();
 #endif
-
+	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
 	return 0;
 }
 
@@ -191,8 +190,10 @@ void config_board_mux(void)
 	/*
 	 * LS1046A FRWY board has demultiplexer NX3DV42GU with GPIO3_23 as input
 	 * to select I2C3_USB2_SEL_IO
-	 * I2C3_USB2_SEL = 0: I2C3_SCL/SDA signals are routed to I2C3 header (default)
-	 * I2C3_USB2_SEL = 1: USB2_DRVVBUS/PWRFAULT signals are routed to USB2 port
+	 * I2C3_USB2_SEL = 0: I2C3_SCL/SDA signals are routed to
+	 * I2C3 header (default)
+	 * I2C3_USB2_SEL = 1: USB2_DRVVBUS/PWRFAULT signals are routed to
+	 * USB2 port
 	 * programmed to select USB2 by setting GPIO3_23 output to one
 	 */
 	demux_select_usb2();
