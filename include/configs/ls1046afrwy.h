@@ -201,6 +201,8 @@
 #define QSGMII_PORT3_PHY_ADDR		0x1e
 #define QSGMII_PORT4_PHY_ADDR		0x1f
 
+#define FDT_SEQ_MACADDR_FROM_ENV
+
 #define CONFIG_ETHPRIME			"FM1@DTSEC3"
 #endif
 
