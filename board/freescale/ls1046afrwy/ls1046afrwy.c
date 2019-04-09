@@ -21,6 +21,7 @@
 #include <fsl_esdhc.h>
 #include <power/mc34vr500_pmic.h>
 #include <fsl_sec.h>
+#include <fsl_dspi.h>
 
 #define LS1046A_PORSR1_REG 0x1EE0000
 #define BOOT_SRC_SD        0x20000000
@@ -32,6 +33,7 @@
 (((word) & 0x00ff0000) >>  8) | \
 (((word) & 0x0000ff00) <<  8) | \
 (((word) & 0x000000ff) << 24))
+#define SPI_MCR_REG	0x2100000
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -60,6 +62,22 @@ static inline void demux_select_usb2(void)
 	val = in_be32(&pgpio->gpdat);
 	val |=  USB2_SEL_MASK;
 	out_be32(&pgpio->gpdat, val);
+}
+
+static inline void set_spi_cs_signal_inactive(void)
+{
+	/* default: all CS signals inactive state is high */
+	uint mcr_val;
+	uint mcr_cfg_val = DSPI_MCR_MSTR | DSPI_MCR_PCSIS_MASK |
+				DSPI_MCR_CRXF | DSPI_MCR_CTXF;
+
+	mcr_val = in_be32(SPI_MCR_REG);
+	mcr_val |= DSPI_MCR_HALT;
+	out_be32(SPI_MCR_REG, mcr_val);
+	out_be32(SPI_MCR_REG, mcr_cfg_val);
+	mcr_val = in_be32(SPI_MCR_REG);
+	mcr_val &= ~DSPI_MCR_HALT;
+	out_be32(SPI_MCR_REG, mcr_val);
 }
 
 int board_early_init_f(void)
@@ -199,6 +217,7 @@ void config_board_mux(void)
 	demux_select_usb2();
 #endif
 #endif
+	set_spi_cs_signal_inactive();
 }
 
 #ifdef CONFIG_MISC_INIT_R
