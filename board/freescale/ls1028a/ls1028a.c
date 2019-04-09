@@ -386,14 +386,12 @@ void setup_4xSGMII(void)
 	u16 value;
 	int i, to;
 
-	PCS_INF("trying to set up 4xSGMII, this is hardcoded for SERDES 9999/99xx!!!!\n");
-
 	/* turn on PCI function */
 	out_le16(NETC_PF5_ECAM_BASE + 4, 0xffff);
 	bus.priv = (void *)NETC_PF5_BAR0_BASE + 0x8030;
 
 	for (i = 0; i < 4; i++) {
-		if (((serdes_protocol >> (i*4)) & 0xf) != 0x9)
+		if (((serdes_protocol >> (i * 4)) & 0xf) != 0x9)
 			continue;
 
 		out_le32(NETC_PCS_SGMIICR1(i), 0x00000800 + 0x08000000 * i);
@@ -414,7 +412,8 @@ void setup_4xSGMII(void)
 		/* wait for link */
 		to = 1000;
 		do {
-			value = enetc_imdio_read(&bus, i, MDIO_DEVAD_NONE, 0x01);
+			value = enetc_imdio_read(&bus, i,
+						 MDIO_DEVAD_NONE, 0x01);
 			if ((value & 0x0024) == 0x0024)
 				break;
 		} while (--to);
@@ -531,31 +530,29 @@ void setup_QSGMII(void)
 
 static void setup_switch(void)
 {
-
 #define L2SW_PORTS	5
 
-#define L2SW_BASE				0x1fc000000
-#define L2SW_SYS				(L2SW_BASE + 0x010000)
-#define L2SW_ES0				(L2SW_BASE + 0x040000)
-#define L2SW_IS1				(L2SW_BASE + 0x050000)
-#define L2SW_IS2				(L2SW_BASE + 0x060000)
-#define L2SW_GMII(i)				(L2SW_BASE + 0x100000 + (i)*0x10000)
-#define L2SW_QSYS				(L2SW_BASE + 0x200000)
+#define L2SW_BASE			0x1fc000000
+#define L2SW_SYS			(L2SW_BASE + 0x010000)
+#define L2SW_ES0			(L2SW_BASE + 0x040000)
+#define L2SW_IS1			(L2SW_BASE + 0x050000)
+#define L2SW_IS2			(L2SW_BASE + 0x060000)
+#define L2SW_GMII(i)			(L2SW_BASE + 0x100000 + (i) * 0x10000)
+#define L2SW_QSYS			(L2SW_BASE + 0x200000)
 
-#define L2SW_SYS_SYSTEM				(L2SW_SYS + 0x00000E00)
-#define L2SW_SYS_RAM_CTRL			(L2SW_SYS + 0x00000F24)
+#define L2SW_SYS_SYSTEM			(L2SW_SYS + 0x00000E00)
+#define L2SW_SYS_RAM_CTRL		(L2SW_SYS + 0x00000F24)
 
-#define L2SW_ES0_TCAM_CTRL			(L2SW_ES0 + 0x000003C0)
-#define L2SW_IS1_TCAM_CTRL			(L2SW_IS1 + 0x000003C0)
-#define L2SW_IS2_TCAM_CTRL			(L2SW_IS2 + 0x000003C0)
+#define L2SW_ES0_TCAM_CTRL		(L2SW_ES0 + 0x000003C0)
+#define L2SW_IS1_TCAM_CTRL		(L2SW_IS1 + 0x000003C0)
+#define L2SW_IS2_TCAM_CTRL		(L2SW_IS2 + 0x000003C0)
 
-#define L2SW_GMII_CLOCK_CFG(i)			(L2SW_GMII(i) + 0x00000000)
-#define L2SW_GMII_MAC_ENA_CFG(i)		(L2SW_GMII(i) + 0x0000001C)
-#define L2SW_GMII_MAC_IFG_CFG(i)		(L2SW_GMII(i) + 0x0000001C + 0x14)
+#define L2SW_GMII_CLOCK_CFG(i)		(L2SW_GMII(i) + 0x00000000)
+#define L2SW_GMII_MAC_ENA_CFG(i)	(L2SW_GMII(i) + 0x0000001C)
+#define L2SW_GMII_MAC_IFG_CFG(i)	(L2SW_GMII(i) + 0x0000001C + 0x14)
 
-#define L2SW_QSYS_SYSTEM			(L2SW_QSYS + 0x0000F460)
-#define L2SW_QSYS_SYSTEM_SWITCH_PORT_MODE(i)	(L2SW_QSYS_SYSTEM + 0x20 + (i)*4)
-
+#define L2SW_QSYS_SYSTEM		(L2SW_QSYS + 0x0000F460)
+#define L2SW_QSYS_SYSTEM_SW_PORT_MODE(i) (L2SW_QSYS_SYSTEM + 0x20 + (i) * 4)
 
 	int to, i;
 
@@ -584,7 +581,7 @@ static void setup_switch(void)
 		// MAC Tx and Rx
 		out_le32(L2SW_GMII_MAC_ENA_CFG(i), 0x00000011);
 		out_le32(L2SW_GMII_CLOCK_CFG(i), 0x00000001);
-		out_le32(L2SW_QSYS_SYSTEM_SWITCH_PORT_MODE(i), 0x00004a00);
+		out_le32(L2SW_QSYS_SYSTEM_SW_PORT_MODE(i), 0x00004a00);
 		out_le32(L2SW_GMII_MAC_IFG_CFG(i), 0x00000515);
 	}
 }
