@@ -88,9 +88,9 @@
 #define LS1021_CEVA_PHY4_CFG	0x064a080b
 #define LS1021_CEVA_PHY5_CFG	0x2aa86470
 
-/* for ls1088a */
-#define LS1088_ECC_DIS_ADDR_CH2	0x100520
-#define LS1088_ECC_DIS_VAL_CH2	0x40000000
+/* for CHASSIS3 */
+#define ECC_DIS_ADDR_CH3	0x700100520
+#define ECC_DIS_VAL_CH3		0x40000000
 
 /* ecc addr-val pair */
 #define ECC_DIS_ADDR_CH2	0x20140520
@@ -102,6 +102,7 @@ enum ceva_soc {
 	CEVA_1V84,
 	CEVA_LS1012A,
 	CEVA_LS1021A,
+	CEVA_LS1028A,
 	CEVA_LS1043A,
 	CEVA_LS1046A,
 	CEVA_LS1088A,
@@ -154,8 +155,9 @@ static int ceva_init_sata(struct ceva_sata_priv *priv)
 			writel(CEVA_AXICC_CFG, base + AHCI_VEND_AXICC);
 		break;
 
+	case CEVA_LS1028A:
 	case CEVA_LS1088A:
-		writel(LS1088_ECC_DIS_VAL_CH2, LS1088_ECC_DIS_ADDR_CH2);
+		writel(ECC_DIS_VAL_CH3, ECC_DIS_ADDR_CH3);
 		writel(CEVA_PHY1_CFG, base + AHCI_VEND_PPCFG);
 		writel(CEVA_TRANS_CFG, base + AHCI_VEND_PTC);
 		if (priv->flag & FLAG_COHERENT)
@@ -186,6 +188,7 @@ static const struct udevice_id sata_ceva_ids[] = {
 	{ .compatible = "ceva,ahci-1v84", .data = CEVA_1V84 },
 	{ .compatible = "fsl,ls1012a-ahci", .data = CEVA_LS1012A },
 	{ .compatible = "fsl,ls1021a-ahci", .data = CEVA_LS1021A },
+	{ .compatible = "fsl,ls1028a-ahci", .data = CEVA_LS1028A },
 	{ .compatible = "fsl,ls1043a-ahci", .data = CEVA_LS1043A },
 	{ .compatible = "fsl,ls1046a-ahci", .data = CEVA_LS1046A },
 	{ .compatible = "fsl,ls1088a-ahci", .data = CEVA_LS1088A },
