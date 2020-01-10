@@ -3,6 +3,8 @@
  * Atheros PHY drivers
  *
  * Copyright 2011, 2013 Freescale Semiconductor, Inc.
+ * Copyright 2020-2021 NXP
+ *
  * author Andy Fleming
  */
 #include <common.h>
@@ -62,6 +64,16 @@ static int ar8035_config(struct phy_device *phydev)
 	phy_write(phydev, MDIO_DEVAD_NONE, 0xd, 0x4007);
 	regval = phy_read(phydev, MDIO_DEVAD_NONE, 0xe);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0xe, (regval|0x0018));
+
+#ifdef CONFIG_PHY_ATHEROS_AR8035_RCLK
+	/* CLK_25M can be configured to 25MHz, 50MHz, 62.5MHz or 125MHz by
+	 * register 8016[4:3]. Bits 00=25M, 01=50M, 10=62.5M, 11=125M
+	 */
+	regval = phy_read(phydev, MDIO_DEVAD_NONE, 0x8016);
+	regval &= 0xFFE7;
+	regval |= CONFIG_PHY_ATHEROS_AR8035_RCLK_MASK << 3;
+	phy_write(phydev, MDIO_DEVAD_NONE, 0x8016, regval);
+#endif
 
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x05);
 	regval = phy_read(phydev, MDIO_DEVAD_NONE, 0x1e);

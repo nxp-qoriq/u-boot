@@ -1,0 +1,82 @@
+// SPDX-License-Identifier: GPL-2.0+ OR X11
+/*
+ * NXP LA1224RDB device tree source
+ *
+ * Copyright 2020-2021 NXP
+ *
+ */
+
+/dts-v1/;
+
+#include "fsl-lx2160a.dtsi"
+
+/ {
+	model = "NXP Layerscape LA1224-RDB Board";
+	compatible = "nxp,la1224rdb", "fsl,lx2160a";
+
+	aliases {
+		spi0 = &fspi;
+	};
+};
+
+&fspi {
+	bus-num = <0>;
+	status = "okay";
+	fspi-has-second-chip;
+
+	qflash0: mt35xu512g@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-flash";
+		spi-max-frequency = <20000000>;
+		reg = <0>;
+		/* The following setting enables 1-1-8 (CMD-ADDR-DATA) mode */
+		fspi-rx-bus-width = <8>; /* 8 FSPI Rx lines */
+		fspi-tx-bus-width = <1>; /* 1 FSPI Tx line */
+	};
+
+	/*
+	 * MCR2[SAMEDEVICEEN] bit is enabled in FlexSPI controller for
+	 * LX2160ARDB and LX2160AQDS board. Both these has same type of flash
+	 * slave devices connected on both A0 and A1.
+	 * No need to provide node info for second flash device.
+	 */
+};
+
+&esdhc0 {
+	status = "okay";
+};
+
+&esdhc1 {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+	u-boot,dm-pre-reloc;
+};
+
+&i2c3 {
+	status = "okay";
+
+	rtc@51 {
+		compatible = "pcf2127-rtc";
+		reg = <0x51>;
+	};
+};
+
+&sata0 {
+	status = "okay";
+};
+
+&sata1 {
+	status = "okay";
+};
+
+&sata2 {
+	status = "okay";
+};
+
+&sata3 {
+	status = "okay";
+};

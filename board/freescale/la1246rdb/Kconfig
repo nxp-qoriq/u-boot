@@ -1,0 +1,17 @@
+
+if TARGET_LA1246RDB
+
+config SYS_BOARD
+	default "la1246rdb"
+
+config SYS_VENDOR
+	default "freescale"
+
+config SYS_SOC
+	default "fsl-layerscape"
+
+config SYS_CONFIG_NAME
+	default "la1246rdb"
+
+source "board/freescale/common/Kconfig"
+endif
