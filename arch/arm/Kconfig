@@ -1114,6 +1114,18 @@ config TARGET_LX2160AQDS
 	  is a high-performance development platform that supports the
 	  QorIQ LX2160A/LX2120A/LX2080A Layerscape Architecture processor.
 
+config TARGET_LX2160ABNYRG
+        bool "Support lx2160abnyrg"
+        select ARCH_LX2160A
+        select ARCH_MISC_INIT
+        select ARM64
+        select ARMV8_MULTIENTRY
+        select BOARD_LATE_INIT
+        help
+          Support for NXP LX2160ABNYRG platform.
+	  THE LX2160ABNYRG board support is based on LX2160A
+	  Layerscape Architecture processor.
+
 config TARGET_HIKEY
 	bool "Support HiKey 96boards Consumer Edition Platform"
 	select ARM64
