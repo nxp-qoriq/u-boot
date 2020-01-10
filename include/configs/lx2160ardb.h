@@ -97,6 +97,8 @@
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
+	"boot_scripts=lx2160ardb_boot.scr\0"	\
+	"boot_script_hdr=hdr_lx2160ardb_bs.out\0"	\
 	"lx2160ardb_vdd_mv=800\0"		\
 	"BOARD=lx2160ardb\0"			\
 	"xspi_bootcmd=echo Trying load from flexspi..;"		\
