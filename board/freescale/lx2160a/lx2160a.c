@@ -51,6 +51,12 @@ static struct pl01x_serial_platdata serial0 = {
 	.base = CONFIG_SYS_SERIAL0,
 #elif CONFIG_CONS_INDEX == 1
 	.base = CONFIG_SYS_SERIAL1,
+#ifdef CONFIG_TARGET_LX2160ABNYRG
+#elif CONFIG_CONS_INDEX == 2
+	.base = CONFIG_SYS_SERIAL2,
+#elif CONFIG_CONS_INDEX == 3
+	.base = CONFIG_SYS_SERIAL3,
+#endif
 #else
 #error "Unsupported console index value."
 #endif
@@ -71,6 +77,28 @@ U_BOOT_DEVICE(nxp_serial1) = {
 	.name = "serial_pl01x",
 	.platdata = &serial1,
 };
+
+#ifdef CONFIG_TARGET_LX2160ABNYRG
+static struct pl01x_serial_platdata serial2 = {
+	.base = CONFIG_SYS_SERIAL2,
+	.type = TYPE_PL011,
+};
+
+U_BOOT_DEVICE(nxp_serial2) = {
+	.name = "serial_pl01x",
+	.platdata = &serial2,
+};
+
+static struct pl01x_serial_platdata serial3 = {
+	.base = CONFIG_SYS_SERIAL3,
+	.type = TYPE_PL011,
+};
+
+U_BOOT_DEVICE(nxp_serial3) = {
+	.name = "serial_pl01x",
+	.platdata = &serial3,
+};
+#endif
 
 int select_i2c_ch_pca9547(u8 ch)
 {
@@ -117,6 +145,10 @@ static void uart_get_clock(void)
 {
 	serial0.clock = get_serial_clock();
 	serial1.clock = get_serial_clock();
+#ifdef CONFIG_TARGET_LX2160ABNYRG
+	serial2.clock = get_serial_clock();
+	serial3.clock = get_serial_clock();
+#endif
 }
 
 int board_early_init_f(void)
