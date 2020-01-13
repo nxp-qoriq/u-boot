@@ -51,7 +51,7 @@
 #define CONFIG_VOL_MONITOR_LTC3882_READ
 
 /* RTC */
-#define CONFIG_SYS_RTC_BUS_NUM		4
+#define CONFIG_SYS_RTC_BUS_NUM		3
 
 /* MAC/PHY configuration */
 #if defined(CONFIG_FSL_MC_ENET)
