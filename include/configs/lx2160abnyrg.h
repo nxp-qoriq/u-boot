@@ -8,25 +8,7 @@
 
 #include "lx2160a_common.h"
 
-/* Qixis */
-#define QIXIS_XMAP_MASK			0x07
-#define QIXIS_XMAP_SHIFT		5
-#define QIXIS_RST_CTL_RESET_EN		0x30
-#define QIXIS_LBMAP_DFLTBANK		0x00
-#define QIXIS_LBMAP_ALTBANK		0x20
-#define QIXIS_LBMAP_QSPI		0x00
-#define QIXIS_RCW_SRC_QSPI		0xff
-#define QIXIS_RST_CTL_RESET		0x31
-#define QIXIS_RCFG_CTL_RECONFIG_IDLE	0x20
-#define QIXIS_RCFG_CTL_RECONFIG_START	0x21
-#define QIXIS_RCFG_CTL_WATCHDOG_ENBLE	0x08
-#define QIXIS_LBMAP_MASK		0x0f
-#define QIXIS_LBMAP_SD
-#define QIXIS_RCW_SRC_SD           0x08
-#define NON_EXTENDED_DUTCFG
-
 /* VID */
-
 #define I2C_MUX_CH_VOL_MONITOR		0xA
 /* Voltage monitor on channel 2*/
 #define I2C_VOL_MONITOR_ADDR		0x63
@@ -76,12 +58,6 @@
 #define RGMII_PHY_ADDR2		0x02
 
 #endif
-
-/* EMC2305 */
-#define I2C_MUX_CH_EMC2305		0x09
-#define I2C_EMC2305_ADDR		0x4D
-#define I2C_EMC2305_CMD		0x40
-#define I2C_EMC2305_PWM		0x80
 
 /* EEPROM */
 #define CONFIG_ID_EEPROM
