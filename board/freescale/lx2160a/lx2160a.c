@@ -309,7 +309,7 @@ int esdhc_status_fixup(void *blob, const char *compat)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
 #else
-	/* Enable both esdhc DT nodes for LX2160ARDB */
+	/* Enable both esdhc DT nodes for LX2160ARDB and LX2160ABNYRG */
 	do_fixup_by_compat(blob, compat, "status", "okay",
 			   sizeof("okay"), 1);
 #endif
@@ -331,6 +331,30 @@ int init_func_vid(void)
 }
 #endif
 
+#ifdef CONFIG_TARGET_LX2160ABNYRG
+int checkboard(void)
+{
+	enum boot_src src = get_boot_src();
+
+	printf("Board: LA1224-RDB, ");
+
+	// TODO Board revision from I2C IO Expander
+	printf("Board version: A  boot from ");
+
+	if (src == BOOT_SOURCE_SD_MMC)
+		puts("SD\n");
+	else	if (src == BOOT_SOURCE_XSPI_NOR)
+		puts("FlexSPI NOR\n");
+	else
+		printf("invalid boot source setting\n");
+
+	puts("SERDES1 Reference: Clock1 = 100MHz Clock2 = 161.13MHz\n");
+	puts("SERDES2 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+	puts("SERDES3 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+
+	return 0;
+}
+#else
 int checkboard(void)
 {
 	enum boot_src src = get_boot_src();
@@ -410,6 +434,7 @@ int checkboard(void)
 #endif
 	return 0;
 }
+#endif
 
 #ifdef CONFIG_TARGET_LX2160AQDS
 /*
