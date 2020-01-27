@@ -113,7 +113,7 @@ int board_eth_init(bd_t *bis)
 		break;
 
 	default:
-		printf("SerDes1 protocol 0x%x is not supported on LX2160ARDB\n",
+		printf("SerDes1 protocol 0x%x is not supported on LA1224RDB\n",
 		       srds_s1);
 		goto next;
 	}

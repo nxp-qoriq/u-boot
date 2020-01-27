@@ -51,7 +51,7 @@ static struct pl01x_serial_platdata serial0 = {
 	.base = CONFIG_SYS_SERIAL0,
 #elif CONFIG_CONS_INDEX == 1
 	.base = CONFIG_SYS_SERIAL1,
-#ifdef CONFIG_TARGET_LX2160ABNYRG
+#ifdef CONFIG_TARGET_LA1224RDB
 #elif CONFIG_CONS_INDEX == 2
 	.base = CONFIG_SYS_SERIAL2,
 #elif CONFIG_CONS_INDEX == 3
@@ -78,7 +78,7 @@ U_BOOT_DEVICE(nxp_serial1) = {
 	.platdata = &serial1,
 };
 
-#ifdef CONFIG_TARGET_LX2160ABNYRG
+#ifdef CONFIG_TARGET_LA1224RDB
 static struct pl01x_serial_platdata serial2 = {
 	.base = CONFIG_SYS_SERIAL2,
 	.type = TYPE_PL011,
@@ -145,7 +145,7 @@ static void uart_get_clock(void)
 {
 	serial0.clock = get_serial_clock();
 	serial1.clock = get_serial_clock();
-#ifdef CONFIG_TARGET_LX2160ABNYRG
+#ifdef CONFIG_TARGET_LA1224RDB
 	serial2.clock = get_serial_clock();
 	serial3.clock = get_serial_clock();
 #endif
@@ -309,7 +309,7 @@ int esdhc_status_fixup(void *blob, const char *compat)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
 #else
-	/* Enable both esdhc DT nodes for LX2160ARDB and LX2160ABNYRG */
+	/* Enable both esdhc DT nodes for LX2160ARDB and LA1224RDB */
 	do_fixup_by_compat(blob, compat, "status", "okay",
 			   sizeof("okay"), 1);
 #endif
@@ -331,7 +331,7 @@ int init_func_vid(void)
 }
 #endif
 
-#ifdef CONFIG_TARGET_LX2160ABNYRG
+#ifdef CONFIG_TARGET_LA1224RDB
 int checkboard(void)
 {
 	enum boot_src src = get_boot_src();

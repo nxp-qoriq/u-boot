@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+ OR X11
 /*
- * NXP LX2160A_BNYRG device tree source
+ * NXP LA1224RDB device tree source
  *
  * Copyright 2020 NXP
  *
@@ -11,8 +11,8 @@
 #include "fsl-lx2160a.dtsi"
 
 / {
-	model = "NXP Layerscape LX2160A_BNYRG Board";
-	compatible = "fsl,lx2160a_bnyrg", "fsl,lx2160a";
+	model = "NXP Layerscape LA1224RDB Board";
+	compatible = "nxp,la1224rdb", "fsl,lx2160a";
 
 	aliases {
 		spi0 = &fspi;
