@@ -35,7 +35,7 @@
 #endif
 
 #define GIC_LPI_SIZE                             0x200000
-#ifdef CONFIG_TARGET_LX2160AQDS
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 #define CFG_MUX_I2C_SDHC(reg, value)		((reg & 0x3f) | value)
 #define SET_CFG_MUX1_SDHC1_SDHC(reg)		(reg & 0x3f)
 #define SET_CFG_MUX2_SDHC1_SPI(reg, value)	((reg & 0xcf) | value)
@@ -45,7 +45,7 @@
 #define SDHC1_BASE_PMUX_DSPI			2
 #define SDHC2_BASE_PMUX_DSPI			2
 #define IIC5_PMUX_SPI3				3
-#endif /* CONFIG_TARGET_LX2160AQDS */
+#endif /* CONFIG_TARGET_LX2160AQDS or CONFIG_TARGET_LX2162AQDS */
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -210,7 +210,7 @@ int board_fix_fdt(void *fdt)
 }
 #endif
 
-#if defined(CONFIG_TARGET_LX2160AQDS)
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 void esdhc_dspi_status_fixup(void *blob)
 {
 	const char esdhc0_path[] = "/soc/esdhc@2140000";
@@ -278,7 +278,7 @@ void esdhc_dspi_status_fixup(void *blob)
 
 int esdhc_status_fixup(void *blob, const char *compat)
 {
-#if defined(CONFIG_TARGET_LX2160AQDS)
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
 #else
@@ -316,7 +316,7 @@ int checkboard(void)
 	enum boot_src src = get_boot_src();
 	char buf[64];
 	u8 sw;
-#ifdef CONFIG_TARGET_LX2160AQDS
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	int clock;
 	static const char *const freq[] = {"100", "125", "156.25",
 					   "161.13", "322.26", "", "", "",
@@ -325,7 +325,7 @@ int checkboard(void)
 #endif
 
 	cpu_name(buf);
-#ifdef CONFIG_TARGET_LX2160AQDS
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	printf("Board: %s-QDS, ", buf);
 #else
 	printf("Board: %s-RDB, ", buf);
@@ -358,7 +358,7 @@ int checkboard(void)
 			break;
 		}
 	}
-#ifdef CONFIG_TARGET_LX2160AQDS
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	printf("FPGA: v%d (%s), build %d",
 	       (int)QIXIS_READ(scver), qixis_read_tag(buf),
 	       (int)qixis_read_minor());
@@ -393,7 +393,7 @@ int checkboard(void)
 	return 0;
 }
 
-#ifdef CONFIG_TARGET_LX2160AQDS
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 /*
  * implementation of CONFIG_ESDHC_DETECT_QUIRK Macro.
  */
@@ -544,7 +544,7 @@ int config_board_mux(void)
 
 unsigned long get_board_sys_clk(void)
 {
-#ifdef CONFIG_TARGET_LX2160AQDS
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	u8 sysclk_conf = QIXIS_READ(brdcfg[1]);
 
 	switch (sysclk_conf & 0x03) {
@@ -563,7 +563,7 @@ unsigned long get_board_sys_clk(void)
 
 unsigned long get_board_ddr_clk(void)
 {
-#ifdef CONFIG_TARGET_LX2160AQDS
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	u8 ddrclk_conf = QIXIS_READ(brdcfg[1]);
 
 	switch ((ddrclk_conf & 0x30) >> 4) {
