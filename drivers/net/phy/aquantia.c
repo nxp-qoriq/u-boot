@@ -689,6 +689,19 @@ struct phy_driver aqr412_driver = {
 	.data = AQUANTIA_GEN3,
 };
 
+struct phy_driver aqr113c_driver = {
+	.name = "Aquantia AQR113C",
+	.uid = 0x31c31c12,
+	.mask = 0xfffffff0,
+	.features = PHY_10G_FEATURES,
+	.mmds = (MDIO_MMD_PMAPMD | MDIO_MMD_PCS |
+			MDIO_MMD_PHYXS | MDIO_MMD_AN |
+			MDIO_MMD_VEND1),
+	.config = &aquantia_config,
+	.startup = &aquantia_startup,
+	.shutdown = &gen10g_shutdown,
+};
+
 int phy_aquantia_init(void)
 {
 	phy_register(&aq1202_driver);
@@ -699,6 +712,7 @@ int phy_aquantia_init(void)
 	phy_register(&aqr112_driver);
 	phy_register(&aqr405_driver);
 	phy_register(&aqr412_driver);
+	phy_register(&aqr113c_driver);
 
 	return 0;
 }
