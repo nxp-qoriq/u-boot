@@ -8,6 +8,9 @@
 
 #include "lx2160a_common.h"
 
+/* USB */
+#define CONFIG_USB_MAX_CONTROLLER_COUNT 1
+
 /* Qixis */
 #define QIXIS_XMAP_MASK			0x07
 #define QIXIS_XMAP_SHIFT		5
