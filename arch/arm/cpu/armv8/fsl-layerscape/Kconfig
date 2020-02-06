@@ -213,7 +213,7 @@ config ARCH_LX2160A
 	select SYS_HAS_SERDES
 	select SYS_FSL_SRDS_1
 	select SYS_FSL_SRDS_2
-	select SYS_NXP_SRDS_3
+	select SYS_NXP_SRDS_3 if !TARGET_LX2162AQDS
 	select SYS_FSL_DDR
 	select SYS_FSL_DDR_LE
 	select SYS_FSL_DDR_VER_50

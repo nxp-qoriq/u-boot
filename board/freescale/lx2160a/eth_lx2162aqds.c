@@ -5,6 +5,7 @@
  */
 
 #include <common.h>
+#include <env.h>
 #include <hwconfig.h>
 #include <command.h>
 #include <netdev.h>
@@ -75,13 +76,37 @@ struct serdes_phy_config {
  * requirement.
  */
 /*****************************************************************
- *   SERDES_1 PROTOCOL   *	IO_SLOT		*	CARD	 *
+ |   SERDES_1 PROTOCOL   |      IO_SLOT         |       CARD     |
  *****************************************************************
- *	18		 *	IO_SLOT_1	*  M11-USXGMII	 *
- *			 *	IO_SLOT_6	*  M13-25G	 *
+ |      3                |      IO_SLOT_1       |  M11-USXGMII   |
+ |      15               |      IO_SLOT_1       |  M13-25G       |
+ |      17               |      IO_SLOT_1       |  M13-25G       |
+ |      18               |      IO_SLOT_1       |  M11-USXGMII   |
+ |                       |      IO_SLOT_6       |  M13-25G       |
+ |      20               |      IO_SLOT_1       |  M7-40G        |
  *****************************************************************
  */
 static const struct serdes_phy_config serdes1_phy_config[] = {
+	{3, {{WRIOP1_DPMAC3, {AQ_PHY_ADDR1, -1},
+	      EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC4, {AQ_PHY_ADDR2, -1},
+	     EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC5, {AQ_PHY_ADDR3, -1},
+	     EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC6, {AQ_PHY_ADDR4, -1},
+	     EMI1, IO_SLOT_1} } },
+	{15, {{WRIOP1_DPMAC1, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2, -1},
+	       EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC2, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2, -1},
+	      EMI1, IO_SLOT_1} } },
+	{17, {{WRIOP1_DPMAC3, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2, -1},
+	       EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC4, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2, -1},
+	      EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC5, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2, -1},
+	      EMI1, IO_SLOT_1},
+	     {WRIOP1_DPMAC6, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2, -1},
+	      EMI1, IO_SLOT_1} } },
 	{18, {{WRIOP1_DPMAC3, {AQ_PHY_ADDR1, -1},
 	      EMI1, IO_SLOT_1},
 	     {WRIOP1_DPMAC4, {AQ_PHY_ADDR2, -1},
@@ -89,17 +114,59 @@ static const struct serdes_phy_config serdes1_phy_config[] = {
 	     {WRIOP1_DPMAC5, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2, -1},
 	      EMI1, IO_SLOT_6},
 	     {WRIOP1_DPMAC6, {INPHI_PHY_ADDR1, INPHI_PHY_ADDR2, -1},
-	      EMI1, IO_SLOT_6} } }
+	      EMI1, IO_SLOT_6} } },
+	{20, {{WRIOP1_DPMAC1, {CORTINA_PHY_ADDR1, -1},
+	       EMI1, IO_SLOT_1} } }
 };
 
 /*****************************************************************
- *   SERDES_2 PROTOCOL   *	IO_SLOT		*	CARD	 *
+ |   SERDES_2 PROTOCOL   |      IO_SLOT         |       CARD     |
  *****************************************************************
- *	5		 *	IO_SLOT_7	*  M4-PCIE-SGMII *
+ |      2                |      IO_SLOT_7       |  M4-PCIE-SGMII |
+ |                       |      IO_SLOT_8       |  M4-PCIE-SGMII |
+ |      3                |      IO_SLOT_7       |  M4-PCIE-SGMII |
+ |                       |      IO_SLOT_8       |  M4-PCIE-SGMII |
+ |      5                |      IO_SLOT_7       |  M4-PCIE-SGMII |
+ |      10               |      IO_SLOT_7       |  M4-PCIE-SGMII |
+ |                       |      IO_SLOT_8       |  M4-PCIE-SGMII |
+ |      11               |      IO_SLOT_7       |  M4-PCIE-SGMII |
+ |                       |      IO_SLOT_8       |  M4-PCIE-SGMII |
+ |      12               |      IO_SLOT_7       |  M4-PCIE-SGMII |
+ |                       |      IO_SLOT_8       |  M4-PCIE-SGMII |
  *****************************************************************
  */
 static const struct serdes_phy_config serdes2_phy_config[] = {
-	{5, {} }
+	{2, {} },
+	{3, {} },
+	{5, {} },
+	{10, {{WRIOP1_DPMAC11, {SGMII_CARD_PORT1_PHY_ADDR, -1},
+	       EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC12, {SGMII_CARD_PORT2_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC17, {SGMII_CARD_PORT3_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC18, {SGMII_CARD_PORT4_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_7} } },
+	{11, {{WRIOP1_DPMAC12, {SGMII_CARD_PORT2_PHY_ADDR, -1},
+	       EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC17, {SGMII_CARD_PORT3_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC18, {SGMII_CARD_PORT4_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC16, {SGMII_CARD_PORT2_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_8},
+	     {WRIOP1_DPMAC13, {SGMII_CARD_PORT3_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_8},
+	     {WRIOP1_DPMAC14, {SGMII_CARD_PORT4_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_8} } },
+	{12, {{WRIOP1_DPMAC11, {SGMII_CARD_PORT1_PHY_ADDR, -1},
+	       EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC12, {SGMII_CARD_PORT2_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC17, {SGMII_CARD_PORT3_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_7},
+	     {WRIOP1_DPMAC18, {SGMII_CARD_PORT4_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_7} } }
 };
 
 static inline
