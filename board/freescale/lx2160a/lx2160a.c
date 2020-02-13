@@ -629,7 +629,7 @@ unsigned long get_board_ddr_clk(void)
 
 int board_init(void)
 {
-#if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LX2160ARDB)
+#if defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_TARGET_LX2160AQDS)
 	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
 #endif
 #ifdef CONFIG_ENV_IS_NOWHERE
@@ -641,6 +641,11 @@ int board_init(void)
 #if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LX2160ARDB)
 	/* invert AQR107 IRQ pins polarity */
 	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR107_IRQ_MASK);
+#endif
+
+#if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LA1224RDB)
+	/* invert AQR107 IRQ pins polarity */
+	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR113_IRQ_MASK);
 #endif
 
 #ifdef CONFIG_FSL_CAAM
