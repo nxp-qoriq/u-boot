@@ -3,6 +3,7 @@
  * Generic PHY Management code
  *
  * Copyright 2011 Freescale Semiconductor, Inc.
+ * Copyright 2020 NXP
  * author Andy Fleming
  *
  * Based loosely off of Linux's PHY Lib
@@ -702,15 +703,24 @@ int __weak get_phy_id(struct mii_dev *bus, int addr, int devad, u32 *phy_id)
 }
 
 static struct phy_device *create_phy_by_mask(struct mii_dev *bus,
-					     uint phy_mask, int devad,
+					     uint phy_mask,
 					     phy_interface_t interface)
 {
 	u32 phy_id = 0xffffffff;
 	bool is_c45;
+	int devad[] = {
+		MDIO_DEVAD_NONE, /* Clause-22 */
+		MDIO_MMD_PMAPMD, /* Clause-45 */
+		MDIO_MMD_VEND1,
+		MDIO_MMD_WIS,
+		MDIO_MMD_PCS,
+	};
+	int devad_cnt = sizeof(devad)/sizeof(int);
+	int i = 0;
 
 	while (phy_mask) {
 		int addr = ffs(phy_mask) - 1;
-		int r = get_phy_id(bus, addr, devad, &phy_id);
+		int r = get_phy_id(bus, addr, devad[i], &phy_id);
 
 		/*
 		 * If the PHY ID is flat 0 we ignore it.  There are C45 PHYs
@@ -723,12 +733,17 @@ static struct phy_device *create_phy_by_mask(struct mii_dev *bus,
 
 		/* If the PHY ID is mostly f's, we didn't find anything */
 		if (r == 0 && (phy_id & 0x1fffffff) != 0x1fffffff) {
-			is_c45 = (devad == MDIO_DEVAD_NONE) ? false : true;
+			is_c45 = (devad[i] == MDIO_DEVAD_NONE) ? false : true;
 			return phy_device_create(bus, addr, phy_id, is_c45,
 						 interface);
 		}
 next:
-		phy_mask &= ~(1 << addr);
+		/* re-iterate through mask */
+		if (i ==  devad_cnt) {
+			phy_mask &= ~(1 << addr);
+			i = 0;
+		} else
+			i++;
 	}
 	return NULL;
 }
@@ -754,31 +769,19 @@ static struct phy_device *get_phy_device_by_mask(struct mii_dev *bus,
 						 uint phy_mask,
 						 phy_interface_t interface)
 {
-	int i;
 	struct phy_device *phydev;
 
 	phydev = search_for_existing_phy(bus, phy_mask, interface);
 	if (phydev)
 		return phydev;
-	/* Try Standard (ie Clause 22) access */
-	/* Otherwise we have to try Clause 45 */
-	for (i = 0; i < 5; i++) {
-		phydev = create_phy_by_mask(bus, phy_mask,
-					    i ? i : MDIO_DEVAD_NONE, interface);
-		if (IS_ERR(phydev))
-			return NULL;
-		if (phydev)
-			return phydev;
-	}
 
-/* For IN112525 Phy, phy id is located in MDIO_MMD_VEND1 device space */
-#ifdef CONFIG_PHY_INPHI
-	phydev = create_phy_by_mask(bus, phy_mask, MDIO_MMD_VEND1, interface);
+	phydev = create_phy_by_mask(bus, phy_mask, interface);
+
 	if (IS_ERR(phydev))
 		return NULL;
+
 	if (phydev)
 		return phydev;
-#endif
 
 	debug("\n%s PHY: ", bus->name);
 	while (phy_mask) {
