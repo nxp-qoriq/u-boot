@@ -396,7 +396,7 @@ static int mc_fixup_dpc_enet_if(void *blob, int dpmac_id)
 			}
 		}
 
-		err = fdt_setprop_string(blob, nodeoffset, propname,
+		err = fdt_setprop_string(blob, noff, propname,
 					 enet_if_type);
 		if (err) {
 			printf("fdt_setprop_string: err=%s\n",
