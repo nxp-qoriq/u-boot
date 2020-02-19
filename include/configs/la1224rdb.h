@@ -40,8 +40,8 @@
 #define CONFIG_MII
 #define CONFIG_ETHPRIME		"DPMAC3@xgmii"
 
-#define AQR113_PHY_ADDR1	0
-#define AQR113_PHY_ADDR2	0x08
+#define AQR113_PHY_ADDR1	0x08
+#define AQR113_PHY_ADDR2	0
 #define AQR113_IRQ_MASK		0x0C
 
 #define RGMII_PHY_ADDR1		0x03
