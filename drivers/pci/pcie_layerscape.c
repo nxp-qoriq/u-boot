@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2017-2019 NXP
+ * Copyright 2017-2020 NXP
  * Copyright 2014-2015 Freescale Semiconductor, Inc.
  * Layerscape PCIe driver
  */
@@ -597,7 +597,8 @@ static int ls_pcie_probe(struct udevice *dev)
 		pcie->ctrl = pcie->lut + 0x40000;
 	}
 
-	if (svr == SVR_LX2160A)
+	if (svr == SVR_LX2160A || svr == SVR_LX2162A ||
+	    svr == SVR_LX2120A || svr == SVR_LX2080A)
 		pcie->pf1_offset = LX2160_PCIE_PF1_OFFSET;
 	else
 		pcie->pf1_offset = LS_PCIE_PF1_OFFSET;
