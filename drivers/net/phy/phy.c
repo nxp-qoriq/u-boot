@@ -772,7 +772,7 @@ static struct phy_device *get_phy_device_by_mask(struct mii_dev *bus,
 	struct phy_device *phydev;
 
 	phydev = search_for_existing_phy(bus, phy_mask, interface);
-	if (phydev)
+	if (phydev && phy_mask != ~0)
 		return phydev;
 
 	phydev = create_phy_by_mask(bus, phy_mask, interface);
