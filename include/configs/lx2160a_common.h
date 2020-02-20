@@ -297,11 +297,18 @@ int select_i2c_ch_pca9547_sec(unsigned char ch);
 		"run distro_bootcmd;run sd2_bootcmd;"		\
 		"env exists secureboot && esbc_halt;"
 
+#ifndef CONFIG_TARGET_LA1224RDB
 #define BOOT_TARGET_DEVICES(func) \
 	func(USB, usb, 0) \
 	func(MMC, mmc, 0) \
 	func(MMC, mmc, 1) \
 	func(SCSI, scsi, 0)
+#else
+#define BOOT_TARGET_DEVICES(func) \
+	func(USB, usb, 0) \
+	func(MMC, mmc, 0) \
+	func(MMC, mmc, 1)
+#endif
 #include <config_distro_bootcmd.h>
 
 #endif /* __LX2_COMMON_H */
