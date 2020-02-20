@@ -60,7 +60,8 @@
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
-	"la1224rdb_vdd_mv=800\0"		\
+	"boot_scripts=la1224rdb_boot.scr\0"	\
+	"boot_script_hdr=hdr_la1224rdb_bs.out\0"	\
 	"BOARD=la1224rdb\0"			\
 	"xspi_bootcmd=echo Trying load from flexspi..;"		\
 		"sf probe 0:0 && sf read $load_addr "		\
