@@ -16,7 +16,6 @@
 #define I2C_VOL_MONITOR_BUS_V_OVF	0x1
 #define I2C_VOL_MONITOR_BUS_V_SHIFT	3
 #define CONFIG_VID_FLS_ENV		"la1224rdb_vdd_mv"
-#define CONFIG_VID
 
 /* The lowest and highest voltage allowed*/
 #define VDD_MV_MIN			775
@@ -69,6 +68,7 @@
 	EXTRA_ENV_SETTINGS			\
 	"boot_scripts=la1224rdb_boot.scr\0"	\
 	"boot_script_hdr=hdr_la1224rdb_bs.out\0"	\
+	"la1224rdb_vdd_mv=825\0"                \
 	"BOARD=la1224rdb\0"			\
 	"xspi_bootcmd=echo Trying load from flexspi..;"		\
 		"sf probe 0:0 && sf read $load_addr "		\
