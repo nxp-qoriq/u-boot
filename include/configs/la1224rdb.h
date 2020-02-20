@@ -57,6 +57,13 @@
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS     3
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 5
 
+/*
+ * Need to override existing one (lx2160a) with la1224rdb so set_board_info will
+ * use proper prefix when creating full board_name (SYS_BOARD + type)
+ */
+#undef CONFIG_SYS_BOARD
+#define CONFIG_SYS_BOARD                "la1224rdb"
+
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
