@@ -38,7 +38,7 @@
 /* MAC/PHY configuration */
 #if defined(CONFIG_FSL_MC_ENET)
 #define CONFIG_MII
-#define CONFIG_ETHPRIME		"DPMAC3@xgmii"
+#define CONFIG_ETHPRIME		"DPMAC17@rgmii-id"
 
 #define AQR113_PHY_ADDR1	0x08
 #define AQR113_PHY_ADDR2	0
