@@ -45,6 +45,8 @@
 
 #define RGMII_PHY_ADDR1		0x03
 
+#define TI_DS250_I2C_ADDR	0x18
+
 #endif
 
 /* EEPROM */
