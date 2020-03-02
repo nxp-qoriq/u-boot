@@ -130,7 +130,6 @@ u8 qixis_esdhc_detect_quirk(void);
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
-	"lx2162aqds_vdd_mv=800\0"		\
 	"boot_scripts=lx2162aqds_boot.scr\0"	\
 	"boot_script_hdr=hdr_lx2162aqds_bs.out\0"	\
 	"BOARD=lx2162aqds\0"			\
