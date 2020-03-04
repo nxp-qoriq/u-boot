@@ -92,21 +92,17 @@ static struct serdes_config serdes2_cfg_tbl[] = {
 	{}
 };
 
-#ifndef CONFIG_TARGET_LX2162AQDS
 static struct serdes_config serdes3_cfg_tbl[] = {
 	/* SerDes 3 */
 	{0x02, {PCIE5, PCIE5, PCIE5, PCIE5, PCIE5, PCIE5, PCIE5, PCIE5 } },
 	{0x03, {PCIE5, PCIE5, PCIE5, PCIE5, PCIE6, PCIE6, PCIE6, PCIE6 } },
 	{}
 };
-#endif
 
 static struct serdes_config *serdes_cfg_tbl[] = {
 	serdes1_cfg_tbl,
 	serdes2_cfg_tbl,
-#ifndef CONFIG_TARGET_LX2162AQDS
 	serdes3_cfg_tbl,
-#endif
 };
 
 enum srds_prtcl serdes_get_prtcl(int serdes, int cfg, int lane)

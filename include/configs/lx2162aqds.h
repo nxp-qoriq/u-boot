@@ -9,7 +9,17 @@
 #include "lx2160a_common.h"
 
 /* USB */
+#undef CONFIG_USB_MAX_CONTROLLER_COUNT
 #define CONFIG_USB_MAX_CONTROLLER_COUNT 1
+
+/*
+ * Need to override existing (lx2160a) with lx2162aqds so set_board_info will
+ * use proper prefix when creating full board_name (SYS_BOARD + type)
+ */
+#undef CONFIG_SYS_BOARD
+#define CONFIG_SYS_BOARD                "lx2162aqds"
+
+#undef CONFIG_SYS_NXP_SRDS_3
 
 /* Qixis */
 #define QIXIS_XMAP_MASK			0x07
