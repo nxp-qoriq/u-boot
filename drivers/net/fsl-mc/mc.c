@@ -503,9 +503,19 @@ static int mc_fixup_dpc(u64 dpc_addr)
 
 	/* fixup MAC addresses for dpmac ports */
 	nodeoffset = fdt_path_offset(blob, "/board_info/ports");
-	if (nodeoffset < 0)
-		goto out;
+	if (nodeoffset < 0) {
+		err = fdt_increase_size(blob, 500);
+		if (err) {
+			printf("fdt_increase_size: err=%s\n",
+			       fdt_strerror(err));
+			goto out;
+		}
+		nodeoffset = fdt_path_offset(blob, "/board_info");
+		if (nodeoffset < 0)
+			nodeoffset = fdt_add_subnode(blob, 0, "board_info");
 
+		nodeoffset = fdt_add_subnode(blob, nodeoffset, "ports");
+	}
 	err = mc_fixup_mac_addrs(blob, MC_FIXUP_DPC);
 	/* fixup Ethernet interface type for LA1224RDB board
 	 * MAC17 will be enabled as RGMII even thought
