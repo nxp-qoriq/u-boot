@@ -2,7 +2,7 @@
 /*
  * NXP lx2160a SOC common device tree source
  *
- * Copyright 2018 NXP
+ * Copyright 2018, 2020 NXP
  *
  */
 
@@ -362,5 +362,12 @@
 		device_type = "pci";
 		bus-range = <0x0 0xff>;
 		ranges = <0x82000000 0x0 0x40000000 0xa8 0x40000000 0x0 0x40000000>;
+	};
+
+	firmware {
+		optee {
+			compatible = "linaro,optee-tz";
+			method = "smc";
+		};
 	};
 };
