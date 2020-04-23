@@ -228,10 +228,10 @@ int select_i2c_ch_pca9547_sec(unsigned char ch);
 	"mmc dev 1; mmc read 0x80a00000 0x5000 0x1200;"	\
 	"mmc read 0x80e00000 0x7000 0x800;"	\
 	"env exists secureboot && "		\
-	"mmc read 0x80640000 0x3200 0x20 && "	\
-	"mmc read 0x80680000 0x3400 0x20 && "	\
-	"esbc_validate 0x80640000 && "		\
-	"esbc_validate 0x80680000 ;"		\
+	"mmc read 0x80700000 0x3800 0x20 && "	\
+	"mmc read 0x80740000 0x3A00 0x20 && "	\
+	"esbc_validate 0x80700000 && "		\
+	"esbc_validate 0x80740000 ;"		\
 	"fsl_mc start mc 0x80a00000 0x80e00000\0"
 
 #define EXTRA_ENV_SETTINGS			\
@@ -301,8 +301,8 @@ int select_i2c_ch_pca9547_sec(unsigned char ch);
 		"mmc dev 1; env exists mcinitcmd && mmcinfo; "	\
 		"mmc read 0x80d00000 0x6800 0x800; "		\
 		"env exists mcinitcmd && env exists secureboot "	\
-		" && mmc read 0x806C0000 0x3600 0x20 "		\
-		"&& esbc_validate 0x806C0000;env exists mcinitcmd "	\
+		" && mmc read 0x80780000 0x3C00 0x20 "		\
+		"&& esbc_validate 0x80780000;env exists mcinitcmd "	\
 		"&& fsl_mc lazyapply dpl 0x80d00000;"		\
 		"run distro_bootcmd;run sd2_bootcmd;"		\
 		"env exists secureboot && esbc_halt;"
