@@ -43,20 +43,19 @@ int board_eth_init(bd_t *bis)
 
 	/* Set the two on-board RGMII PHY address */
 	fm_info_set_phy_address(FM1_DTSEC3, RGMII_PHY1_ADDR);
-	fm_info_set_phy_address(FM1_DTSEC4, RGMII_PHY2_ADDR);
 
 	/* Set the two on-board SGMII PHY address */
 	fm_info_set_phy_address(FM1_DTSEC5, SGMII_PHY1_ADDR);
 	fm_info_set_phy_address(FM1_DTSEC6, SGMII_PHY2_ADDR);
 
 	/* Set the on-board AQ PHY address */
-	fm_info_set_phy_address(FM1_10GEC1, FM1_10GEC1_PHY_ADDR);
+	fm_info_set_phy_address(FM1_10GEC2, FM1_10GEC2_PHY_ADDR);
 
 	switch (srds_s1) {
 	case 0x1133:
 		break;
 	default:
-		printf("Invalid SerDes protocol 0x%x for LS1046ARDB\n",
+		printf("Invalid SerDes protocol 0x%x for LS1046AWRDB\n",
 		       srds_s1);
 		break;
 	}
@@ -65,9 +64,9 @@ int board_eth_init(bd_t *bis)
 	for (i = FM1_DTSEC1; i < FM1_DTSEC1 + CONFIG_SYS_NUM_FM1_DTSEC; i++)
 		fm_info_set_mdio(i, dev);
 
-	/* XFI on lane A, MAC 9 */
+	/* XFI on MAC 10 */
 	dev = miiphy_get_dev_by_name(DEFAULT_FM_TGEC_MDIO_NAME);
-	fm_info_set_mdio(FM1_10GEC1, dev);
+	fm_info_set_mdio(FM1_10GEC2, dev);
 
 	cpu_eth_init(bis);
 #endif
@@ -116,7 +115,7 @@ int fdt_update_ethernet_dt(void *blob)
 				fdt_status_disabled(blob, nodeoff);
 		break;
 		default:
-			printf("%s: Invalid SerDes prtcl 0x%x for LS1046ARDB\n",
+			printf("%s:Invalid SerDes prtcl 0x%x for LS1046AWRDB\n",
 			       __func__, srds_s1);
 		break;
 		}

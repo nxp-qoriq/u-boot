@@ -1,0 +1,69 @@
+Overview
+--------
+The LS1046A Wireless Reference Design Board (WRDB) is a high-performance computing,
+evaluation, and development platform that supports the QorIQ LS1046A
+LayerScape Architecture processor. The LS1046AWRDB provides SW development
+platform for the Freescale LS1046A processor series, with a complete
+debugging environment. The LS1046AWRDB is lead-free and RoHS-compliant.
+
+LS1046A SoC Overview
+--------------------
+Please refer arch/arm/cpu/armv8/fsl-layerscape/doc/README.soc for LS1046A
+SoC overview.
+
+ LS1046AWRDB board Overview
+ -----------------------
+ - SERDES1 Connections, 4 lanes supporting:
+      - Lane0: XFI.9 on Daughter card(PON/10GbE)
+      - Lane1: XFI.10 to AQR113
+      - Lane2: SGMII.5 to Realtek
+      - Lane3: SGMII.6 to Realtek
+ - SERDES2 Connections, 4 lanes supporting:
+      - Lane0: PCIe1 x1 to 2G W9064
+      - Lane1: PCIe2 x1 to 5G W9064
+      - Lane2, Lane3: PCIe3 x2 connector
+ - DDR Controller
+     - 8GB 64bits DDR4 SDRAM. Support rates of up to 2133MT/s
+ - USB 3.0
+    - two Type C ports
+ - SDHC
+    - mini SD card slot/EMMC selected via switch
+ - 4 I2C controllers
+ - UART
+   - One UART console upto 115.2 Kbit/s (RJ-45 connector/USB)
+ - ARM JTAG support
+
+Memory map from core's view
+----------------------------
+Start Address	 End Address	 Description		Size
+0x00_0000_0000 - 0x00_000F_FFFF  Secure Boot ROM	1MB
+0x00_0100_0000 - 0x00_0FFF_FFFF  CCSRBAR		240MB
+0x00_1000_0000 - 0x00_1000_FFFF  OCRAM1 		64KB
+0x00_1001_0000 - 0x00_1001_FFFF  OCRAM2 		64KB
+0x00_2000_0000 - 0x00_20FF_FFFF  DCSR			16MB
+0x00_7E80_0000 - 0x00_7E80_FFFF  IFC - NAND Flash	64KB
+0x00_7FB0_0000 - 0x00_7FB0_0FFF  IFC - CPLD		4KB
+0x00_8000_0000 - 0x00_FFFF_FFFF  DRAM1			2GB
+0x05_0000_0000 - 0x05_07FF_FFFF  QMAN S/W Portal	128M
+0x05_0800_0000 - 0x05_0FFF_FFFF  BMAN S/W Portal	128M
+0x08_8000_0000 - 0x09_FFFF_FFFF  DRAM2			6GB
+0x40_0000_0000 - 0x47_FFFF_FFFF  PCI Express1		32G
+0x48_0000_0000 - 0x4F_FFFF_FFFF  PCI Express2		32G
+0x50_0000_0000 - 0x57_FFFF_FFFF  PCI Express3		32G
+
+QSPI flash map:
+Start Address    End Address     Description			Size
+0x00_4000_0000 - 0x00_400F_FFFF  RCW + PBI + BL2		1MB
+0x00_4010_0000 - 0x00_402F_FFFF  TFA FIP(BL31 + BL32 + U-Boot)	4MB
+0x00_4050_0000 - 0x00_405F_FFFF  U-Boot Env			1MB
+0x00_4060_0000 - 0x00_407F_FFFF  Secure boot header		2MB
+0x00_4090_0000 - 0x00_4093_FFFF  FMan ucode			256KB
+0x00_4094_0000 - 0x00_4097_FFFF  QE/uQE firmware		256KB
+0x00_409c_0000 - 0x00_409F_FFFF  boot script			256KB
+0x00_4100_0000 - 0x00_43FF_FFFF  lsdk_linux_arm65_LS_tiny.itb	48MB
+
+Booting Options
+---------------
+a) QSPI boot
+b) SD boot
+c) eMMC boot

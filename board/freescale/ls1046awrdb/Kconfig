@@ -1,0 +1,17 @@
+
+if TARGET_LS1046AWRDB
+
+config SYS_BOARD
+	default "ls1046awrdb"
+
+config SYS_VENDOR
+	default "freescale"
+
+config SYS_SOC
+	default "fsl-layerscape"
+
+config SYS_CONFIG_NAME
+	default "ls1046awrdb"
+
+source "board/freescale/common/Kconfig"
+endif
