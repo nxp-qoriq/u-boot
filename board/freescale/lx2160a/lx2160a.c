@@ -39,9 +39,9 @@
 #define GPIO1_INPUT_BUFFER_ENABLE (GPIO1_BASE_ADDR +  0x18)
 #define GPIO1_DATA_REG            (GPIO1_BASE_ADDR +  0x8)
 #define GPIO1_DIR_REG             (GPIO1_BASE_ADDR +  0x0)
-#define GPIO1_ENABLE_INPUT        0x0c000000
-#define GPIO1_PIN_HIGH            0x00000004
-#define GPIO1_PIN_LOW             0x00000000
+#define GPIO1_ENABLE_INPUT        0x0000000c
+#define GPIO1_PIN_29_HIGH         0x00000004
+#define GPIO1_PIN_29_LOW          0x00000000
 #endif
 
 #ifdef CONFIG_TARGET_LX2160AQDS
@@ -687,26 +687,26 @@ unsigned long get_board_ddr_clk(void)
 
 #if defined(CONFIG_TARGET_LA1224RDB)
 /*
- * implementaion of ERRATA E-000014:HS DCS Firmware loading
+ * Software Changes for ERRATA E-000014:HS DCS Firmware loading
  */
-void gpio1_28_29_bit_toggle(void)
+void gpio1_29_bit_toggle(void)
 {
 	void __iomem *gpibe_addr = NULL, *gpodr_addr = NULL, *gpdir_addr = NULL;
 	// Enable GPIO buffer
 	gpibe_addr = (u32 __iomem *)GPIO1_INPUT_BUFFER_ENABLE;
-	out_be32(gpibe_addr, GPIO1_ENABLE_INPUT);
+	out_le32(gpibe_addr, GPIO1_ENABLE_INPUT);
 	// Set Output direction
 	gpdir_addr = (u32 __iomem *)GPIO1_DIR_REG;
-	out_be32(gpdir_addr, GPIO1_PIN_HIGH);
+	out_le32(gpdir_addr, GPIO1_PIN_29_HIGH);
 	// Drive GPIO PIN high
 	gpodr_addr = (u32 __iomem *)GPIO1_DATA_REG;
-	out_be32(gpodr_addr, GPIO1_PIN_HIGH);
+	out_le32(gpodr_addr, GPIO1_PIN_29_HIGH);
 	// Drive GPIO PIN low
-	out_be32(gpodr_addr, GPIO1_PIN_LOW);
+	out_le32(gpodr_addr, GPIO1_PIN_29_LOW);
 	// Drive GPIO PIN  high
-	out_be32(gpodr_addr, GPIO1_PIN_HIGH);
+	out_le32(gpodr_addr, GPIO1_PIN_29_HIGH);
 	// Set input direction
-	out_be32(gpdir_addr, GPIO1_PIN_LOW);
+	out_le32(gpdir_addr, GPIO1_PIN_29_LOW);
 }
 #endif
 
@@ -736,7 +736,7 @@ int board_init(void)
 #endif
 
 #if defined(CONFIG_TARGET_LA1224RDB)
-	gpio1_28_29_bit_toggle();
+	gpio1_29_bit_toggle();
 #endif
 
 	return 0;
