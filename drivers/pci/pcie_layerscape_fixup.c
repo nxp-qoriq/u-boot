@@ -17,6 +17,7 @@
 #include <asm/arch/clock.h>
 #endif
 #include <asm/arch/soc.h>
+#include <malloc.h>
 #include "pcie_layerscape.h"
 #include "pcie_layerscape_fixup_common.h"
 
@@ -186,11 +187,119 @@ static int fdt_fixup_pcie_device_ls(void *blob, pci_dev_t bdf,
 	return 0;
 }
 
+#ifdef CONFIG_PCI_IOMMU_EXTRA_MAPPINGS
+struct extra_iommu_entry {
+	int action;
+	pci_dev_t bdf;
+	int num_vfs;
+};
+
+#define EXTRA_IOMMU_ENTRY_HOTPLUG	1
+#define EXTRA_IOMMU_ENTRY_VFS		2
+
+static struct extra_iommu_entry *get_extra_iommu_ents(void *blob,
+						      int nodeoffset,
+						      phys_addr_t addr,
+						      int *cnt)
+{
+	const char *s, *p, *tok;
+	struct extra_iommu_entry *entries;
+	int i = 0, b, d, f;
+
+	s = env_get("pci_iommu_extra");
+	if (!s) {
+		s = fdt_getprop(blob, nodeoffset, "pci-iommu-extra", NULL);
+	} else {
+		phys_addr_t pci_base;
+		char *endp;
+
+		tok = s;
+		p = strchrnul(s + 1, ',');
+		s = NULL;
+		do {
+			if (!strncmp(tok, "pci", 3)) {
+				pci_base = simple_strtoul(tok  + 4, &endp, 0);
+				if (pci_base == addr) {
+					s = endp + 1;
+					break;
+				}
+			}
+			p = strchrnul(p + 1, ',');
+			tok = p + 1;
+		} while (*p);
+	}
+
+	if (!s)
+		return NULL;
+
+	*cnt = 0;
+	p = s;
+	while (*p && strncmp(p, "pci", 3)) {
+		if (*p == ',')
+			(*cnt)++;
+		p++;
+	}
+	if (!(*p))
+		(*cnt)++;
+
+	if (!(*cnt) || (*cnt) % 2) {
+		printf("ERROR: invalid or odd extra iommu token count %d\n",
+		       *cnt);
+		return NULL;
+	}
+	*cnt = (*cnt) / 2;
+
+	entries = malloc((*cnt) * sizeof(*entries));
+	if (!entries) {
+		printf("ERROR: fail to allocate extra iommu entries\n");
+		return NULL;
+	}
+
+	p = s;
+	while (p) {
+		b = simple_strtoul(p, (char **)&p, 0); p++;
+		d = simple_strtoul(p, (char **)&p, 0); p++;
+		f = simple_strtoul(p, (char **)&p, 0); p++;
+		entries[i].bdf = PCI_BDF(b, d, f);
+
+		if (!strncmp(p, "hp", 2)) {
+			entries[i].action = EXTRA_IOMMU_ENTRY_HOTPLUG;
+			p += 3;
+		} else if (!strncmp(p, "vfs", 3)) {
+			entries[i].action = EXTRA_IOMMU_ENTRY_VFS;
+
+			p = strchr(p, '=');
+			entries[i].num_vfs = simple_strtoul(p + 1, (char **)&p,
+							    0);
+			if (*p)
+				p++;
+		} else {
+			printf("ERROR: invalid action in extra iommu entry\n");
+			free(entries);
+
+			return NULL;
+		}
+
+		if (!(*p) || !strncmp(p, "pci", 3))
+			break;
+
+		i++;
+	}
+
+	return entries;
+}
+#endif /* CONFIG_PCI_IOMMU_EXTRA_MAPPINGS */
+
 static void fdt_fixup_pcie_ls(void *blob)
 {
 	struct udevice *dev, *bus;
 	struct ls_pcie *pcie;
 	pci_dev_t bdf;
+#ifdef CONFIG_PCI_IOMMU_EXTRA_MAPPINGS
+	struct extra_iommu_entry *entries;
+	unsigned short vf_offset, vf_stride;
+	int i, j, cnt, sriov_pos, nodeoffset;
+#endif
 
 	/* Scan all known buses */
 	for (pci_find_first_device(&dev);
@@ -207,6 +316,75 @@ static void fdt_fixup_pcie_ls(void *blob)
 		if (fdt_fixup_pcie_device_ls(blob, bdf, pcie) < 0)
 			break;
 	}
+
+#ifdef CONFIG_PCI_IOMMU_EXTRA_MAPPINGS
+	list_for_each_entry(pcie, &ls_pcie_list, list) {
+		nodeoffset = fdt_pcie_get_nodeoffset(blob, pcie);
+		if (nodeoffset < 0) {
+			printf("ERROR: couldn't find pci node\n");
+			continue;
+		}
+
+		entries = get_extra_iommu_ents(blob, nodeoffset,
+					       pcie->dbi_res.start, &cnt);
+		if (!entries)
+			continue;
+
+		for (i = 0; i < cnt; i++) {
+			if (entries[i].action == EXTRA_IOMMU_ENTRY_HOTPLUG) {
+				bdf = entries[i].bdf -
+					PCI_BDF(pcie->bus->seq + 1, 0, 0);
+				printf("Added iommu map for hotplug %d.%d.%d\n",
+				       PCI_BUS(entries[i].bdf),
+				       PCI_DEV(entries[i].bdf),
+				       PCI_FUNC(entries[i].bdf));
+				if (fdt_fixup_pcie_device_ls(blob,
+							     bdf, pcie) < 0) {
+					free(entries);
+					return;
+				}
+				continue;
+			}
+
+			/* EXTRA_IOMMU_ENTRY_VFS case */
+			if (dm_pci_bus_find_bdf(entries[i].bdf, &dev)) {
+				printf("ERROR: BDF %d.%d.%d not found\n",
+				       PCI_BUS(entries[i].bdf),
+				       PCI_DEV(entries[i].bdf),
+				       PCI_FUNC(entries[i].bdf));
+				continue;
+			}
+			sriov_pos = dm_pci_find_ext_capability
+						(dev, PCI_EXT_CAP_ID_SRIOV);
+			if (!sriov_pos) {
+				printf("WARN: setting VFs on non-SRIOV dev\n");
+				continue;
+			}
+			dm_pci_read_config16(dev, sriov_pos + 0x14,
+					     &vf_offset);
+			dm_pci_read_config16(dev, sriov_pos + 0x16,
+					     &vf_stride);
+
+			bdf = entries[i].bdf -
+				PCI_BDF(pcie->bus->seq + 1, 0, 0) +
+				(vf_offset << 8);
+			printf("Added %d iommu VF mappings for PF %d.%d.%d\n",
+			       entries[i].num_vfs, PCI_BUS(entries[i].bdf),
+			       PCI_DEV(entries[i].bdf),
+			       PCI_FUNC(entries[i].bdf));
+			for (j = 0; j < entries[i].num_vfs; j++) {
+				if (fdt_fixup_pcie_device_ls(blob,
+							     bdf, pcie) < 0) {
+					free(entries);
+					return;
+				}
+				bdf += vf_stride << 8;
+			}
+		}
+		free(entries);
+	}
+#endif /* CONFIG_PCI_IOMMU_EXTRA_MAPPINGS */
+
 	pcie_board_fix_fdt(blob);
 }
 #endif
