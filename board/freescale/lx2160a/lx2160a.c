@@ -56,6 +56,11 @@
 #define IIC5_PMUX_SPI3				3
 #endif /* CONFIG_TARGET_LX2160AQDS */
 
+#if defined(CONFIG_TARGET_LA1224RDB)
+/* Toggle TCLK 10 times max */
+#define TCLK_TOGGLE_MAX_COUNT		10
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 static struct pl01x_serial_platdata serial0 = {
@@ -691,6 +696,7 @@ unsigned long get_board_ddr_clk(void)
  */
 void gpio1_29_bit_toggle(void)
 {
+	uint8_t t_max = TCLK_TOGGLE_MAX_COUNT;
 	void __iomem *gpibe_addr = NULL, *gpodr_addr = NULL, *gpdir_addr = NULL;
 	// Enable GPIO buffer
 	gpibe_addr = (u32 __iomem *)GPIO1_INPUT_BUFFER_ENABLE;
@@ -698,13 +704,18 @@ void gpio1_29_bit_toggle(void)
 	// Set Output direction
 	gpdir_addr = (u32 __iomem *)GPIO1_DIR_REG;
 	out_le32(gpdir_addr, GPIO1_PIN_29_HIGH);
-	// Drive GPIO PIN high
-	gpodr_addr = (u32 __iomem *)GPIO1_DATA_REG;
-	out_le32(gpodr_addr, GPIO1_PIN_29_HIGH);
-	// Drive GPIO PIN low
-	out_le32(gpodr_addr, GPIO1_PIN_29_LOW);
-	// Drive GPIO PIN  high
-	out_le32(gpodr_addr, GPIO1_PIN_29_HIGH);
+	while (t_max--) {
+		// Drive GPIO PIN high
+		gpodr_addr = (u32 __iomem *)GPIO1_DATA_REG;
+		out_le32(gpodr_addr, GPIO1_PIN_29_HIGH);
+		mdelay(1);
+		// Drive GPIO PIN low
+		out_le32(gpodr_addr, GPIO1_PIN_29_LOW);
+		mdelay(1);
+		// Drive GPIO PIN  high
+		out_le32(gpodr_addr, GPIO1_PIN_29_HIGH);
+		mdelay(1);
+	}
 	// Set input direction
 	out_le32(gpdir_addr, GPIO1_PIN_29_LOW);
 }
