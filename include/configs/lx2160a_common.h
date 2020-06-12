@@ -228,7 +228,7 @@ int select_i2c_ch_pca9547_sec(unsigned char ch);
 	"fsl_mc start mc 0x80a00000 0x80e00000\0"
 
 #define SD2_MC_INIT_CMD				\
-	"mmc read 0x80a00000 0x5000 0x1200;"	\
+	"mmc dev 1; mmc read 0x80a00000 0x5000 0x1200;"	\
 	"mmc read 0x80e00000 0x7000 0x800;"	\
 	"env exists secureboot && "		\
 	"mmc read 0x80640000 0x3200 0x20 && "	\
