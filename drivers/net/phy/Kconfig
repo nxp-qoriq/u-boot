@@ -91,8 +91,26 @@ config PHY_AQUANTIA_FW_NAME
 	help
 		Firmware filename.
 
-config PHY_ATHEROS
+menuconfig PHY_ATHEROS
 	bool "Atheros Ethernet PHYs support"
+
+if PHY_ATHEROS
+
+config PHY_ATHEROS_AR8035_RCLK
+	bool "Configure AR8035 recovered clock"
+	default n
+
+config PHY_ATHEROS_AR8035_RCLK_MASK
+	hex
+	help
+		AR8035 recovered clock output settings
+		0 - 25 MHz
+		1 - 50 MHz
+		2 - 62.5 MHz
+		3 - 125 MHz
+	prompt "AR8035 recovered clock output select" if PHY_ATHEROS_AR8035_RCLK
+	default 0x1
+endif
 
 config PHY_BROADCOM
 	bool "Broadcom Ethernet PHYs support"
