@@ -359,7 +359,13 @@ int checkboard(void)
 			break;
 		}
 	}
-#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
+#if defined(CONFIG_TARGET_LX2160ARDB)
+	printf("FPGA: v%d.%d\n", QIXIS_READ(scver), QIXIS_READ(tagdata));
+
+	puts("SERDES1 Reference: Clock1 = 161.13MHz Clock2 = 161.13MHz\n");
+	puts("SERDES2 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+	puts("SERDES3 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+#else
 	printf("FPGA: v%d (%s), build %d",
 	       (int)QIXIS_READ(scver), qixis_read_tag(buf),
 	       (int)qixis_read_minor());
@@ -378,18 +384,13 @@ int checkboard(void)
 	clock = sw >> 4;
 	printf("Clock1 = %sMHz ", freq[clock]);
 	clock = sw & 0x0f;
-	printf("Clock2 = %sMHz", freq[clock]);
-
+	printf("Clock2 = %sMHz\n", freq[clock]);
+#if defined(CONFIG_TARGET_LX2160AQDS)
 	sw = QIXIS_READ(brdcfg[12]);
-	puts("\nSERDES3 Reference : ");
+	puts("SERDES3 Reference : ");
 	clock = sw >> 4;
 	printf("Clock1 = %sMHz Clock2 = %sMHz\n", freq[clock], freq[clock]);
-#else
-	printf("FPGA: v%d.%d\n", QIXIS_READ(scver), QIXIS_READ(tagdata));
-
-	puts("SERDES1 Reference: Clock1 = 161.13MHz Clock2 = 161.13MHz\n");
-	puts("SERDES2 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
-	puts("SERDES3 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+#endif
 #endif
 	return 0;
 }
