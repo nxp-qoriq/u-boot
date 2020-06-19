@@ -51,7 +51,6 @@ static int sbsa_gwdt_reset(struct udevice *dev)
 static int sbsa_gwdt_start(struct udevice *dev, u64 timeout, ulong flags)
 {
 	struct sbsa_gwdt_priv *priv = dev_get_priv(dev);
-	u32 load_value;
 	u32 clk;
 
 	/*
