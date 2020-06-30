@@ -420,7 +420,9 @@ int checkboard(void)
 {
 	enum boot_src src = get_boot_src();
 	struct udevice *dev;
-	u8 val = 0;
+	// conf  = 0xFB
+	// Enable Port1 UART bit as output of IO expander
+	u8 conf = 0xFB, val = 0;
 
 	printf("Board: LA1224-RDB, ");
 
@@ -428,7 +430,10 @@ int checkboard(void)
 	// enabling Port1 as a output register of IO expander
 	// enable  UART 2,3 and 4
 	if (!(i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI, 1, &dev))) {
-		if (!(dm_i2c_write(dev, IO_EXAPNDER_CONF_REG, &val, 1))) {
+		// conf  = 0xFB
+		// Enable Port1 UART bit as output of IO expander
+		// Port1[2] = UART enable bit(1111 1011)
+		if (!(dm_i2c_write(dev, IO_EXAPNDER_CONF_REG, &conf, 1))) {
 			// Read output Port1 value of IO expander PACL6416A
 			if (!dm_i2c_read(dev, 3, &val, 1)) {
 				// enable LX2_UART_EN of IO expander PACL6416A
