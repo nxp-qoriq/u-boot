@@ -61,6 +61,26 @@
 #define TCLK_TOGGLE_MAX_COUNT		10
 #endif
 
+#if defined(CONFIG_TARGET_LA1224RDB)
+// LA1224RDB RevA, RevB and RevC
+// GPIO IO Expander Port1
+// Port1[6:7]
+//    00 = RevA
+//    01 = RevB
+//    10 = RevC
+#define REVA                            0
+#define REVB                            1
+#define REVC                            2
+// PCAL6416A
+// GPIO IO Expander configuration register 7
+#define IO_EXAPNDER_CONF_REG            7
+
+// Get the Port1[6:7] bit of PCAL6416A
+// bit position ( 7 6 5 4 3 2 1 0)
+#define BOARD_REV_SHIFT_MASK            6
+#define BOARD_REV_MASK                  3
+#endif /*CONFIG_TARGET_LA1224RDB*/
+
 DECLARE_GLOBAL_DATA_PTR;
 
 static struct pl01x_serial_platdata serial0 = {
@@ -115,6 +135,41 @@ U_BOOT_DEVICE(nxp_serial3) = {
 	.name = "serial_pl01x",
 	.platdata = &serial3,
 };
+#endif
+
+// Get the Board revision number of LA1224RDB Board
+#if defined(CONFIG_TARGET_LA1224RDB)
+int board_revision_num(void)
+{
+	struct udevice *dev;
+	//Input port defalut value 0xFF(1 each bit)
+	u8 val = 0xff, io_port1_val, ret;
+	// Get IO expander 0x20 of I2c bus 0
+	ret = i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI, 1, &dev);
+	if (!ret) {
+		// Enable Port1 as input of IO expander PACL6416A
+		ret = dm_i2c_write(dev, IO_EXAPNDER_CONF_REG, &val, 1);
+		if (!ret) {
+			// read Port1 value of I2C expander PACL6416A
+			ret = dm_i2c_read(dev, 1, &io_port1_val, 1);
+			if (ret) {
+				printf("Warning: port1 read fail PCAL6461A");
+				return ret;
+			}
+		} else {
+			printf("Warning:Fail to enable Port1 as input");
+			return ret;
+		}
+	} else {
+		printf("Fail to select IO expander from I2C Bus\n");
+		return ret;
+	}
+	// Port1[6:7]
+	//      00 = RevA
+	//      01 = RevB
+	//      10 = RevC
+	return ((io_port1_val >> BOARD_REV_SHIFT_MASK) & BOARD_REV_MASK);
+}
 #endif
 
 int select_i2c_ch_pca9547(u8 ch)
@@ -336,11 +391,23 @@ int esdhc_status_fixup(void *blob, const char *compat)
 #if defined(CONFIG_VID)
 int i2c_multiplexer_select_vid_channel(u8 channel)
 {
+// Software change for Erratum E-00011: VID Adjustment
+// RevA VID is fixed
+#if defined(CONFIG_TARGET_LA1224RDB)
+	if (board_revision_num() == REVA)
+		return 0;
+#endif
 	return select_i2c_ch_pca9547(channel);
 }
 
 int init_func_vid(void)
 {
+// Software change for Erratum E-00011: VID Adjustment
+// RevA VID is fixed
+#if defined(CONFIG_TARGET_LA1224RDB)
+	if (board_revision_num() == REVA)
+		return 0;
+#endif
 	if (adjust_vdd(0) < 0)
 		printf("core voltage not adjusted\n");
 
@@ -353,25 +420,16 @@ int checkboard(void)
 {
 	enum boot_src src = get_boot_src();
 	struct udevice *dev;
-	u8 ret, ch, val = 0;
+	u8 val = 0;
 
 	printf("Board: LA1224-RDB, ");
 
-	// select  bus 0 of I2C and get IO expander
-	ret = i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI, 1, &dev);
-	if (!ret) {
-		// read input PORT 1 of I2C expander PACL6416A
-		ret = dm_i2c_read(dev, 1, &ch, 1);
-		printf("Board version: %c, boot from ",
-		       ((ch >> 5) & 0x11) - 1 + 'A');
-	}
-	if (ret)
-		printf("failed to select IO expander\n");
-	// enabling PORT1 as a output register of IO expander
+	printf("Board version: %c, boot from ", board_revision_num() + 'A');
+	// enabling Port1 as a output register of IO expander
 	// enable  UART 2,3 and 4
 	if (!(i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI, 1, &dev))) {
-		if (!(dm_i2c_write(dev, 7, &val, 1))) {
-			// Read output port1 value of IO expander PACL6416A
+		if (!(dm_i2c_write(dev, IO_EXAPNDER_CONF_REG, &val, 1))) {
+			// Read output Port1 value of IO expander PACL6416A
 			if (!dm_i2c_read(dev, 3, &val, 1)) {
 				// enable LX2_UART_EN of IO expander PACL6416A
 				val = val | UART_EN_MASK;
@@ -395,7 +453,9 @@ int checkboard(void)
 	else
 		printf("invalid boot source setting\n");
 
-	puts("VID: Core voltage fixed at 825 mV\n");
+	// Software change for Erratum E-00011
+	if (board_revision_num() == REVA)
+		puts("VID: Core voltage fixed at 825 mV\n");
 
 	puts("SERDES1 Reference: Clock1 = 100MHz Clock2 = 161.13MHz\n");
 	puts("SERDES2 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");

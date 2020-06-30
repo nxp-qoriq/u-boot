@@ -16,7 +16,7 @@
 #define I2C_VOL_MONITOR_BUS_V_OVF	0x1
 #define I2C_VOL_MONITOR_BUS_V_SHIFT	3
 #define CONFIG_VID_FLS_ENV		"la1224rdb_vdd_mv"
-
+#define CONFIG_VID
 /* The lowest and highest voltage allowed*/
 #define VDD_MV_MIN			775
 #define VDD_MV_MAX			855
