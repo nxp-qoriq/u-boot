@@ -1217,13 +1217,15 @@ __efi_runtime_data u32 __iomem *rstcr = (u32 *)CONFIG_SYS_FSL_RST_ADDR;
 
 void __efi_runtime reset_cpu(ulong addr)
 {
+#ifdef CONFIG_ARCH_LX2160A
+	/* clear the RST_REQ_MSK and SW_RST_REQ */
+	out_le32(rstcr, 0x0);
+
+	/* initiate the sw reset request */
+	out_le32(rstcr, 0x1);
+#else
 	u32 val;
 
-#ifdef CONFIG_ARCH_LX2160A
-	val = in_le32(rstcr);
-	val |= 0x01;
-	out_le32(rstcr, val);
-#else
 	/* Raise RESET_REQ_B */
 	val = scfg_in32(rstcr);
 	val |= 0x02;
