@@ -57,7 +57,7 @@
 #endif /* CONFIG_TARGET_LX2160AQDS */
 
 #if defined(CONFIG_TARGET_LA1224RDB)
-/* Toggle TCLK 10 times max */
+/* Toggle TCLK 10 times max for RevA */
 #define TCLK_TOGGLE_MAX_COUNT		10
 #endif
 
@@ -763,28 +763,48 @@ void gpio1_29_bit_toggle(void)
 {
 	uint8_t t_max = TCLK_TOGGLE_MAX_COUNT;
 	void __iomem *gpibe_addr = NULL, *gpodr_addr = NULL, *gpdir_addr = NULL;
-	// Enable GPIO buffer
 	gpibe_addr = (u32 __iomem *)GPIO1_INPUT_BUFFER_ENABLE;
-	out_le32(gpibe_addr, in_le32(GPIO1_INPUT_BUFFER_ENABLE)
-						| GPIO1_ENABLE_INPUT);
-	// Set Output direction
 	gpdir_addr = (u32 __iomem *)GPIO1_DIR_REG;
+	gpodr_addr = (u32 __iomem *)GPIO1_DATA_REG;
+
+	if (board_revision_num() == REVB)
+		mdelay(2000);
+	// Enable GPIO buffer
+	out_le32(gpibe_addr, in_le32(GPIO1_INPUT_BUFFER_ENABLE)
+					  | GPIO1_ENABLE_INPUT);
+	// Set Output direction
 	out_le32(gpdir_addr, in_le32(GPIO1_DIR_REG)
+			       | GPIO1_PIN_29_HIGH);
+
+	if (board_revision_num() == REVA) {
+		while (t_max--) {
+			// Drive GPIO PIN high
+			out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
 						| GPIO1_PIN_29_HIGH);
-	while (t_max--) {
+			mdelay(1);
+			// Drive GPIO PIN low
+			out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
+						 | GPIO1_PIN_29_LOW);
+			mdelay(1);
+			// Drive GPIO PIN  high
+			out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
+						| GPIO1_PIN_29_HIGH);
+			mdelay(1);
+			debug("%s: GPIO Toggle count (count %d)\n",
+			      __func__, t_max);
+		}
+	} else {
+		// RevB JTAG TCK Workaround
 		// Drive GPIO PIN high
-		gpodr_addr = (u32 __iomem *)GPIO1_DATA_REG;
 		out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
-						| GPIO1_PIN_29_HIGH);
-		mdelay(1);
+					| GPIO1_PIN_29_HIGH);
 		// Drive GPIO PIN low
 		out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
-						| GPIO1_PIN_29_LOW);
-		mdelay(1);
+					 | GPIO1_PIN_29_LOW);
+		mdelay(10);
 		// Drive GPIO PIN  high
 		out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
-						| GPIO1_PIN_29_LOW);
-		mdelay(1);
+					| GPIO1_PIN_29_HIGH);
 	}
 	// Set input direction
 	out_le32(gpdir_addr, GPIO1_PIN_29_LOW);
@@ -817,10 +837,8 @@ int board_init(void)
 #endif
 
 #if defined(CONFIG_TARGET_LA1224RDB)
-	// ERRATA E-000014:HS DCS Firmware loading:
-	// for REVA
-	if (board_revision_num() == REVA)
-		gpio1_29_bit_toggle();
+	// ERRATA E-000014:HS DCS Firmware loading
+	gpio1_29_bit_toggle();
 #endif
 
 	return 0;
