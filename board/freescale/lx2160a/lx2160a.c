@@ -376,9 +376,10 @@ int checkboard(void)
 	sw = QIXIS_READ(brdcfg[2]);
 	clock = sw >> 4;
 	printf("Clock1 = %sMHz ", freq[clock]);
+#if defined(CONFIG_TARGET_LX2160AQDS)
 	clock = sw & 0x0f;
 	printf("Clock2 = %sMHz", freq[clock]);
-
+#endif
 	sw = QIXIS_READ(brdcfg[3]);
 	puts("\nSERDES2 Reference : ");
 	clock = sw >> 4;
