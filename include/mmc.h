@@ -661,6 +661,7 @@ struct mmc {
 				  * accessing the boot partitions
 				  */
 	u32 quirks;
+	u8 hs400_tuning;
 };
 
 struct mmc_hwpart_conf {
