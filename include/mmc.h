@@ -407,6 +407,13 @@ struct mmc;
 #if CONFIG_IS_ENABLED(DM_MMC)
 struct dm_mmc_ops {
 	/**
+	 * hs400_prepare_ddr - prepare to switch to DDR mode
+	 *
+	 * @dev:	Device to check
+	 * @return 0 if success, -ve on error
+	 */
+	int (*hs400_prepare_ddr)(struct udevice *dev);
+	/**
 	 * reinit() - Re-initialization to clear old configuration for
 	 * mmc rescan.
 	 *
@@ -495,6 +502,7 @@ int mmc_getwp(struct mmc *mmc);
 int mmc_execute_tuning(struct mmc *mmc, uint opcode);
 int mmc_wait_dat0(struct mmc *mmc, int state, int timeout_us);
 int mmc_set_enhanced_strobe(struct mmc *mmc);
+int mmc_hs400_prepare_ddr(struct mmc *mmc);
 int mmc_reinit(struct mmc *mmc);
 
 #else
@@ -506,6 +514,11 @@ struct mmc_ops {
 	int (*getcd)(struct mmc *mmc);
 	int (*getwp)(struct mmc *mmc);
 };
+
+static inline int mmc_hs400_prepare_ddr(struct mmc *mmc)
+{
+	return 0;
+}
 #endif
 
 struct mmc_config {
