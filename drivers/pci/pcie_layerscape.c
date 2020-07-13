@@ -543,7 +543,8 @@ static int ls_pcie_probe(struct udevice *dev)
 
 	pcie->enabled = is_serdes_configured(PCIE_SRDS_PRTCL(pcie->idx));
 	if (!pcie->enabled) {
-		printf("PCIe%d: %s disabled\n", pcie->idx, dev->name);
+		printf("PCIe%d: %s disabled\n", PCIE_SRDS_PRTCL(pcie->idx),
+		       dev->name);
 		return 0;
 	}
 
@@ -625,10 +626,12 @@ static int ls_pcie_probe(struct udevice *dev)
 	pcie->mode = readb(pcie->dbi + PCI_HEADER_TYPE) & 0x7f;
 
 	if (pcie->mode == PCI_HEADER_TYPE_NORMAL) {
-		printf("PCIe%u: %s %s", pcie->idx, dev->name, "Endpoint");
+		printf("PCIe%u: %s %s", PCIE_SRDS_PRTCL(pcie->idx), dev->name,
+		       "Endpoint");
 			ls_pcie_setup_ep(pcie);
 	} else {
-		printf("PCIe%u: %s %s", pcie->idx, dev->name, "Root Complex");
+		printf("PCIe%u: %s %s", PCIE_SRDS_PRTCL(pcie->idx), dev->name,
+		       "Root Complex");
 			ls_pcie_setup_ctrl(pcie);
 	}
 
