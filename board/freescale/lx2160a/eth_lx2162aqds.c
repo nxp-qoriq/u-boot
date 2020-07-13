@@ -747,6 +747,9 @@ out:
 	return ret;
 }
 
+#define is_rgmii(dpmac_id) \
+	wriop_get_enet_if((dpmac_id)) == PHY_INTERFACE_MODE_RGMII_ID
+
 int fdt_fixup_board_phy(void *fdt)
 {
 	int fpga_offset, offset, subnodeoffset;
@@ -801,6 +804,11 @@ int fdt_fixup_board_phy(void *fdt)
 			}
 			if (dpmac_id == NUM_WRIOP_PORTS)
 				continue;
+
+			if ((dpmac_id == 17 || dpmac_id == 18) &&
+			    is_rgmii(dpmac_id))
+				continue;
+
 			ret = fdt_create_phy_node(fdt, offset, i,
 						  &subnodeoffset,
 						  phy_dev, phandle);
