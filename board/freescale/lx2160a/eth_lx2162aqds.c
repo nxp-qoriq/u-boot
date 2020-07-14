@@ -78,6 +78,7 @@ struct serdes_phy_config {
 /*****************************************************************
  |   SERDES_1 PROTOCOL   |      IO_SLOT         |       CARD     |
  *****************************************************************
+ |      2                |      IO_SLOT_1       |  M4-PCIE-SGMII |
  |      3                |      IO_SLOT_1       |  M11-USXGMII   |
  |      15               |      IO_SLOT_1       |  M13-25G       |
  |      17               |      IO_SLOT_1       |  M13-25G       |
@@ -87,6 +88,15 @@ struct serdes_phy_config {
  *****************************************************************
  */
 static const struct serdes_phy_config serdes1_phy_config[] = {
+	{1, {} },
+	{2, {{WRIOP1_DPMAC3, {SGMII_CARD_PORT1_PHY_ADDR, -1},
+	      EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC4, {SGMII_CARD_PORT2_PHY_ADDR, -1},
+	     EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC5, {SGMII_CARD_PORT3_PHY_ADDR, -1},
+	     EMI1, IO_SLOT_1},
+	    {WRIOP1_DPMAC6, {SGMII_CARD_PORT4_PHY_ADDR, -1},
+	     EMI1, IO_SLOT_1} } },
 	{3, {{WRIOP1_DPMAC3, {AQ_PHY_ADDR1, -1},
 	      EMI1, IO_SLOT_1},
 	    {WRIOP1_DPMAC4, {AQ_PHY_ADDR2, -1},
