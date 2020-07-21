@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright 2008,2010 Freescale Semiconductor, Inc
+ * Copyright 2020 NXP
  * Andy Fleming
  *
  * Based (loosely) on the Linux code
@@ -406,6 +407,14 @@ struct mmc;
 #if CONFIG_IS_ENABLED(DM_MMC)
 struct dm_mmc_ops {
 	/**
+	 * reinit() - Re-initialization to clear old configuration for
+	 * mmc rescan.
+	 *
+	 * @dev:	Device to reinit
+	 * @return 0 if Ok, -ve if error
+	 */
+	int (*reinit)(struct udevice *dev);
+	/**
 	 * send_cmd() - Send a command to the MMC device
 	 *
 	 * @dev:	Device to receive the command
@@ -477,6 +486,7 @@ int dm_mmc_get_cd(struct udevice *dev);
 int dm_mmc_get_wp(struct udevice *dev);
 int dm_mmc_execute_tuning(struct udevice *dev, uint opcode);
 int dm_mmc_wait_dat0(struct udevice *dev, int state, int timeout_us);
+int dm_mmc_reinit(struct udevice *dev);
 
 /* Transition functions for compatibility */
 int mmc_set_ios(struct mmc *mmc);
@@ -485,6 +495,7 @@ int mmc_getwp(struct mmc *mmc);
 int mmc_execute_tuning(struct mmc *mmc, uint opcode);
 int mmc_wait_dat0(struct mmc *mmc, int state, int timeout_us);
 int mmc_set_enhanced_strobe(struct mmc *mmc);
+int mmc_reinit(struct mmc *mmc);
 
 #else
 struct mmc_ops {

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2008, Freescale Semiconductor, Inc
+ * Copyright 2020 NXP
  * Andy Fleming
  *
  * Based vaguely on the Linux code
@@ -2759,13 +2760,17 @@ int mmc_get_op_cond(struct mmc *mmc)
 		return err;
 
 #if CONFIG_IS_ENABLED(DM_MMC)
-	/* The device has already been probed ready for use */
+	/*
+	 * Re-initialization is needed to clear old configuration for
+	 * mmc rescan.
+	 */
+	err = mmc_reinit(mmc);
 #else
 	/* made sure it's not NULL earlier */
 	err = mmc->cfg->ops->init(mmc);
+#endif
 	if (err)
 		return err;
-#endif
 	mmc->ddr_mode = 0;
 
 retry:
