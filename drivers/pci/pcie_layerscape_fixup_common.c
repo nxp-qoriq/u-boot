@@ -98,7 +98,8 @@ int pcie_board_fix_fdt(void *fdt)
 	svr = SVR_SOC_VER(get_svr());
 
 	if ((svr == SVR_LX2160A || svr == SVR_LX2162A ||
-	     svr == SVR_LX2120A || svr == SVR_LX2080A) &&
+	     svr == SVR_LX2120A || svr == SVR_LX2080A ||
+	     svr == SVR_LX2122A || svr == SVR_LX2082A) &&
 	     IS_SVR_REV(get_svr(), 2, 0))
 		return lx2_board_fix_fdt(fdt);
 
