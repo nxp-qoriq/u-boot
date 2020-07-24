@@ -296,6 +296,46 @@ int i2c_multiplexer_select_vid_channel(u8 channel)
 	return select_i2c_ch_pca9547(channel);
 }
 
+u16 soc_get_fuse_vid(int vid_index)
+{
+	static const u16 vdd[32] = {
+		8250,
+		7875,
+		7750,
+		0,      /* reserved */
+		0,	 /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		8000,
+		8125,
+		8250,
+		0,      /* reserved */
+		8500,
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+	};
+
+	return vdd[vid_index];
+};
+
 int init_func_vid(void)
 {
 	int set_vid;
