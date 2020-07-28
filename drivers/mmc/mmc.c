@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2008, Freescale Semiconductor, Inc
+ * Copyright 2020 NXP
  * Andy Fleming
  *
  * Based vaguely on the Linux code
@@ -1928,7 +1929,9 @@ static int mmc_select_hs400(struct mmc *mmc)
 	mmc_set_clock(mmc, mmc->tran_speed, false);
 
 	/* execute tuning if needed */
+	mmc->hs400_tuning = 1;
 	err = mmc_execute_tuning(mmc, MMC_CMD_SEND_TUNING_BLOCK_HS200);
+	mmc->hs400_tuning = 0;
 	if (err) {
 		debug("tuning failed\n");
 		return err;
@@ -1936,6 +1939,8 @@ static int mmc_select_hs400(struct mmc *mmc)
 
 	/* Set back to HS */
 	mmc_set_card_speed(mmc, MMC_HS, true);
+
+	mmc_hs400_prepare_ddr(mmc);
 
 	err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BUS_WIDTH,
 			 EXT_CSD_BUS_WIDTH_8 | EXT_CSD_DDR_FLAG);
@@ -2665,16 +2670,19 @@ static void mmc_set_initial_state(struct mmc *mmc)
 {
 	int err;
 
-	/* First try to set 3.3V. If it fails set to 1.8V */
-	err = mmc_set_signal_voltage(mmc, MMC_SIGNAL_VOLTAGE_330);
-	if (err != 0)
-		err = mmc_set_signal_voltage(mmc, MMC_SIGNAL_VOLTAGE_180);
-	if (err != 0)
-		pr_warn("mmc: failed to set signal voltage\n");
-
+	mmc->signal_voltage = MMC_SIGNAL_VOLTAGE_330;
 	mmc_select_mode(mmc, MMC_LEGACY);
-	mmc_set_bus_width(mmc, 1);
-	mmc_set_clock(mmc, 0, MMC_CLK_ENABLE);
+	mmc->bus_width = 1;
+	mmc->clock = 0;
+	mmc->clk_disable = MMC_CLK_ENABLE;
+
+	err = mmc_set_ios(mmc);
+	if (err)
+		mmc->signal_voltage = MMC_SIGNAL_VOLTAGE_180;
+
+	err = mmc_set_ios(mmc);
+	if (err)
+		pr_warn("mmc: failed to set initial state\n");
 }
 
 static int mmc_power_on(struct mmc *mmc)
@@ -2743,6 +2751,23 @@ int mmc_get_op_cond(struct mmc *mmc)
 		      MMC_QUIRK_RETRY_SEND_CID;
 #endif
 
+#if CONFIG_IS_ENABLED(DM_MMC)
+	/*
+	 * Re-initialization is needed to clear old configuration for
+	 * mmc rescan.
+	 */
+	err = mmc_reinit(mmc);
+#else
+	/* made sure it's not NULL earlier */
+	err = mmc->cfg->ops->init(mmc);
+#endif
+	if (err)
+		return err;
+	mmc->ddr_mode = 0;
+
+retry:
+	mmc_set_initial_state(mmc);
+
 	err = mmc_power_cycle(mmc);
 	if (err) {
 		/*
@@ -2757,19 +2782,6 @@ int mmc_get_op_cond(struct mmc *mmc)
 	}
 	if (err)
 		return err;
-
-#if CONFIG_IS_ENABLED(DM_MMC)
-	/* The device has already been probed ready for use */
-#else
-	/* made sure it's not NULL earlier */
-	err = mmc->cfg->ops->init(mmc);
-	if (err)
-		return err;
-#endif
-	mmc->ddr_mode = 0;
-
-retry:
-	mmc_set_initial_state(mmc);
 
 	/* Reset the Card */
 	err = mmc_go_idle(mmc);
@@ -2787,7 +2799,6 @@ retry:
 	err = sd_send_op_cond(mmc, uhs_en);
 	if (err && uhs_en) {
 		uhs_en = false;
-		mmc_power_cycle(mmc);
 		goto retry;
 	}
 

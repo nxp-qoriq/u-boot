@@ -159,14 +159,14 @@ void get_sys_info(struct sys_info *sys_info)
 		break;
 	}
 #endif
-#if defined(CONFIG_TARGET_LX2160ARDB) || defined(CONFIG_TARGET_LS2080ARDB)
-	sys_info->freq_cga_m2 = sys_info->freq_systembus;
-#endif
 }
 
 int get_clocks(void)
 {
 	struct sys_info sys_info;
+#ifdef CONFIG_FSL_ESDHC
+	u32 clock = 0;
+#endif
 	get_sys_info(&sys_info);
 	gd->cpu_clk = sys_info.freq_processor[0];
 	gd->bus_clk = sys_info.freq_systembus / CONFIG_SYS_FSL_PCLK_DIV;
@@ -174,18 +174,16 @@ int get_clocks(void)
 #ifdef CONFIG_SYS_FSL_HAS_DP_DDR
 	gd->arch.mem2_clk = sys_info.freq_ddrbus2;
 #endif
-#if defined(CONFIG_FSL_ESDHC)
-#if defined(CONFIG_FSL_ESDHC_USE_PERIPHERAL_CLK)
-#if defined(CONFIG_TARGET_LS1028ARDB) || defined(CONFIG_TARGET_LX2160ARDB)
-	gd->arch.sdhc_clk = sys_info.freq_cga_m2 / 2;
+
+#ifdef CONFIG_FSL_ESDHC
+#if defined(CONFIG_ARCH_LS1028A) || defined(CONFIG_ARCH_LS1088A)
+	clock = sys_info.freq_cga_m2;
+#elif defined(CONFIG_ARCH_LX2160A) || defined(CONFIG_ARCH_LS2080A)
+	clock = sys_info.freq_systembus;
 #endif
-#if defined(CONFIG_TARGET_LS2080ARDB) || defined(CONFIG_TARGET_LS1088ARDB)
-	gd->arch.sdhc_clk = sys_info.freq_cga_m2;
-#endif
-#else
+	gd->arch.sdhc_per_clk = clock / CONFIG_SYS_FSL_SDHC_CLK_DIV;
 	gd->arch.sdhc_clk = gd->bus_clk / CONFIG_SYS_FSL_SDHC_CLK_DIV;
 #endif
-#endif /* defined(CONFIG_FSL_ESDHC) */
 
 	if (gd->cpu_clk != 0)
 		return 0;
@@ -236,16 +234,6 @@ int get_dspi_freq(ulong dummy)
 	return get_bus_freq(0) / CONFIG_SYS_FSL_DSPI_CLK_DIV;
 }
 
-#ifdef CONFIG_FSL_ESDHC
-int get_sdhc_freq(ulong dummy)
-{
-	if (!gd->arch.sdhc_clk)
-		get_clocks();
-
-	return gd->arch.sdhc_clk;
-}
-#endif
-
 int get_serial_clock(void)
 {
 	return get_bus_freq(0) / CONFIG_SYS_FSL_DUART_CLK_DIV;
@@ -256,11 +244,6 @@ unsigned int mxc_get_clock(enum mxc_clock clk)
 	switch (clk) {
 	case MXC_I2C_CLK:
 		return get_i2c_freq(0);
-#if defined(CONFIG_FSL_ESDHC)
-	case MXC_ESDHC_CLK:
-	case MXC_ESDHC2_CLK:
-		return get_sdhc_freq(0);
-#endif
 	case MXC_DSPI_CLK:
 		return get_dspi_freq(0);
 	default:
