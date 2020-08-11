@@ -89,7 +89,9 @@ static int find_vid_chip_on_i2c(void)
 	}
 #endif
 #if defined(CONFIG_VOL_MONITOR_LTC3882_READ) || \
-	defined(CONFIG_VOL_MONITOR_LTC3882_SET)
+	defined(CONFIG_VOL_MONITOR_LTC7132_READ) || \
+	defined(CONFIG_VOL_MONITOR_LTC3882_SET) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_SET)
 	int i2caddress = I2C_VOL_MONITOR_ADDR;
 	int ret;
 	u8 buf[8];
@@ -99,27 +101,35 @@ static int find_vid_chip_on_i2c(void)
 
 #ifndef CONFIG_DM_I2C
 	ret = i2c_read(i2caddress,
-		       LTC3882_MFR_ID, 1, (void *)&buf[0],
+		       LTC_MFR_ID, 1, (void *)&buf[0],
 		       4);
 #else
 	ret = i2c_get_chip_for_busnum(0, i2caddress, 1, &dev);
 	if (!ret)
-		ret = dm_i2c_read(dev, LTC3882_MFR_ID,
+		ret = dm_i2c_read(dev, LTC_MFR_ID,
 				  (void *)&buf[0], 4);
 #endif
 	if (!ret && memcmp(buf, "\3LTC", 4) == 0) {
 #ifndef CONFIG_DM_I2C
 		ret = i2c_read(i2caddress,
-			       LTC3882_MFR_MODEL, 1, (void *)&buf[0],
+			       LTC_MFR_MODEL, 1, (void *)&buf[0],
 			       8);
 #else
 		ret = i2c_get_chip_for_busnum(0, i2caddress, 1, &dev);
 		if (!ret)
-			ret = dm_i2c_read(dev, LTC3882_MFR_MODEL,
+			ret = dm_i2c_read(dev, LTC_MFR_MODEL,
 					  (void *)&buf[0], 8);
 #endif
-		if (!ret && memcmp(buf, "\7LTC3882", 8) == 0)
-			return i2caddress;
+		if (!ret) {
+#if defined(CONFIG_VOL_MONITOR_LTC3882_SET) || \
+	defined(CONFIG_VOL_MONITOR_LTC3882_READ)
+			if (memcmp(buf, "\7LTC3882", 8) == 0)
+#elif defined(CONFIG_VOL_MONITOR_LTC7132_SET) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_READ)
+			if (memcmp(buf, "\7LTC7132", 8) == 0)
+#endif
+				return i2caddress;
+		}
 	}
 #endif
 	return -1;
@@ -145,7 +155,8 @@ static int find_vid_chip_on_i2c(void)
 #define VDD_STEP_UP		IR_VDD_STEP_UP
 #define VDD_STEP_DOWN		IR_VDD_STEP_DOWN
 #endif
-#ifdef CONFIG_VOL_MONITOR_LTC3882_READ
+#if defined(CONFIG_VOL_MONITOR_LTC3882_READ) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_READ)
 #define WAIT_FOR_ADC		0
 #define ADC_MIN_ACCURACY	LTC_ADC_MIN_ACCURACY
 #define VDD_STEP_UP		LTC_VDD_STEP_UP
@@ -250,14 +261,15 @@ static int read_voltage_from_IR(int i2caddress)
 }
 #endif
 
-#ifdef CONFIG_VOL_MONITOR_LTC3882_READ
+#if defined(CONFIG_VOL_MONITOR_LTC3882_READ) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_READ)
 /* read the current value of the LTC Regulator Voltage.
  * This will only read the first channel for dual channel setups
  */
 static int read_voltage_from_LTC(int i2caddress)
 {
 	int  ret, vcode = 0;
-	u8 chan = LTC3882_VID_CHANNEL;
+	u8 chan = LTC_VID_CHANNEL;
 	u8 buf[2];
 #ifdef CONFIG_DM_I2C
 	struct udevice *dev;
@@ -266,11 +278,11 @@ static int read_voltage_from_LTC(int i2caddress)
 	/* select the PAGE 0 using PMBus commands PAGE for VDD*/
 #ifndef CONFIG_DM_I2C
 	ret = i2c_write(i2caddress,
-			LTC3882_PAGE, 1, &chan, 1);
+			LTC_PAGE, 1, &chan, 1);
 #else
 	ret = i2c_get_chip_for_busnum(0, i2caddress, 1, &dev);
 	if (!ret)
-		ret = dm_i2c_write(dev, LTC3882_PAGE, &chan, 1);
+		ret = dm_i2c_write(dev, LTC_PAGE, &chan, 1);
 #endif
 	if (ret) {
 		printf("VID: failed to select VDD Page\n");
@@ -280,11 +292,11 @@ static int read_voltage_from_LTC(int i2caddress)
 	/*read the output voltage using PMBus command READ_VOUT*/
 #ifndef CONFIG_DM_I2C
 	ret = i2c_read(i2caddress,
-		       LTC3882_READ_VOUT, 1, (void *)&buf[0], 2);
+		       LTC_READ_VOUT, 1, (void *)&buf[0], 2);
 #else
 	ret = i2c_get_chip_for_busnum(0, i2caddress, 1, &dev);
 	if (!ret)
-		ret = dm_i2c_read(dev, LTC3882_READ_VOUT,
+		ret = dm_i2c_read(dev, LTC_READ_VOUT,
 				  (void *)&buf[0], 2);
 #endif
 	if (ret) {
@@ -307,7 +319,8 @@ static int read_voltage(int i2caddress)
 	voltage_read = read_voltage_from_INA220(I2C_VOL_MONITOR_ADDR);
 #elif defined CONFIG_VOL_MONITOR_IR36021_READ
 	voltage_read = read_voltage_from_IR(i2caddress);
-#elif defined CONFIG_VOL_MONITOR_LTC3882_READ
+#elif defined(CONFIG_VOL_MONITOR_LTC3882_READ) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_READ)
 	voltage_read = read_voltage_from_LTC(i2caddress);
 #else
 	voltage_read = -1;
@@ -449,11 +462,12 @@ static int set_voltage_to_IR(int i2caddress, int vdd)
 }
 #endif
 
-#if defined(CONFIG_VOL_MONITOR_LTC3882_SET)
+#if defined(CONFIG_VOL_MONITOR_LTC3882_SET) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_SET)
 /* Helper function to write a mV value as LTC L16 into the chip,
  * returning a boolean for success
  */
-static int write_l16_mV_LTC3882(int i2caddress, int cmd, int mv)
+static int write_l16_mV_LTC(int i2caddress, int cmd, int mv)
 {
 	int l16;
 	int ret;
@@ -468,7 +482,7 @@ static int write_l16_mV_LTC3882(int i2caddress, int cmd, int mv)
 	l16 /= 1000;
 	debug("VID: cmd 0x%02x voltage write 0x%04x\n", cmd, l16);
 	buf[0] = 4;
-	buf[1] = LTC3882_VID_CHANNEL;
+	buf[1] = LTC_VID_CHANNEL;
 	buf[2] = cmd;
 	buf[3] = (l16 & 0xff);
 	buf[4] = (l16 >> 8);
@@ -480,23 +494,23 @@ static int write_l16_mV_LTC3882(int i2caddress, int cmd, int mv)
 	 */
 #ifndef CONFIG_DM_I2C
 	ret = i2c_write(i2caddress,
-			LTC3882_PAGE_PLUS_WRITE, 1, (void *)&buf, 5);
+			LTC_PAGE_PLUS_WRITE, 1, (void *)&buf, 5);
 #else
 	ret = i2c_get_chip_for_busnum(0, i2caddress, 1, &dev);
 	if (!ret)
 		ret = dm_i2c_write(dev,
-				   LTC3882_PAGE_PLUS_WRITE, (void *)&buf, 5);
+				   LTC_PAGE_PLUS_WRITE, (void *)&buf, 5);
 #endif
-#ifdef LTC3882_VID_CHANNEL2
+#ifdef LTC_VID_CHANNEL2
 	if (!ret) {
-		buf[1] = LTC3882_VID_CHANNEL2;
+		buf[1] = LTC_VID_CHANNEL2;
 #ifndef CONFIG_DM_I2C
 		ret = i2c_write(i2caddress,
-				LTC3882_PAGE_PLUS_WRITE, 1, (void *)&buf, 5);
+				LTC_PAGE_PLUS_WRITE, 1, (void *)&buf, 5);
 #else
 		ret = i2c_get_chip_for_busnum(0, i2caddress, 1, &dev);
 		if (!ret)
-			ret = dm_i2c_write(dev, LTC3882_PAGE_PLUS_WRITE,
+			ret = dm_i2c_write(dev, LTC_PAGE_PLUS_WRITE,
 					   (void *)&buf, 5);
 #endif
 	}
@@ -505,16 +519,17 @@ static int write_l16_mV_LTC3882(int i2caddress, int cmd, int mv)
 }
 #endif
 
-#ifdef CONFIG_VOL_MONITOR_LTC3882_SET
+#if defined(CONFIG_VOL_MONITOR_LTC3882_SET) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_SET)
 /* this function sets the VDD and returns the value set */
 static int set_voltage_to_LTC(int i2caddress, int vdd)
 {
 	int wait, ret, vdd_last;
 
 	/* Write the desired voltage code to the regulator */
-	ret = write_l16_mV_LTC3882(i2caddress,
-				   LTC3882_VOUT_COMMAND,
-				   vdd);
+	ret = write_l16_mV_LTC(i2caddress,
+			       LTC_VOUT_COMMAND,
+			       vdd);
 	if (ret) {
 		printf("VID: I2C failed to write to the voltage regulator\n");
 		return -1;
@@ -542,7 +557,8 @@ static int set_voltage(int i2caddress, int vdd)
 	vdd += board_vdd_drop_compensation();
 #ifdef CONFIG_VOL_MONITOR_IR36021_SET
 	vdd_last = set_voltage_to_IR(i2caddress, vdd);
-#elif defined CONFIG_VOL_MONITOR_LTC3882_SET
+#elif defined(CONFIG_VOL_MONITOR_LTC3882_SET) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_SET)
 	vdd_last = set_voltage_to_LTC(i2caddress, vdd);
 #else
 	#error Specific voltage monitor must be defined
@@ -586,49 +602,50 @@ int vid_set_mv_limits(int absmax,
 	}
 	i2caddress = find_vid_chip_on_i2c();
 
-#if defined(CONFIG_VOL_MONITOR_LTC3882_SET)
+#if defined(CONFIG_VOL_MONITOR_LTC3882_SET) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_SET)
 	if (i2caddress >= 0) {
 		/* We need to program the voltage limits
 		 * properly, or the chip may freak out on
 		 * VID changes.
 		 */
-		ret = write_l16_mV_LTC3882(i2caddress,
-					   LTC3882_VOUT_MAX,
-					   absmax);
+		ret = write_l16_mV_LTC(i2caddress,
+				       LTC_VOUT_MAX,
+				       absmax);
 		if (!ret) {
-			ret = write_l16_mV_LTC3882(i2caddress,
-						   LTC3882_VOUT_MARGIN_HIGH,
-						   marginhigh);
+			ret = write_l16_mV_LTC(i2caddress,
+					       LTC_VOUT_MARGIN_HIGH,
+					       marginhigh);
 		}
 		if (!ret) {
-			ret = write_l16_mV_LTC3882(i2caddress,
-						   LTC3882_VOUT_MARGIN_LOW,
-						   marginlow);
+			ret = write_l16_mV_LTC(i2caddress,
+					       LTC_VOUT_MARGIN_LOW,
+					       marginlow);
 		}
 		if (!ret) {
-			ret = write_l16_mV_LTC3882(i2caddress,
-						   LTC3882_VOUT_OV_FAULT_LIMIT,
-						   ovfault);
+			ret = write_l16_mV_LTC(i2caddress,
+					       LTC_VOUT_OV_FAULT_LIMIT,
+					       ovfault);
 		}
 		if (!ret) {
-			ret = write_l16_mV_LTC3882(i2caddress,
-						   LTC3882_VOUT_OV_WARN_LIMIT,
-						   ovwarn);
+			ret = write_l16_mV_LTC(i2caddress,
+					       LTC_VOUT_OV_WARN_LIMIT,
+					       ovwarn);
 		}
 		if (!ret) {
-			ret = write_l16_mV_LTC3882(i2caddress,
-						   LTC3882_VOUT_UV_WARN_LIMIT,
-						   uvwarn);
+			ret = write_l16_mV_LTC(i2caddress,
+					       LTC_VOUT_UV_WARN_LIMIT,
+					       uvwarn);
 		}
 		if (!ret) {
-			ret = write_l16_mV_LTC3882(i2caddress,
-						   LTC3882_VOUT_UV_FAULT_LIMIT,
-						   uvfault);
+			ret = write_l16_mV_LTC(i2caddress,
+					       LTC_VOUT_UV_FAULT_LIMIT,
+					       uvfault);
 		}
 	} else {
 		ret = -1;
 	}
-#endif /* CONFIG_VOL_MONITOR_LTC3882_SET */
+#endif /* CONFIG_VOL_MONITOR_LTC3882_SET || CONFIG_VOL_MONITOR_LTC7132_SET*/
 	if (ret)
 		printf("VID: Setting voltage limits failed! VID regulation may not be stable!\n");
 

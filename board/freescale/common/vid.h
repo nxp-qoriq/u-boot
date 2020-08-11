@@ -22,21 +22,21 @@
 #define IR_VDD_STEP_UP			5 /* mV */
 #define IR_ADC_MIN_ACCURACY		8 /* mV */
 
-/* Declarations for the LTC3882 */
-#define LTC3882_PAGE			0x00
-#define LTC3882_PAGE_PLUS_WRITE		0x05
-#define LTC3882_PAGE_PLUS_READ		0x06
-#define LTC3882_VOUT_COMMAND		0x21
-#define LTC3882_VOUT_MAX		0x24
-#define LTC3882_VOUT_MARGIN_HIGH	0x25
-#define LTC3882_VOUT_MARGIN_LOW		0x26
-#define LTC3882_VOUT_OV_FAULT_LIMIT	0x40
-#define LTC3882_VOUT_OV_WARN_LIMIT	0x42
-#define LTC3882_VOUT_UV_WARN_LIMIT	0x43
-#define LTC3882_VOUT_UV_FAULT_LIMIT	0x44
-#define LTC3882_READ_VOUT		0x8B
-#define LTC3882_MFR_ID			0x99
-#define LTC3882_MFR_MODEL		0x9A
+/* Declarations for the LTC regulator */
+#define LTC_PAGE		0x00
+#define LTC_PAGE_PLUS_WRITE	0x05
+#define LTC_PAGE_PLUS_READ	0x06
+#define LTC_VOUT_COMMAND	0x21
+#define LTC_VOUT_MAX		0x24
+#define LTC_VOUT_MARGIN_HIGH	0x25
+#define LTC_VOUT_MARGIN_LOW	0x26
+#define LTC_VOUT_OV_FAULT_LIMIT	0x40
+#define LTC_VOUT_OV_WARN_LIMIT	0x42
+#define LTC_VOUT_UV_WARN_LIMIT	0x43
+#define LTC_VOUT_UV_FAULT_LIMIT	0x44
+#define LTC_READ_VOUT		0x8B
+#define LTC_MFR_ID		0x99
+#define LTC_MFR_MODEL		0x9A
 
 /* step the LTC regulator in 1mV increments */
 #define LTC_VDD_STEP_DOWN		1 /* mV */
@@ -45,7 +45,7 @@
 
 /* This is a compatibility setting for existing board configs */
 #ifdef PWM_CHANNEL0
-#define LTC3882_VID_CHANNEL	PWM_CHANNEL0
+#define LTC_VID_CHANNEL	PWM_CHANNEL0
 #endif
 
 int vid_set_mv_limits(int absmax,
