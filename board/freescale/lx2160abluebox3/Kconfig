@@ -1,0 +1,17 @@
+
+if TARGET_LX2160ABLUEBOX3
+
+config SYS_BOARD
+        default "lx2160abluebox3"
+
+config SYS_VENDOR
+        default "freescale"
+
+config SYS_SOC
+        default "fsl-layerscape"
+
+config SYS_CONFIG_NAME
+        default "lx2160abluebox3"
+
+source "board/freescale/common/Kconfig"
+endif
