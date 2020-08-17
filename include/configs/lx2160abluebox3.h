@@ -41,10 +41,11 @@
 #define VDD_MV_MIN			775
 #define VDD_MV_MAX			855
 
+/* Channel to be used with LTC7132 */
 #define PWM_CHANNEL0                    0x0
 
-#define CONFIG_VOL_MONITOR_LTC3882_SET
-#define CONFIG_VOL_MONITOR_LTC3882_READ
+#define CONFIG_VOL_MONITOR_LTC7132_SET
+#define CONFIG_VOL_MONITOR_LTC7132_READ
 
 /* RTC */
 #define CONFIG_SYS_RTC_BUS_NUM		0   /* Channel 4 I2C bus 0*/
