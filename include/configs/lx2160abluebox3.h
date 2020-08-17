@@ -41,11 +41,6 @@
 #define VDD_MV_MIN			775
 #define VDD_MV_MAX			855
 
-/* PM Bus commands code for LTC7132*/
-#define PMBUS_CMD_PAGE                  0x0
-#define PMBUS_CMD_READ_VOUT             0x8B
-#define PMBUS_CMD_PAGE_PLUS_WRITE       0x05
-#define PMBUS_CMD_VOUT_COMMAND          0x21
 #define PWM_CHANNEL0                    0x0
 
 #define CONFIG_VOL_MONITOR_LTC3882_SET
