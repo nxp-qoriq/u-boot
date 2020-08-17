@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+ OR X11
 /*
- * NXP LX2160A BlueBox 3 device tree source
+ * NXP LX2160A BLUEBOX3 device tree source
  *
  * Copyright 2020 NXP
  *
@@ -11,7 +11,7 @@
 #include "fsl-lx2160a.dtsi"
 
 / {
-	model = "NXP Layerscape LX2160A BlueBox 3";
+	model = "NXP Layerscape LX2160A BLUEBOX3";
 	compatible = "fsl,lx2160ardb", "fsl,lx2160a";
 	aliases {
 		spi0 = &fspi;

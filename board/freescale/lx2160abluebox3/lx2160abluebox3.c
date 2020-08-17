@@ -234,10 +234,12 @@ int checkboard(void)
 	enum boot_src src = get_boot_src();
 	char buf[64];
 	u8 sw;
+	int clock;
+	static const char *const freq[] = {"100", "", "", "161.13"};
 
 	cpu_name(buf);
 
-	printf("Board: %s-RDB, ", buf);
+	printf("Board: %s-BLUEBOX3, ", buf);
 
 	sw = QIXIS_READ(arch);
 	printf("Board version: %c, boot from ", (sw & 0xf) - 1 + 'A');
@@ -262,12 +264,28 @@ int checkboard(void)
 		}
 	}
 
-//TODO:Read FPGA using QVER Identification Register
 	printf("FPGA: v%d.%d\n", QIXIS_READ(scver), QIXIS_READ(tagdata));
-//TODO:Read SerDes Clock Using BRDCFG2, BRDCFG3. Fixed to below print values
-	puts("SERDES1 Reference: Clock1 = 100MHz Clock2 = 161.13MHz\n");
-	puts("SERDES2 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
-	puts("SERDES3 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+
+	puts("SERDES1 Reference : ");
+	sw = QIXIS_READ(brdcfg[2]);
+	clock = sw >> 6 & SERDES_CLOCK_MASK;
+	printf("Clock1 = %sMHz ", freq[clock]);
+	clock = sw >> 4 & SERDES_CLOCK_MASK;
+	printf("Clock2 = %sMHz", freq[clock]);
+
+	puts("\nSERDES2 Reference : ");
+	sw = QIXIS_READ(brdcfg[2]);
+	clock = sw >> 2 & SERDES_CLOCK_MASK;
+	printf("Clock1 = %sMHz ", freq[clock]);
+	clock = sw & SERDES_CLOCK_MASK;
+	printf("Clock2 = %sMHz", freq[clock]);
+
+	puts("\nSERDES3 Reference : ");
+	sw = QIXIS_READ(brdcfg[3]);
+	clock = sw >> 6 & SERDES_CLOCK_MASK;
+	printf("Clock1 = %sMHz ", freq[clock]);
+	clock = sw >> 4 & SERDES_CLOCK_MASK;
+	printf("Clock2 = %sMHz\n", freq[clock]);
 
 	return 0;
 }

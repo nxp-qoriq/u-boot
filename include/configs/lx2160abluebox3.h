@@ -79,6 +79,9 @@
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS     3
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 5
 
+/* SerDes */
+#define SERDES_CLOCK_MASK                      0x3
+
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
