@@ -146,11 +146,12 @@ static int find_vid_chip_on_i2c(void)
 #ifdef CONFIG_VOL_MONITOR_INA220
 #define NUM_READINGS    4       /* prefer to be power of 2 for efficiency */
 #define WAIT_FOR_ADC	532	/* wait for 532 microseconds for ADC */
-#define ADC_MIN_ACCURACY	4 /* mV */
 #endif
 #ifdef CONFIG_VOL_MONITOR_IR36021_READ
 #define NUM_READINGS    4       /* prefer to be power of 2 for efficiency */
 #define WAIT_FOR_ADC	138	/* wait for 138 microseconds for ADC */
+#endif
+#ifdef CONFIG_VOL_MONITOR_IR36021_SET
 #define ADC_MIN_ACCURACY	IR_ADC_MIN_ACCURACY
 #define VDD_STEP_UP		IR_VDD_STEP_UP
 #define VDD_STEP_DOWN		IR_VDD_STEP_DOWN
@@ -158,11 +159,15 @@ static int find_vid_chip_on_i2c(void)
 #if defined(CONFIG_VOL_MONITOR_LTC3882_READ) || \
 	defined(CONFIG_VOL_MONITOR_LTC7132_READ)
 #define WAIT_FOR_ADC		0
+#endif
+#if defined(CONFIG_VOL_MONITOR_LTC3882_SET) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_SET)
 #define ADC_MIN_ACCURACY	LTC_ADC_MIN_ACCURACY
 #define VDD_STEP_UP		LTC_VDD_STEP_UP
 #define VDD_STEP_DOWN		LTC_VDD_STEP_DOWN
 #endif
-#if VDD_STEP_UP < 1 || VDD_STEP_DOWN < 1
+#if (defined(VDD_STEP_UP) && (VDD_STEP_UP < 1)) || \
+	(defined(VDD_STEP_DOWN) && (VDD_STEP_DOWN < 1))
 #error VDD_STEP values must be > 0!
 #endif
 
@@ -593,8 +598,10 @@ int vid_set_mv_limits(int absmax,
 		      int uvwarn, int uvfault)
 {
 	int ret;
-	int i2caddress;
 
+#if defined(CONFIG_VOL_MONITOR_LTC3882_SET) || \
+	defined(CONFIG_VOL_MONITOR_LTC7132_SET)
+	int i2caddress;
 	ret = i2c_multiplexer_select_vid_channel(I2C_MUX_CH_VOL_MONITOR);
 	if (ret) {
 		debug("VID: I2C failed to switch channel\n");
@@ -602,8 +609,6 @@ int vid_set_mv_limits(int absmax,
 	}
 	i2caddress = find_vid_chip_on_i2c();
 
-#if defined(CONFIG_VOL_MONITOR_LTC3882_SET) || \
-	defined(CONFIG_VOL_MONITOR_LTC7132_SET)
 	if (i2caddress >= 0) {
 		/* We need to program the voltage limits
 		 * properly, or the chip may freak out on
@@ -645,12 +650,14 @@ int vid_set_mv_limits(int absmax,
 	} else {
 		ret = -1;
 	}
-#endif /* CONFIG_VOL_MONITOR_LTC3882_SET || CONFIG_VOL_MONITOR_LTC7132_SET*/
+
 	if (ret)
 		printf("VID: Setting voltage limits failed! VID regulation may not be stable!\n");
 
 	i2c_multiplexer_select_vid_channel(I2C_MUX_CH_DEFAULT);
-
+#else /* CONFIG_VOL_MONITOR_LTC3882_SET || CONFIG_VOL_MONITOR_LTC7132_SET*/
+	ret = 0;
+#endif
 	return ret;
 }
 
@@ -930,6 +937,7 @@ int adjust_vdd(ulong vdd_override)
 	  * we may run through dummy steps that cancel each other
 	  * when stepping up and then down.
 	  */
+#if defined(VDD_STEP_UP) && defined(VDD_STEP_DOWN)
 	while (vdd_last > 0 &&
 	       vdd_last < vdd_target &&
 	       vdd_current < vdd_target) {
@@ -943,6 +951,7 @@ int adjust_vdd(ulong vdd_override)
 		vdd_current -= min(VDD_STEP_DOWN, vdd_current - vdd_target);
 		vdd_last = set_voltage(i2caddress, vdd_current);
 	}
+#endif
 
 	if (vdd_last > 0) {
 		printf("VID: Core voltage after adjustment is at %d mV\n",
