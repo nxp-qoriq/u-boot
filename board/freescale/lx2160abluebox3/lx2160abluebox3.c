@@ -289,6 +289,9 @@ int checkboard(void)
 	clock = sw >> 4 & SERDES_CLOCK_MASK;
 	printf("Clock2 = %sMHz\n", freq[clock]);
 
+	printf("Serdes1 Protocol: 0x11 is not valid for BlueBox3\n");
+	printf("Using SERDES1 Protocol: 0x10a : Custom Encoding\n");
+
 	return 0;
 }
 
