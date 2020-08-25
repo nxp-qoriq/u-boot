@@ -91,7 +91,7 @@
 	EXTRA_ENV_SETTINGS			\
 	"boot_scripts=lx2160bluebox3_boot.scr\0"	\
 	"boot_script_hdr=hdr_lx2160bluebox3_bs.out\0"	\
-	"BOARD=lx2160ardb\0"			\
+	"BOARD=lx2160abluebox3\0"			\
 	"xspi_bootcmd=echo Trying load from flexspi..;"		\
 		"sf probe 0:0 && sf read $load_addr "		\
 		"$kernel_start $kernel_size ; env exists secureboot &&"	\
