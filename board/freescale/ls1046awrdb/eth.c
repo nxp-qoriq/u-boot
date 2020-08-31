@@ -15,8 +15,10 @@
 int board_eth_init(bd_t *bis)
 {
 #ifdef CONFIG_FMAN_ENET
+#ifndef CONFIG_TARGET_DB1046
 	int i;
 	struct memac_mdio_info dtsec_mdio_info;
+#endif
 	struct memac_mdio_info tgec_mdio_info;
 	struct mii_dev *dev;
 	u32 srds_s1;
@@ -26,6 +28,7 @@ int board_eth_init(bd_t *bis)
 			FSL_CHASSIS2_RCWSR4_SRDS1_PRTCL_MASK;
 	srds_s1 >>= FSL_CHASSIS2_RCWSR4_SRDS1_PRTCL_SHIFT;
 
+#ifndef CONFIG_TARGET_DB1046
 	dtsec_mdio_info.regs =
 		(struct memac_mdio_controller *)CONFIG_SYS_FM1_DTSEC_MDIO_ADDR;
 
@@ -33,6 +36,7 @@ int board_eth_init(bd_t *bis)
 
 	/* Register the 1G MDIO bus */
 	fm_memac_mdio_init(bis, &dtsec_mdio_info);
+#endif
 
 	tgec_mdio_info.regs =
 		(struct memac_mdio_controller *)CONFIG_SYS_FM1_TGEC_MDIO_ADDR;
@@ -41,13 +45,14 @@ int board_eth_init(bd_t *bis)
 	/* Register the 10G MDIO bus */
 	fm_memac_mdio_init(bis, &tgec_mdio_info);
 
+#ifndef CONFIG_TARGET_DB1046
 	/* Set the two on-board RGMII PHY address */
 	fm_info_set_phy_address(FM1_DTSEC3, RGMII_PHY1_ADDR);
 
 	/* Set the two on-board SGMII PHY address */
 	fm_info_set_phy_address(FM1_DTSEC5, SGMII_PHY1_ADDR);
 	fm_info_set_phy_address(FM1_DTSEC6, SGMII_PHY2_ADDR);
-
+#endif
 	/* Set the on-board AQ PHY address */
 	fm_info_set_phy_address(FM1_10GEC2, FM1_10GEC2_PHY_ADDR);
 
@@ -60,9 +65,11 @@ int board_eth_init(bd_t *bis)
 		break;
 	}
 
+#ifndef CONFIG_TARGET_DB1046
 	dev = miiphy_get_dev_by_name(DEFAULT_FM_MDIO_NAME);
 	for (i = FM1_DTSEC1; i < FM1_DTSEC1 + CONFIG_SYS_NUM_FM1_DTSEC; i++)
 		fm_info_set_mdio(i, dev);
+#endif
 
 	/* XFI on MAC 10 */
 	dev = miiphy_get_dev_by_name(DEFAULT_FM_TGEC_MDIO_NAME);

@@ -1511,6 +1511,24 @@ config TARGET_LS1046AWRDB
 	  development platform that supports the QorIQ LS1046A
 	  Layerscape Architecture processor.
 
+config TARGET_DB1046
+	bool "Support db1046"
+	select ARCH_LS1046A
+	select ARM64
+	select ARMV8_MULTIENTRY
+	select ARCH_SUPPORT_TFABOOT
+	select BOARD_EARLY_INIT_F
+	select BOARD_LATE_INIT
+	select DM_SPI_FLASH if DM_SPI
+	select SUPPORT_SPL
+	select FSL_DDR_BIST
+	select FSL_DDR_INTERACTIVE if !SPL
+	imply SCSI
+	help
+	  Support for NXP DB1046 Platform.
+	  The DB1046 is a development platform that supports
+	  the QorIQ LS1046A Layerscape Architecture processor.
+
 config TARGET_H2200
 	bool "Support h2200"
 	select CPU_PXA

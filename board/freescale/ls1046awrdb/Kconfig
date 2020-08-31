@@ -1,5 +1,5 @@
 
-if TARGET_LS1046AWRDB
+if TARGET_LS1046AWRDB || TARGET_DB1046
 
 config SYS_BOARD
 	default "ls1046awrdb"

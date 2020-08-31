@@ -130,6 +130,7 @@ void get_sys_info(struct sys_info *sys_info)
 #define HWA_CGA_M2_CLK_SHIFT	0
 #if defined(CONFIG_TARGET_LS1046ARDB) || \
 	defined(CONFIG_TARGET_LS1046AWRDB) || \
+	defined(CONFIG_TARGET_DB1046) || \
 	defined(CONFIG_TARGET_LS1043ARDB)
 	rcw_tmp = in_be32(&gur->rcwsr[15]);
 	switch ((rcw_tmp & HWA_CGA_M2_CLK_SEL) >> HWA_CGA_M2_CLK_SHIFT) {
@@ -137,7 +138,8 @@ void get_sys_info(struct sys_info *sys_info)
 		sys_info->freq_cga_m2 = freq_c_pll[1];
 		break;
 #if defined(CONFIG_TARGET_LS1046ARDB) || \
-	defined(CONFIG_TARGET_LS1046AWRDB)
+	defined(CONFIG_TARGET_LS1046AWRDB) ||\
+	defined(CONFIG_TARGET_DB1046)
 	case 2:
 		sys_info->freq_cga_m2 = freq_c_pll[1] / 2;
 		break;
@@ -146,7 +148,8 @@ void get_sys_info(struct sys_info *sys_info)
 		sys_info->freq_cga_m2 = freq_c_pll[1] / 3;
 		break;
 #if defined(CONFIG_TARGET_LS1046ARDB) || \
-	defined(CONFIG_TARGET_LS1046AWRDB)
+	defined(CONFIG_TARGET_LS1046AWRDB) ||\
+	defined(CONFIG_TARGET_DB1046)
 	case 6:
 		sys_info->freq_cga_m2 = freq_c_pll[0] / 2;
 		break;
@@ -192,7 +195,8 @@ int get_clocks(void)
 #ifdef CONFIG_FSL_ESDHC
 #if defined(CONFIG_FSL_ESDHC_USE_PERIPHERAL_CLK)
 #if defined(CONFIG_TARGET_LS1046ARDB) || \
-	defined(CONFIG_TARGET_LS1046AWRDB)
+	defined(CONFIG_TARGET_LS1046AWRDB) ||\
+	defined(CONFIG_TARGET_DB1046)
 	gd->arch.sdhc_clk = sys_info.freq_cga_m2 / 2;
 #endif
 #if defined(CONFIG_TARGET_LS1043ARDB)

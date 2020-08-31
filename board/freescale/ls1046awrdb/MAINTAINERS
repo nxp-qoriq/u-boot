@@ -6,3 +6,4 @@ F:	board/freescale/ls1046awrdb/ls1046awrdb.c
 F:	include/configs/ls1046awrdb.h
 F:	configs/ls1046awrdb_tfa_defconfig
 F:	configs/ls1046awrdb_tfa_SECURE_BOOT_defconfig
+F:	configs/db1046_tfa_defconfig
