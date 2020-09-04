@@ -27,6 +27,10 @@
 	mmc-hs200-1_8v;
 };
 
+&usb1 {
+	status = "disabled";
+};
+
 &fspi {
 	status = "okay";
 
