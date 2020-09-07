@@ -72,6 +72,11 @@
 #define PCAL1_P1_7_SD		0x7f
 #define PCAL1_P1_7_EMMC		0xff
 
+#ifndef CONFIG_TARGET_DB1046
+#define I2C_MUX_PCA_ADDR_PRI	0x77
+#define I2C_MUX_CH_DEFAULT	0x8
+#endif
+
 /*TODO: Add more details here*/
 
 /* PMIC */

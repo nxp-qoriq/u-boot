@@ -33,6 +33,30 @@ struct pcal_info {
 	u8 offset_addr[2];
 };
 
+#ifndef CONFIG_TARGET_DB1046
+int select_i2c_ch_pca9847(u8 ch, int bus_num)
+{
+	int ret;
+
+	struct udevice *dev;
+
+	ret = i2c_get_chip_for_busnum(bus_num, I2C_MUX_PCA_ADDR_PRI,
+				      1, &dev);
+	if (ret) {
+		printf("%s: Cannot find udev for a bus %d\n", __func__,
+		       bus_num);
+		return ret;
+	}
+	ret = dm_i2c_write(dev, 0, &ch, 1);
+	if (ret) {
+		puts("PCA: failed to select proper channel\n");
+		return ret;
+	}
+
+	return 0;
+}
+#endif
+
 int board_early_init_f(void)
 {
 	fsl_lsch2_early_init_f();
@@ -48,6 +72,9 @@ int checkboard(void)
 	enum boot_src src = get_boot_src();
 	struct udevice *dev;
 
+#ifndef CONFIG_TARGET_DB1046
+	select_i2c_ch_pca9847(I2C_MUX_CH_DEFAULT, 0);
+#endif
 	puts("Board: DB1046A, boot from ");
 	ret = i2c_get_chip_for_busnum(bus_num, I2C_MUX_IO_ADDR,
 				      1, &dev);
@@ -184,6 +211,9 @@ static int switch_boot_source(int src_id)
 	int ret, i, bus_num = 0;
 	struct udevice *dev;
 
+#ifndef CONFIG_TARGET_DB1046
+	select_i2c_ch_pca9847(I2C_MUX_CH_DEFAULT, 0);
+#endif
 	pcal0.offset_addr[0] = PCAL_P1_CONF_ADDR;
 	pcal0.offset_addr[1] = PCAL_P1_OUTPUT_ADDR;
 
