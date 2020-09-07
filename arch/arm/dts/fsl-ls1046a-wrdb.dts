@@ -43,9 +43,22 @@
 &i2c0 {
 	status = "okay";
 
-	rtc@51 {
-		compatible = "pcf2127-rtc";
-		reg = <0x51>;
+	i2c-mux@77 {
+		compatible = "nxp,pca9547";
+		reg = <0x77>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		i2c@1 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0x3>;
+
+			rtc@51 {
+				compatible = "pcf2127-rtc";
+				reg = <0x51>;
+			};
+		};
 	};
 };
 
