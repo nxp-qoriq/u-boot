@@ -1,0 +1,54 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Device Tree Include file for Layerscape-1046AWRDB board.
+ *
+ * Copyright 2020 NXP
+ *
+ * Yuantian Tang <andy.tang@nxp.com>
+ */
+
+/dts-v1/;
+/include/ "fsl-ls1046a.dtsi"
+
+/ {
+	model = "LS1046A WRDB Board";
+
+	aliases {
+		spi0 = &qspi;
+	};
+
+};
+
+&qspi {
+	bus-num = <0>;
+	status = "okay";
+
+	qflash0: mt25qu512abb8esf@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-flash";
+		spi-max-frequency = <50000000>;
+		reg = <0>;
+	};
+
+	qflash1: mt25qu512abb8esf@1 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-flash";
+		spi-max-frequency = <50000000>;
+		reg = <1>;
+	};
+};
+
+&i2c0 {
+	status = "okay";
+
+	rtc@51 {
+		compatible = "pcf2127-rtc";
+		reg = <0x51>;
+	};
+};
+
+&i2c3 {
+	status = "okay";
+};

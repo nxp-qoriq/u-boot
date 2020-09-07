@@ -355,6 +355,7 @@ dtb-$(CONFIG_FSL_LSCH2) += fsl-ls1043a-qds-duart.dtb \
 	fsl-ls1046a-qds-lpuart.dtb \
 	fsl-ls1046a-rdb.dtb \
 	fsl-ls1046a-frwy.dtb \
+	fsl-ls1046a-db.dtb \
 	fsl-ls1046a-wrdb.dtb \
 	fsl-ls1012a-qds.dtb \
 	fsl-ls1012a-rdb.dtb \
