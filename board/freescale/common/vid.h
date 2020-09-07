@@ -48,6 +48,10 @@
 #define LTC_VID_CHANNEL	PWM_CHANNEL0
 #endif
 
+#ifdef PWM_CHANNEL1
+#define LTC_VID_CHANNEL2 PWM_CHANNEL1
+#endif
+
 int vid_set_mv_limits(int absmax,
 		      int marginhigh, int marginlow,
 		      int ovfault, int ovwarn,
