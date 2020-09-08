@@ -238,6 +238,7 @@ int checkboard(void)
 	u8 sw;
 	int clock;
 	static const char *const freq[] = {"100", "", "", "161.13"};
+	u16 minor;
 
 	cpu_name(buf);
 
@@ -266,7 +267,14 @@ int checkboard(void)
 		}
 	}
 
-	printf("FPGA: v%d.%d\n", QIXIS_READ(scver), QIXIS_READ(tagdata));
+	printf("FPGA: v%d", (int)QIXIS_READ(scver));
+
+	minor = qixis_read_minor();
+	if (minor)
+		printf(".%d", minor);
+
+	/* the timestamp string contains "\n" at the end */
+	printf(" built on %s", qixis_read_time(buf));
 
 	puts("SERDES1 Reference : ");
 	sw = QIXIS_READ(brdcfg[2]);
