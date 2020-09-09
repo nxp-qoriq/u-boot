@@ -42,8 +42,7 @@
 #define VDD_MV_MAX			855
 
 /* Channel to be used with LTC7132 */
-#define PWM_CHANNEL0                    0x0
-#define PWM_CHANNEL1                    0x1
+#define PWM_CHANNEL0                    0xff
 
 #define CONFIG_VOL_MONITOR_LTC7132_SET
 #define CONFIG_VOL_MONITOR_LTC7132_READ

@@ -506,20 +506,6 @@ static int write_l16_mV_LTC(int i2caddress, int cmd, int mv)
 		ret = dm_i2c_write(dev,
 				   LTC_PAGE_PLUS_WRITE, (void *)&buf, 5);
 #endif
-#ifdef LTC_VID_CHANNEL2
-	if (!ret) {
-		buf[1] = LTC_VID_CHANNEL2;
-#ifndef CONFIG_DM_I2C
-		ret = i2c_write(i2caddress,
-				LTC_PAGE_PLUS_WRITE, 1, (void *)&buf, 5);
-#else
-		ret = i2c_get_chip_for_busnum(0, i2caddress, 1, &dev);
-		if (!ret)
-			ret = dm_i2c_write(dev, LTC_PAGE_PLUS_WRITE,
-					   (void *)&buf, 5);
-#endif
-	}
-#endif
 	return ret;
 }
 #endif
