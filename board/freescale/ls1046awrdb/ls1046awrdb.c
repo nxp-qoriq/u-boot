@@ -306,6 +306,52 @@ err:
 	return ret;
 }
 
+static int switch_sd_emmc(int src_id)
+{
+	struct pcal_info  pcal1;
+	int ret, i, bus_num = 0;
+	struct udevice *dev;
+
+#ifndef CONFIG_TARGET_DB1046
+	select_i2c_ch_pca9847(I2C_MUX_CH_DEFAULT, 0);
+#endif
+	pcal1.offset_addr[0] = PCAL_P1_CONF_ADDR;
+	pcal1.offset_addr[1] = PCAL_P1_OUTPUT_ADDR;
+
+	pcal1.data[0] = PCAL1_P1_7_OUTPUT;
+
+	switch (src_id) {
+	case BOOT_FROM_SD:
+		pcal1.data[1] = PCAL1_P1_7_SD;
+		break;
+	case BOOT_FROM_EMMC:
+		pcal1.data[1] = PCAL1_P1_7_EMMC;
+		break;
+	}
+
+	ret = i2c_get_chip_for_busnum(bus_num, I2C_MUX_IO_ADDR,
+				      1, &dev);
+	if (ret) {
+		printf("%s: Cannot find udev for a bus %d\n", __func__,
+		       bus_num);
+		return -ENXIO;
+	}
+
+	for (i = 0; i < 2; i++) {
+		ret = dm_i2c_write(dev, pcal1.offset_addr[i],
+				   &pcal1.data[i], 1);
+		if (ret) {
+			printf("i2c write error addr: %u reg: %u data: %u\n",
+			       I2C_MUX_IO_ADDR, pcal1.offset_addr[i],
+			       pcal1.data[i]);
+			goto err;
+		}
+	}
+	printf("Run mmc rescan cmd to rescan the sd/emmc card\n");
+err:
+	return ret;
+}
+
 static int flash_boot_cmd(cmd_tbl_t *cmdtp, int flag, int argc,
 			  char * const argv[])
 {
@@ -326,12 +372,33 @@ static int flash_boot_cmd(cmd_tbl_t *cmdtp, int flag, int argc,
 	return 0;
 }
 
+static int select_sd_emmc(cmd_tbl_t *cmdtp, int flag, int argc,
+			  char * const argv[])
+{
+	if (argc <= 1)
+		return CMD_RET_USAGE;
+	if (strcmp(argv[1], "sd") == 0)
+		switch_sd_emmc(BOOT_FROM_SD);
+	else if (strcmp(argv[1], "emmc") == 0)
+		switch_sd_emmc(BOOT_FROM_EMMC);
+	else
+		return CMD_RET_USAGE;
+
+	return 0;
+}
+
 U_BOOT_CMD(boot_source, 3, 0, flash_boot_cmd,
 	   "Flash boot Selection Control",
 	   "boot_source qspi 0 : reset to qspi primary bank\n"
 	   "boot_source qspi 1 : reset to qspi alternate bank\n"
 	   "boot_source sd : reset to sd\n"
 	   "boot_source emmc : reset to emmc\n"
+);
+
+U_BOOT_CMD(select, 3, 0, select_sd_emmc,
+	   "sd/emmc Selection Control",
+	   "select sd : select sd card\n"
+	   "select emmc : select emmc\n"
 );
 
 #endif
