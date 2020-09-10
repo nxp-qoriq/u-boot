@@ -150,7 +150,8 @@ config FSL_PCIE_COMPAT
 	default "fsl,ls1046a-pcie" if ARCH_LS1046A
 	default "fsl,ls2080a-pcie" if ARCH_LS2080A
 	default "fsl,ls1088a-pcie" if ARCH_LS1088A
-	default "fsl,lx2160a-pcie" if ARCH_LX2160A
+	default "fsl,lx2160a-pcie" if TARGET_LX2160ARDB || TARGET_LX2160AQDS
+	default "fsl,ls2088a-pcie" if TARGET_LX2162AQDS
 	default "fsl,ls1021a-pcie" if ARCH_LS1021A
 	help
 	  This compatible is used to find pci controller node in Kernel DT
