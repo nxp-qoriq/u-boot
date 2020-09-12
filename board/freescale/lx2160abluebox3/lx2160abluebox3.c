@@ -336,7 +336,11 @@ unsigned long get_board_ddr_clk(void)
 int board_init(void)
 {
 #if defined(CONFIG_FSL_MC_ENET)
+	struct ccsr_gur __iomem *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
+	struct ccsr_gur __iomem *dcsr = (void *)(DCFG_DCSR_BASE);
 	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
+	u32 rcwsr28;
+	u32 srds_s1;
 #endif
 #ifdef CONFIG_ENV_IS_NOWHERE
 	gd->env_addr = (ulong)&default_environment[0];
@@ -347,6 +351,18 @@ int board_init(void)
 #if defined(CONFIG_FSL_MC_ENET)
 	/* invert AQR113 IRQ pins polarity */
 	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR113_IRQ_MASK);
+
+	/* bluebox3 board uses a custom serdes protocol encoding */
+	rcwsr28 = in_le32(&gur->rcwsr[28]);
+	srds_s1 = rcwsr28 & FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_MASK;
+	srds_s1 >>= FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_SHIFT;
+
+	/* SerDes1 protocol 11 becomes 31 */
+	if (srds_s1 == 11) {
+		rcwsr28 &= ~FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_MASK;
+		rcwsr28 |= 31 << FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_SHIFT;
+		out_le32(&dcsr->rcwsr[28], rcwsr28);
+	}
 #endif
 
 #ifdef CONFIG_FSL_CAAM
