@@ -74,8 +74,10 @@ int checkboard(void)
 
 #ifndef CONFIG_TARGET_DB1046
 	select_i2c_ch_pca9847(I2C_MUX_CH_DEFAULT, 0);
-#endif
+	puts("Board: LS1046AWRDB, boot from ");
+#else
 	puts("Board: DB1046A, boot from ");
+#endif
 	ret = i2c_get_chip_for_busnum(bus_num, I2C_MUX_IO_ADDR,
 				      1, &dev);
 	if (ret) {
