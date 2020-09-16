@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2018 NXP
+ * Copyright 2018, 2020 NXP
  */
 
 #include <common.h>
@@ -46,6 +46,7 @@ static struct serdes_config serdes1_cfg_tbl[] = {
 	{0x15, {_25GE10, _25GE9, PCIE2, PCIE2, _25GE6, _25GE5, _25GE4,
 		_25GE3 } },
 	{0x16, {XFI10, XFI9, PCIE2, PCIE2, XFI6, XFI5, XFI4, XFI3 } },
+	{0x1f, {XFI10, XFI9, PCIE2, PCIE2, XFI6, XFI5, PCIE1, PCIE1 } },
 	{}
 };
 
