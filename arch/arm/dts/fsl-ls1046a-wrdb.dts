@@ -52,7 +52,7 @@
 		i2c@1 {
 			#address-cells = <1>;
 			#size-cells = <0>;
-			reg = <0x3>;
+			reg = <0x1>;
 
 			rtc@51 {
 				compatible = "pcf2127-rtc";
