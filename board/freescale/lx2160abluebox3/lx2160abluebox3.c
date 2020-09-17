@@ -297,9 +297,6 @@ int checkboard(void)
 	clock = sw >> 4 & SERDES_CLOCK_MASK;
 	printf("Clock2 = %sMHz\n", freq[clock]);
 
-	printf("Serdes1 Protocol: 0x11 is not valid for BlueBox3\n");
-	printf("Using SERDES1 Protocol: 0x10a : Custom Encoding\n");
-
 	return 0;
 }
 
@@ -335,22 +332,19 @@ unsigned long get_board_ddr_clk(void)
 
 int board_init(void)
 {
-#if defined(CONFIG_FSL_MC_ENET)
 	struct ccsr_gur __iomem *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
 	struct ccsr_gur __iomem *dcsr = (void *)(DCFG_DCSR_BASE);
-	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
 	u32 rcwsr28;
 	u32 srds_s1;
+
+#if defined(CONFIG_FSL_MC_ENET)
+	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
 #endif
 #ifdef CONFIG_ENV_IS_NOWHERE
 	gd->env_addr = (ulong)&default_environment[0];
 #endif
 
 	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
-
-#if defined(CONFIG_FSL_MC_ENET)
-	/* invert AQR113 IRQ pins polarity */
-	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR113_IRQ_MASK);
 
 	/* bluebox3 board uses a custom serdes protocol encoding */
 	rcwsr28 = in_le32(&gur->rcwsr[28]);
@@ -363,6 +357,10 @@ int board_init(void)
 		rcwsr28 |= 31 << FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_SHIFT;
 		out_le32(&dcsr->rcwsr[28], rcwsr28);
 	}
+
+#if defined(CONFIG_FSL_MC_ENET)
+	/* invert AQR113 IRQ pins polarity */
+	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR113_IRQ_MASK);
 #endif
 
 #ifdef CONFIG_FSL_CAAM
