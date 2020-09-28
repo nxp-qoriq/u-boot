@@ -82,6 +82,11 @@ static void serial_find_console_or_panic(void)
 		uclass_first_device(UCLASS_SERIAL, &dev);
 		if (dev) {
 			gd->cur_serial_dev = dev;
+			if (IS_ENABLED(CONFIG_SERIAL_PROBE_ALL)) {
+				/* Scanning uclass to probe all devices */
+				for (; dev; uclass_next_device(&dev))
+					;
+			}
 			return;
 		}
 	} else if (CONFIG_IS_ENABLED(OF_CONTROL) && blob) {
@@ -92,11 +97,21 @@ static void serial_find_console_or_panic(void)
 			if (np && !uclass_get_device_by_ofnode(UCLASS_SERIAL,
 					np_to_ofnode(np), &dev)) {
 				gd->cur_serial_dev = dev;
+				if (IS_ENABLED(CONFIG_SERIAL_PROBE_ALL)) {
+					/* Scanning uclass to probe devices */
+					for (; dev; uclass_next_device(&dev))
+						;
+				}
 				return;
 			}
 		} else {
 			if (!serial_check_stdout(blob, &dev)) {
 				gd->cur_serial_dev = dev;
+				if (IS_ENABLED(CONFIG_SERIAL_PROBE_ALL)) {
+					/* Scanning uclass to probe devices */
+					for (; dev; uclass_next_device(&dev))
+						;
+				}
 				return;
 			}
 		}
@@ -121,6 +136,11 @@ static void serial_find_console_or_panic(void)
 		    !uclass_get_device(UCLASS_SERIAL, INDEX, &dev)) {
 			if (dev->flags & DM_FLAG_ACTIVATED) {
 				gd->cur_serial_dev = dev;
+				if (IS_ENABLED(CONFIG_SERIAL_PROBE_ALL)) {
+					/* Scanning uclass to probe devices */
+					for (; dev; uclass_next_device(&dev))
+						;
+				}
 				return;
 			}
 		}
@@ -132,6 +152,11 @@ static void serial_find_console_or_panic(void)
 			if (!ret) {
 				/* Device did succeed probing */
 				gd->cur_serial_dev = dev;
+				if (IS_ENABLED(CONFIG_SERIAL_PROBE_ALL)) {
+					/* Scanning uclass to probe devices */
+					for (; dev; uclass_next_device(&dev))
+						;
+				}
 				return;
 			}
 		}
@@ -140,6 +165,11 @@ static void serial_find_console_or_panic(void)
 		    !uclass_get_device(UCLASS_SERIAL, INDEX, &dev) ||
 		    (!uclass_first_device(UCLASS_SERIAL, &dev) && dev)) {
 			gd->cur_serial_dev = dev;
+			if (IS_ENABLED(CONFIG_SERIAL_PROBE_ALL)) {
+				/* Scanning uclass to probe all devices */
+				for (; dev; uclass_next_device(&dev))
+					;
+			}
 			return;
 		}
 #endif
