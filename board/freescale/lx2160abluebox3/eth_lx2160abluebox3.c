@@ -49,15 +49,6 @@ int board_eth_init(bd_t *bis)
 	/* Register the EMI 2 */
 	fm_memac_mdio_init(bis, &mdio_info);
 
-	/* RGMII setup */
-	wriop_set_phy_address(WRIOP1_DPMAC17, 0, RGMII_PHY_ADDR1);
-	wriop_set_phy_address(WRIOP1_DPMAC18, 0, RGMII_PHY_ADDR2);
-
-	for (i = WRIOP1_DPMAC17; i <= WRIOP1_DPMAC18; i++) {
-		dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO1_NAME);
-		wriop_set_mdio(i, dev);
-        }
-
 	/* BlueBox3 uses custom RCW and SerDes protocol 31, based on 11 */
 	if (srds_s1 != 31) {
 		printf("SerDes1 protocol 0x%x is not supported by LX2160A-BlueBox3\n",
