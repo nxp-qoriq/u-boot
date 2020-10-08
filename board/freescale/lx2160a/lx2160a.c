@@ -355,8 +355,10 @@ int checkboard(void)
 
 	if (src == BOOT_SOURCE_SD_MMC)
 		puts("SD\n");
-	else	if (src == BOOT_SOURCE_XSPI_NOR)
+	else if (src == BOOT_SOURCE_XSPI_NOR)
 		puts("FlexSPI NOR\n");
+	else if (src == BOOT_SOURCE_SD_MMC2)
+		puts("eMMC\n");
 	else
 		printf("invalid boot source setting\n");
 
