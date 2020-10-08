@@ -21,36 +21,6 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#if defined(CONFIG_QSFP_EEPROM) && defined(CONFIG_PHY_CORTINA)
-#define CS4223_CONFIG_ENV	"cs4223_autoconfig"
-#define CS4223_CONFIG_CR4	"copper"
-#define CS4223_CONFIG_SR4	"optical"
-
-enum qsfp_compat_codes {
-	QSFP_COMPAT_XLPPI = 0x01,
-	QSFP_COMPAT_LR4	= 0x02,
-	QSFP_COMPAT_SR4	= 0x04,
-	QSFP_COMPAT_CR4	= 0x08,
-};
-#endif /* CONFIG_QSFP_EEPROM && CONFIG_PHY_CORTINA */
-
-static bool get_inphi_phy_id(struct mii_dev *bus, int addr, int devad)
-{
-	int phy_reg;
-	u32 phy_id;
-
-	phy_reg = bus->read(bus, addr, devad, MII_PHYSID1);
-	phy_id = (phy_reg & 0xffff) << 16;
-
-	phy_reg = bus->read(bus, addr, devad, MII_PHYSID2);
-	phy_id |= (phy_reg & 0xffff);
-
-	if (phy_id == PHY_UID_IN112525_S03)
-		return true;
-	else
-		return false;
-}
-
 int board_eth_init(bd_t *bis)
 {
 #if defined(CONFIG_FSL_MC_ENET)
@@ -60,9 +30,6 @@ int board_eth_init(bd_t *bis)
 	struct mii_dev *dev;
 	struct ccsr_gur *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
 	u32 srds_s1;
-#if defined(CONFIG_QSFP_EEPROM) && defined(CONFIG_PHY_CORTINA)
-	u8 qsfp_compat_code;
-#endif
 
 	srds_s1 = in_le32(&gur->rcwsr[28]) &
 				FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_MASK;
@@ -75,35 +42,9 @@ int board_eth_init(bd_t *bis)
 	/* Register the EMI 1 */
 	fm_memac_mdio_init(bis, &mdio_info);
 
-	reg = (struct memac_mdio_controller *)CONFIG_SYS_FSL_WRIOP1_MDIO2;
-	mdio_info.regs = reg;
-	mdio_info.name = DEFAULT_WRIOP_MDIO2_NAME;
-
-	/* Register the EMI 2 */
-	fm_memac_mdio_init(bis, &mdio_info);
-
-	dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO2_NAME);
 	switch (srds_s1) {
-	case 19:
-		wriop_set_phy_address(WRIOP1_DPMAC2, 0,
-				      CORTINA_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC3, 0,
-				      AQR107_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC4, 0,
-				      AQR107_PHY_ADDR2);
-		if (get_inphi_phy_id(dev, INPHI_PHY_ADDR1, MDIO_MMD_VEND1)) {
-			wriop_set_phy_address(WRIOP1_DPMAC5, 0,
-					      INPHI_PHY_ADDR1);
-			wriop_set_phy_address(WRIOP1_DPMAC6, 0,
-					      INPHI_PHY_ADDR1);
-		}
-		wriop_set_phy_address(WRIOP1_DPMAC17, 0,
-				      RGMII_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC18, 0,
-				      RGMII_PHY_ADDR2);
-		break;
-
 	case 18:
+	case 22:
 		wriop_set_phy_address(WRIOP1_DPMAC3, 0,
 				      AQR113_PHY_ADDR1);
 		wriop_set_phy_address(WRIOP1_DPMAC4, 0,
@@ -118,7 +59,7 @@ int board_eth_init(bd_t *bis)
 		goto next;
 	}
 
-	for (i = WRIOP1_DPMAC2; i <= WRIOP1_DPMAC10; i++) {
+	for (i = WRIOP1_DPMAC3; i <= WRIOP1_DPMAC5; i++) {
 		interface = wriop_get_enet_if(i);
 		switch (interface) {
 		case PHY_INTERFACE_MODE_XGMII:
@@ -126,8 +67,7 @@ int board_eth_init(bd_t *bis)
 			wriop_set_mdio(i, dev);
 			break;
 		case PHY_INTERFACE_MODE_25G_AUI:
-			dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO2_NAME);
-			wriop_set_mdio(i, dev);
+			/* TO DO for TI retimer DS250DF230 */
 			break;
 		default:
 			break;
@@ -146,26 +86,6 @@ int board_eth_init(bd_t *bis)
 		}
 
 next:
-#if defined(CONFIG_QSFP_EEPROM) && defined(CONFIG_PHY_CORTINA)
-	/* read qsfp+ eeprom & update environment for cs4223 init */
-	select_i2c_ch_pca9547(I2C_MUX_CH_SEC);
-	select_i2c_ch_pca9547_sec(I2C_MUX_CH_QSFP);
-	qsfp_compat_code = get_qsfp_compat0();
-	switch (qsfp_compat_code) {
-	case QSFP_COMPAT_CR4:
-		env_set(CS4223_CONFIG_ENV, CS4223_CONFIG_CR4);
-		break;
-	case QSFP_COMPAT_XLPPI:
-	case QSFP_COMPAT_SR4:
-		env_set(CS4223_CONFIG_ENV, CS4223_CONFIG_SR4);
-		break;
-	default:
-		/* do nothing if detection fails or not supported*/
-		break;
-	}
-	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
-#endif /* CONFIG_QSFP_EEPROM & CONFIG_PHY_CORTINA */
-
 	cpu_eth_init(bis);
 #endif /* CONFIG_FSL_MC_ENET */
 
@@ -195,32 +115,6 @@ void reset_phy(void)
 
 int fdt_fixup_board_phy(void *fdt)
 {
-	int mdio_offset;
-	int ret;
-	struct mii_dev *dev;
-
-	ret = 0;
-
-	dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO2_NAME);
-	if (!get_inphi_phy_id(dev, INPHI_PHY_ADDR1, MDIO_MMD_VEND1)) {
-		mdio_offset = fdt_path_offset(fdt, "/soc/mdio@0x8B97000");
-
-		if (mdio_offset < 0)
-			mdio_offset = fdt_path_offset(fdt, "/mdio@0x8B97000");
-
-		if (mdio_offset < 0) {
-			printf("mdio@0x8B9700 node not found in dts\n");
-			return mdio_offset;
-		}
-
-		ret = fdt_setprop_string(fdt, mdio_offset, "status",
-					 "disabled");
-		if (ret) {
-			printf("Could not set disable mdio@0x8B97000 %s\n",
-			       fdt_strerror(ret));
-			return ret;
-		}
-	}
-
-	return ret;
+	/* TO DO */
+	return 0;
 }
