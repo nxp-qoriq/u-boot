@@ -159,7 +159,7 @@ void serdes_init(u32 sd, u32 sd_addr, u32 rcwsr, u32 sd_prctl_mask,
 			if (lane_prtcl >= XFI1 && lane_prtcl <= XFI14)
 				wriop_init_dpmac(sd, xfi_dpmac[lane_prtcl],
 						 (int)lane_prtcl);
-#ifdef CONFIG_TARGET_LX2160ABNYRG
+#ifdef CONFIG_TARGET_LA1224RDB
 			if (lane_prtcl >= SGMII1 && lane_prtcl <= SGMII12)
 				wriop_init_dpmac(sd, sgmii_dpmac[lane_prtcl],
 						 (int)lane_prtcl);

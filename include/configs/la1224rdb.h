@@ -3,8 +3,8 @@
  * Copyright 2020 NXP
  */
 
-#ifndef __LX2_BNYRG_H
-#define __LX2_BNYRG_H
+#ifndef __LA1224_RDB_H
+#define __LA1224_RDB_H
 
 #include "lx2160a_common.h"
 
@@ -15,7 +15,7 @@
 #define I2C_VOL_MONITOR_BUS_V_OFFSET	0x2
 #define I2C_VOL_MONITOR_BUS_V_OVF	0x1
 #define I2C_VOL_MONITOR_BUS_V_SHIFT	3
-#define CONFIG_VID_FLS_ENV		"lx2160abnyrg_vdd_mv"
+#define CONFIG_VID_FLS_ENV		"la1224rdb_vdd_mv"
 #define CONFIG_VID
 
 /* The lowest and highest voltage allowed*/
@@ -74,8 +74,8 @@
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
-	"lx2160abnyrg_vdd_mv=800\0"		\
-	"BOARD=lx2160abnyrg\0"			\
+	"la1224rdb_vdd_mv=800\0"		\
+	"BOARD=la1224rdb\0"			\
 	"xspi_bootcmd=echo Trying load from flexspi..;"		\
 		"sf probe 0:0 && sf read $load_addr "		\
 		"$kernel_start $kernel_size ; env exists secureboot &&"	\
@@ -92,4 +92,4 @@
 
 #include <asm/fsl_secure_boot.h>
 
-#endif /* __LX2_BNYRG_H */
+#endif /* __LA1224_RDB_H */
