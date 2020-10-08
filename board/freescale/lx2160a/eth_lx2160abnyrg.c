@@ -104,28 +104,12 @@ int board_eth_init(bd_t *bis)
 		break;
 
 	case 18:
-		wriop_set_phy_address(WRIOP1_DPMAC7, 0,
-				      CORTINA_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC8, 0,
-				      CORTINA_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC9, 0,
-				      CORTINA_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC10, 0,
-				      CORTINA_PHY_ADDR1);
 		wriop_set_phy_address(WRIOP1_DPMAC3, 0,
-				      AQR107_PHY_ADDR1);
+				      AQR113_PHY_ADDR1);
 		wriop_set_phy_address(WRIOP1_DPMAC4, 0,
-				      AQR107_PHY_ADDR2);
-		if (get_inphi_phy_id(dev, INPHI_PHY_ADDR1, MDIO_MMD_VEND1)) {
-			wriop_set_phy_address(WRIOP1_DPMAC5, 0,
-					      INPHI_PHY_ADDR1);
-			wriop_set_phy_address(WRIOP1_DPMAC6, 0,
-					      INPHI_PHY_ADDR1);
-		}
+				      AQR113_PHY_ADDR2);
 		wriop_set_phy_address(WRIOP1_DPMAC17, 0,
 				      RGMII_PHY_ADDR1);
-		wriop_set_phy_address(WRIOP1_DPMAC18, 0,
-				      RGMII_PHY_ADDR2);
 		break;
 
 	default:
@@ -145,26 +129,21 @@ int board_eth_init(bd_t *bis)
 			dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO2_NAME);
 			wriop_set_mdio(i, dev);
 			break;
-		case PHY_INTERFACE_MODE_XLAUI:
-			dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO1_NAME);
-			wriop_set_mdio(i, dev);
-			break;
 		default:
 			break;
 		}
 	}
-	for (i = WRIOP1_DPMAC17; i <= WRIOP1_DPMAC18; i++) {
-		interface = wriop_get_enet_if(i);
+
+		interface = wriop_get_enet_if(WRIOP1_DPMAC17);
 		switch (interface) {
 		case PHY_INTERFACE_MODE_RGMII:
 		case PHY_INTERFACE_MODE_RGMII_ID:
 			dev = miiphy_get_dev_by_name(DEFAULT_WRIOP_MDIO1_NAME);
-			wriop_set_mdio(i, dev);
+			wriop_set_mdio(WRIOP1_DPMAC17, dev);
 			break;
 		default:
 			break;
 		}
-	}
 
 next:
 #if defined(CONFIG_QSFP_EEPROM) && defined(CONFIG_PHY_CORTINA)
