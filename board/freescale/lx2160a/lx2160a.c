@@ -29,9 +29,14 @@
 #include <fsl_immap.h>
 #include <asm/arch-fsl-layerscape/fsl_icid.h>
 #include <asm/gic-v3.h>
+#include <fsl_dspi.h>
 
 #ifdef CONFIG_EMC2305
 #include "../common/emc2305.h"
+#endif
+
+#ifdef CONFIG_TARGET_LA1224RDB
+#define SPI_MCR_REG            0x2120000
 #endif
 
 #define GIC_LPI_SIZE                             0x200000
@@ -624,9 +629,25 @@ int config_board_mux(void)
 
 	return 0;
 }
-#else
+#elif defined(CONFIG_TARGET_LA1224RDB)
+static void set_spi_cs_signal_inactive(void)
+{
+	/*default: all CS signals inactive state is high*/
+	u32 mcr_val;
+	u32 mcr_cfg_val = DSPI_MCR_MSTR | DSPI_MCR_PCSIS_MASK |
+			DSPI_MCR_CRXF | DSPI_MCR_CTXF;
+	mcr_val = in_le32(SPI_MCR_REG);
+	mcr_val |= DSPI_MCR_HALT;
+	out_le32(SPI_MCR_REG, mcr_val);
+	out_le32(SPI_MCR_REG, mcr_cfg_val);
+	mcr_val = in_le32(SPI_MCR_REG);
+	mcr_val &= ~DSPI_MCR_HALT;
+	out_le32(SPI_MCR_REG, mcr_val);
+}
+
 int config_board_mux(void)
 {
+	set_spi_cs_signal_inactive();
 	return 0;
 }
 #endif
