@@ -74,7 +74,7 @@ U_BOOT_DEVICE(nxp_serial1) = {
 	.name = "serial_pl01x",
 	.platdata = &serial1,
 };
-
+#ifndef CONFIG_TARGET_LX2160A_PCHIPLET
 int select_i2c_ch_pca9547(u8 ch)
 {
 	int ret;
@@ -116,7 +116,7 @@ int select_i2c_ch_pca9547_sec(u8 ch)
 
 	return 0;
 }
-
+#endif
 static void uart_get_clock(void)
 {
 	serial0.clock = get_serial_clock();
@@ -281,10 +281,12 @@ int esdhc_status_fixup(void *blob, const char *compat)
 #if defined(CONFIG_TARGET_LX2160AQDS)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
-#else
+#elif defined(CONFIG_TARGET_LX2160ARDB)
 	/* Enable both esdhc DT nodes for LX2160ARDB */
 	do_fixup_by_compat(blob, compat, "status", "okay",
 			   sizeof("okay"), 1);
+#else
+	/* Configure esdhc status in dts file */
 #endif
 	return 0;
 }
@@ -315,7 +317,9 @@ int checkboard(void)
 {
 	enum boot_src src = get_boot_src();
 	char buf[64];
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2160ARDB)
 	u8 sw;
+#endif
 #ifdef CONFIG_TARGET_LX2160AQDS
 	int clock;
 	static const char *const freq[] = {"100", "125", "156.25",
@@ -327,18 +331,22 @@ int checkboard(void)
 	cpu_name(buf);
 #ifdef CONFIG_TARGET_LX2160AQDS
 	printf("Board: %s-QDS, ", buf);
-#else
+#elif defined(CONFIG_TARGET_LX2160ARDB)
 	printf("Board: %s-RDB, ", buf);
+#else
+	printf("Board: %s-Pchiplet, ", buf);
 #endif
 
+#ifndef CONFIG_TARGET_LX2160A_PCHIPLET
 	sw = QIXIS_READ(arch);
 	printf("Board version: %c, boot from ", (sw & 0xf) - 1 + 'A');
-
+#endif
 	if (src == BOOT_SOURCE_SD_MMC) {
 		puts("SD\n");
 	} else if (src == BOOT_SOURCE_SD_MMC2) {
 		puts("eMMC\n");
 	} else {
+#ifndef CONFIG_TARGET_LX2160A_PCHIPLET
 		sw = QIXIS_READ(brdcfg[0]);
 		sw = (sw >> QIXIS_XMAP_SHIFT) & QIXIS_XMAP_MASK;
 		switch (sw) {
@@ -357,6 +365,9 @@ int checkboard(void)
 			printf("invalid setting, xmap: %d\n", sw);
 			break;
 		}
+#else
+		puts("FlexSPI\n");
+#endif
 	}
 #ifdef CONFIG_TARGET_LX2160AQDS
 	printf("FPGA: v%d (%s), build %d",
@@ -383,9 +394,14 @@ int checkboard(void)
 	puts("\nSERDES3 Reference : ");
 	clock = sw >> 4;
 	printf("Clock1 = %sMHz Clock2 = %sMHz\n", freq[clock], freq[clock]);
-#else
+#elif defined(CONFIG_TARGET_LX2160ARDB)
 	printf("FPGA: v%d.%d\n", QIXIS_READ(scver), QIXIS_READ(tagdata));
 
+	puts("SERDES1 Reference: Clock1 = 161.13MHz Clock2 = 161.13MHz\n");
+	puts("SERDES2 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+	puts("SERDES3 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+#else
+	/* fix me */
 	puts("SERDES1 Reference: Clock1 = 161.13MHz Clock2 = 161.13MHz\n");
 	puts("SERDES2 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
 	puts("SERDES3 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
@@ -588,9 +604,9 @@ int board_init(void)
 #ifdef CONFIG_ENV_IS_NOWHERE
 	gd->env_addr = (ulong)&default_environment[0];
 #endif
-
+#ifndef CONFIG_TARGET_LX2160A_PCHIPLET
 	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
-
+#endif
 #if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LX2160ARDB)
 	/* invert AQR107 IRQ pins polarity */
 	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR107_IRQ_MASK);

@@ -180,6 +180,7 @@ static void erratum_a009007(void)
 }
 
 #if defined(CONFIG_FSL_LSCH3)
+#ifndef CONFIG_TARGET_LX2160A_PCHIPLET
 static void erratum_a050106(void)
 {
 #if defined(CONFIG_ARCH_LX2160A)
@@ -189,6 +190,7 @@ static void erratum_a050106(void)
 	PROGRAM_USB_PHY_RX_OVRD_IN_HI(dcsr + DCSR_USB_PHY2);
 #endif
 }
+#endif
 /*
  * This erratum requires setting a value to eddrtqcr1 to
  * optimal the DDR performance.
@@ -340,7 +342,9 @@ void fsl_lsch3_early_init_f(void)
 	erratum_a009798();
 	erratum_a008997();
 	erratum_a009007();
+#ifndef CONFIG_TARGET_LX2160A_PCHIPLET
 	erratum_a050106();
+#endif
 #ifdef CONFIG_CHAIN_OF_TRUST
 	/* In case of Secure Boot, the IBR configures the SMMU
 	* to allow only Secure transactions.

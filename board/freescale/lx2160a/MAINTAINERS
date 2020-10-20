@@ -24,3 +24,12 @@ LX2160AQDS_SECURE_BOOT BOARD
 M:	Udit Agarwal <udit.agarwal@nxp.com>
 S:	Maintained
 F:	configs/lx2160aqds_tfa_SECURE_BOOT_defconfig
+
+LX2160A-PCHIPLET BOARD
+M:	Yanan Yang <yanan.yang@nxp.com>
+S:	Maintained
+F:	board/freescale/lx2160a/
+F:	include/configs/lx2160a_common.h
+F:	include/configs/lx2160apchiplet.h
+F:	configs/lx2160apchiplet_tfa_defconfig
+F:	arch/arm/dts/fsl-lx2160a-pchiplet.dts
