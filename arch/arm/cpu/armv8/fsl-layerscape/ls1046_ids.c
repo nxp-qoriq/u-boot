@@ -24,7 +24,7 @@ struct qportal_info qp_info[CONFIG_SYS_QMAN_NUM_PORTALS] = {
 #endif
 
 struct icid_id_table icid_tbl[] = {
-#ifdef CONFIG_SYS_DPAA_QBMAN
+#if defined(CONFIG_SYS_DPAA_QBMAN) && defined(CONFIG_SETUP_DPAA1_SMMU)
 	SET_QMAN_ICID(FSL_DPAA1_STREAM_ID_START),
 	SET_BMAN_ICID(FSL_DPAA1_STREAM_ID_START + 1),
 #endif

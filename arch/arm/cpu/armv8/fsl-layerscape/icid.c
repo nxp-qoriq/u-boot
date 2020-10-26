@@ -41,7 +41,7 @@ void set_icids(void)
 	/* setup general icid offsets */
 	set_icid(icid_tbl, icid_tbl_sz);
 
-#ifdef CONFIG_SYS_DPAA_FMAN
+#if defined(CONFIG_SYS_DPAA_FMAN) && defined(CONFIG_SETUP_DPAA1_SMMU)
 	set_fman_icids(fman_icid_tbl, fman_icid_tbl_sz);
 #endif
 }
@@ -189,7 +189,7 @@ void fdt_fixup_icid(void *blob)
 
 	fdt_fixup_icid_tbl(blob, smmu_ph, icid_tbl, icid_tbl_sz);
 
-#ifdef CONFIG_SYS_DPAA_FMAN
+#if defined(CONFIG_SYS_DPAA_FMAN) && defined(CONFIG_SETUP_DPAA1_SMMU)
 	fdt_fixup_fman_icids(blob, smmu_ph);
 #endif
 }

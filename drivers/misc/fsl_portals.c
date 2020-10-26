@@ -197,7 +197,8 @@ void fdt_fixup_qportals(void *blob)
 	char compat[64];
 	int compat_len;
 
-#if defined(CONFIG_ARCH_LS1043A) || defined(CONFIG_ARCH_LS1046A)
+#if defined(CONFIG_ARCH_LS1043A) || defined(CONFIG_ARCH_LS1046A) && \
+defined(CONFIG_SETUP_DPAA1_SMMU)
 	int smmu_ph = fdt_get_smmu_phandle(blob);
 #endif
 
@@ -212,7 +213,7 @@ void fdt_fixup_qportals(void *blob)
 	off = fdt_node_offset_by_compatible(blob, -1, "fsl,qman-portal");
 	while (off != -FDT_ERR_NOTFOUND) {
 #if defined(CONFIG_PPC) || defined(CONFIG_ARCH_LS1043A) || \
-defined(CONFIG_ARCH_LS1046A)
+defined(CONFIG_ARCH_LS1046A) && defined(CONFIG_SETUP_DPAA1_SMMU)
 #ifdef CONFIG_FSL_CORENET
 		u32 liodns[2];
 #endif
@@ -276,7 +277,8 @@ defined(CONFIG_ARCH_LS1046A)
 			goto err;
 #endif
 #else
-#if defined(CONFIG_ARCH_LS1043A) || defined(CONFIG_ARCH_LS1046A)
+#if defined(CONFIG_ARCH_LS1043A) || defined(CONFIG_ARCH_LS1046A) && \
+defined(CONFIG_SETUP_DPAA1_SMMU)
 		if (smmu_ph >= 0) {
 			u32 icids[3];
 
