@@ -102,6 +102,7 @@
 
 #define SGMII_PHY1_ADDR			0x2
 #define SGMII_PHY2_ADDR			0x3
+#define FM1_10GEC1_PHY_ADDR		0x8
 #endif
 
 #define FM1_10GEC2_PHY_ADDR		0x0

@@ -55,6 +55,9 @@ int board_eth_init(bd_t *bis)
 #endif
 	/* Set the on-board AQ PHY address */
 	fm_info_set_phy_address(FM1_10GEC2, FM1_10GEC2_PHY_ADDR);
+#ifndef CONFIG_TARGET_DB1046
+	fm_info_set_phy_address(FM1_10GEC1, FM1_10GEC1_PHY_ADDR);
+#endif
 
 	switch (srds_s1) {
 	case 0x1133:
@@ -75,6 +78,9 @@ int board_eth_init(bd_t *bis)
 	dev = miiphy_get_dev_by_name(DEFAULT_FM_TGEC_MDIO_NAME);
 	fm_info_set_mdio(FM1_10GEC2, dev);
 
+#ifndef CONFIG_TARGET_DB1046
+	fm_info_set_mdio(FM1_10GEC1, dev);
+#endif
 	cpu_eth_init(bis);
 #endif
 
