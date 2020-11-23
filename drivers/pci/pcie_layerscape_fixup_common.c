@@ -40,7 +40,6 @@ int lx2_board_fix_fdt(void *fdt)
 		{ "config_axi_slave", "config" }
 	};
 	int off = -1, i;
-	u32 val;
 
 	off = fdt_node_offset_by_compatible(fdt, -1, "fsl,lx2160a-pcie");
 	while (off != -FDT_ERR_NOTFOUND) {
@@ -83,8 +82,6 @@ int lx2_board_fix_fdt(void *fdt)
 		fdt_setprop(fdt, off, "reg-names", reg_names, names_len);
 		fdt_delprop(fdt, off, "apio-wins");
 		fdt_delprop(fdt, off, "ppio-wins");
-		val = cpu_to_fdt32(0x4);
-		fdt_setprop(fdt, off, "num-lanes", &val, sizeof(val));
 		off = fdt_node_offset_by_compatible(fdt, off,
 						    "fsl,lx2160a-pcie");
 	}
