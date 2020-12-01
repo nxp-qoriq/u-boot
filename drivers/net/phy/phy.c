@@ -2,6 +2,7 @@
 /*
  * Generic PHY Management code
  *
+ * Copyright 2020 NXP
  * Copyright 2011 Freescale Semiconductor, Inc.
  * author Andy Fleming
  *

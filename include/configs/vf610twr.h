@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
+ * Copyright 2020 NXP
  * Copyright 2013 Freescale Semiconductor, Inc.
  *
  * Configuration settings for the Freescale Vybrid vf610twr board.

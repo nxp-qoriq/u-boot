@@ -3,7 +3,7 @@
  * NXP FlexSPI(FSPI) controller driver.
  *
  * Copyright (c) 2019 Michael Walle <michael@walle.cc>
- * Copyright (c) 2019 NXP
+ * Copyright 2019-2020 NXP
  *
  * This driver was originally ported from the linux kernel v5.4-rc3, which had
  * the following notes:

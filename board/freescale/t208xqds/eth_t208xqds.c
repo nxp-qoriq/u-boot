@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
+ * Copyright 2020 NXP
  * Copyright 2013 Freescale Semiconductor, Inc.
  *
  * Shengzhou Liu <Shengzhou.Liu@freescale.com>

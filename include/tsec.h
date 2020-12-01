@@ -4,6 +4,7 @@
  *
  *  Driver for the Motorola Triple Speed Ethernet Controller
  *
+ * Copyright 2020 NXP
  * Copyright 2004, 2007, 2009, 2011, 2013 Freescale Semiconductor, Inc.
  * (C) Copyright 2003, Motorola, Inc.
  * maintained by Xianghua Xiao (x.xiao@motorola.com)

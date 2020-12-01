@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
+ * Copyright 2020 NXP
  * Copyright 2009-2012 Freescale Semiconductor, Inc.
  *
  * This file is derived from arch/powerpc/cpu/mpc85xx/cpu.c and

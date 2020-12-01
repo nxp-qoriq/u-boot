@@ -2,6 +2,7 @@
 /*
  * Freescale ls2080a QDS board device tree source
  *
+ * Copyright 2020 NXP
  * Copyright 2013-2015 Freescale Semiconductor, Inc.
  */
 

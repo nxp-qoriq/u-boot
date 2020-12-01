@@ -2,6 +2,7 @@
 /*
  * Device Tree Include file for Freescale Layerscape-1012A family SoC.
  *
+ * Copyright 2020 NXP
  * Copyright 2016, Freescale Semiconductor
  */
 

@@ -2,6 +2,7 @@
 /*
  * Freescale Three Speed Ethernet Controller driver
  *
+ * Copyright 2020 NXP
  * Copyright 2004-2011, 2013 Freescale Semiconductor, Inc.
  * (C) Copyright 2003, Motorola, Inc.
  * author Andy Fleming

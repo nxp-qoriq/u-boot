@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2016 by NXP Semiconductors Inc.
+ * Copyright 2016-2020 NXP
  * Date & Time support for PCF2127 RTC
- * Copyright 2020 NXP
  */
 
 /*	#define	DEBUG	*/
