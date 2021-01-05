@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2018-2020 NXP
+ * Copyright 2018-2021 NXP
  */
 
 #include <common.h>
@@ -38,7 +38,8 @@
 #endif
 
 #define GIC_LPI_SIZE                             0x200000
-#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS) || \
+	defined(CONFIG_TARGET_LA1238MB)
 #define CFG_MUX_I2C_SDHC(reg, value)		((reg & 0x3f) | value)
 #define SET_CFG_MUX1_SDHC1_SDHC(reg)		(reg & 0x3f)
 #define SET_CFG_MUX2_SDHC1_SPI(reg, value)	((reg & 0xcf) | value)
@@ -213,7 +214,8 @@ int board_fix_fdt(void *fdt)
 }
 #endif
 
-#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS) || \
+	defined(CONFIG_TARGET_LA1238MB)
 void esdhc_dspi_status_fixup(void *blob)
 {
 	const char esdhc0_path[] = "/soc/esdhc@2140000";
@@ -281,7 +283,8 @@ void esdhc_dspi_status_fixup(void *blob)
 
 int esdhc_status_fixup(void *blob, const char *compat)
 {
-#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS) || \
+	defined(CONFIG_TARGET_LA1238MB)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
 #else
@@ -314,6 +317,53 @@ int init_func_vid(void)
 }
 #endif
 
+#if defined(CONFIG_TARGET_LA1238MB)
+static inline uint32_t get_board_version(void)
+{
+	struct ccsr_gpio *pgpio = (void *)(GPIO3_BASE_ADDR);
+
+	/* GPIO 13 and GPIO 14 are used for Board Rev */
+	u32 gpio_val = ((in_be32(&pgpio->gpdat) >> BOARD_REV_GPIO_SHIFT))
+		& BOARD_REV_MASK;
+
+	/* GPIOs' are 0..31 in Big Endiness, swap GPIO 13 and GPIO 14 */
+	return ((gpio_val >> 1) | (gpio_val << 1)) & BOARD_REV_MASK;
+}
+
+int checkboard(void)
+{
+	enum boot_src src = get_boot_src();
+	u32 rev = get_board_version();
+	char buf[64];
+
+	cpu_name(buf);
+	printf("CPU: %s\n", buf);
+
+	switch (rev) {
+	case 0x00:
+		puts("Board: LA1238MB, Rev: A, boot from ");
+		break;
+	case 0x01:
+		puts("Board: LA1238MB, Rev: B, boot from ");
+		break;
+	default:
+		puts("Board: LA1238MB, Rev: Unknown, boot from ");
+		break;
+	}
+
+	if (src == BOOT_SOURCE_SD_MMC2)
+		puts("eMMC\n");
+	else if (src == BOOT_SOURCE_XSPI_NOR)
+		puts("FlexSPI NOR\n");
+	else
+		puts("Invalid source\n");
+
+	puts("SERDES1 Reference Clock = 156.25\n");
+	puts("SERDES2 Reference Clock1 = 100MHz Clock2 = 100MHz\n");
+
+	return 0;
+}
+#else
 int checkboard(void)
 {
 	enum boot_src src = get_boot_src();
@@ -397,6 +447,7 @@ int checkboard(void)
 #endif
 	return 0;
 }
+#endif
 
 #if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 /*
@@ -578,6 +629,13 @@ int config_board_mux(void)
 	return 0;
 }
 #else
+/* TBD for CONFIG_TARGET_LA1238MB */
+#if defined(CONFIG_BOARD_EARLY_INIT_R)
+int board_early_init_r(void)
+{
+	return 0;
+}
+#endif
 int config_board_mux(void)
 {
 	return 0;
@@ -622,6 +680,7 @@ unsigned long get_board_ddr_clk(void)
 #endif
 }
 
+/* TBD for CONFIG_TARGET_LA1238MB */
 int board_init(void)
 {
 #if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LX2160ARDB)
@@ -789,7 +848,7 @@ int ft_board_setup(void *blob, bd_t *bd)
 	return 0;
 }
 #endif
-
+#if !defined(CONFIG_TARGET_LA1238MB)
 void qixis_dump_switch(void)
 {
 	int i, nr_of_cfgsw;
@@ -803,3 +862,4 @@ void qixis_dump_switch(void)
 		printf("SW%d = (0x%02x)\n", i, QIXIS_READ(cms[1]));
 	}
 }
+#endif

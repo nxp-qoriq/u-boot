@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * Copyright 2018-2020 NXP
+ * Copyright 2018-2021 NXP
  */
 
 #ifndef __LX2_COMMON_H
@@ -131,10 +131,12 @@
 #define I2C_SFP_EEPROM_ADDR	0x50
 #define I2C_SFP_EEPROM_ADDR_LEN	1
 
+#if !defined(CONFIG_TARGET_LA1238MB)
 /* Qixis */
 #define CONFIG_FSL_QIXIS
 #define CONFIG_QIXIS_I2C_ACCESS
 #define CONFIG_SYS_I2C_FPGA_ADDR		0x66
+#endif
 
 /* PCI */
 #ifdef CONFIG_PCI
@@ -162,7 +164,7 @@
 /* USB */
 #ifdef CONFIG_USB
 #define CONFIG_HAS_FSL_XHCI_USB
-#ifndef CONFIG_TARGET_LX2162AQDS
+#if !defined(CONFIG_TARGET_LX2162AQDS) && !defined(CONFIG_TARGET_LA1238MB)
 #define CONFIG_USB_MAX_CONTROLLER_COUNT	2
 #endif
 #endif

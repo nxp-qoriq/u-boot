@@ -57,3 +57,20 @@ config SYS_CONFIG_NAME
 
 source "board/freescale/common/Kconfig"
 endif
+
+if TARGET_LA1238MB
+
+config SYS_BOARD
+	default "lx2160a"
+
+config SYS_VENDOR
+	default "freescale"
+
+config SYS_SOC
+	default "fsl-layerscape"
+
+config SYS_CONFIG_NAME
+	default "la1238mb"
+
+source "board/freescale/common/Kconfig"
+endif
