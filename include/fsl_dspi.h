@@ -3,6 +3,7 @@
  * Freescale DSPI Module Defines
  *
  * Copyright (C) 2004-2007, 2015 Freescale Semiconductor, Inc.
+ * Copyright 2021 NXP
  * TsiChung Liew (Tsi-Chung.Liew@freescale.com)
  * Chao Fu (B44548@freesacle.com)
  * Haikun Wang (B53464@freescale.com)
@@ -31,6 +32,13 @@ struct dspi {
 #endif
 };
 
+/* DSPI Module regs address */
+#define SPI_MCR_REG		(0x2120000)
+#define SPI_CTAR0_REG		(0x2120000 + 0x0C)
+#define SPI_CTARE0_REG		(0x2120000 + 0x11)
+#define SPI_SR_REG		(0x2120000 + 0x2C)
+#define SPI_RSER_REG		(0x2120000 + 0x30)
+
 /* Module configuration */
 #define DSPI_MCR_MSTR			0x80000000
 #define DSPI_MCR_CSCK			0x40000000
@@ -56,6 +64,7 @@ struct dspi {
 #define DSPI_MCR_CTXF			0x00000800
 #define DSPI_MCR_CRXF			0x00000400
 #define DSPI_MCR_SMPL_PT(x)		(((x) & 0x03) << 8)
+#define DSPI_MCR_XSPI			0x00000008
 #define DSPI_MCR_FCPCS			0x00000001
 #define DSPI_MCR_PES			0x00000001
 #define DSPI_MCR_HALT			0x00000001
@@ -94,15 +103,21 @@ struct dspi {
 #define DSPI_CTAR_ASC(x)		(((x) & 0x0F) << 8)
 #define DSPI_CTAR_DT(x)			(((x) & 0x0F) << 4)
 #define DSPI_CTAR_BR(x)			((x) & 0x0F)
-
+#define DSPI_CTAR_X_TRSZ		(1 << 16)
+#define DSPI_CTAR_X_DTCP(x)   ((x) & 0x7FF)
 /* Status */
 #define DSPI_SR_TCF			0x80000000
 #define DSPI_SR_TXRXS			0x40000000
 #define DSPI_SR_EOQF			0x10000000
 #define DSPI_SR_TFUF			0x08000000
 #define DSPI_SR_TFFF			0x02000000
+#define DSPI_SR_BSYF			0x01000000
+#define DSPI_SR_CMDTCF			0x00800000
+#define DSPI_SR_SPEF			0x00200000
 #define DSPI_SR_RFOF			0x00080000
+#define DSPI_SR_TFIWF			0x00040000
 #define DSPI_SR_RFDF			0x00020000
+#define DSPI_SR_CMDFFF			0x00010000
 #define DSPI_SR_TXCTR(x)		(((x) & 0x0000F000) >> 12)
 #define DSPI_SR_TXPTR(x)		(((x) & 0x00000F00) >> 8)
 #define DSPI_SR_RXCTR(x)		(((x) & 0x000000F0) >> 4)
