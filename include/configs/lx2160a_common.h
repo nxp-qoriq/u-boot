@@ -324,7 +324,8 @@ int select_i2c_ch_pca9547_sec(unsigned char ch);
 #define BOOT_TARGET_DEVICES(func) \
 	func(USB, usb, 0) \
 	func(MMC, mmc, 0) \
-	func(MMC, mmc, 1)
+	func(MMC, mmc, 1) \
+	func(DHCP, dhcp, na)
 #endif
 #include <config_distro_bootcmd.h>
 
