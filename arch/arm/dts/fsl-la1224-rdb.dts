@@ -2,7 +2,7 @@
 /*
  * NXP LA1224RDB device tree source
  *
- * Copyright 2020 NXP
+ * Copyright 2020-2021 NXP
  *
  */
 
@@ -11,7 +11,7 @@
 #include "fsl-lx2160a.dtsi"
 
 / {
-	model = "NXP Layerscape LA1224RDB Board";
+	model = "NXP Layerscape LA1224-RDB Board";
 	compatible = "nxp,la1224rdb", "fsl,lx2160a";
 
 	aliases {
