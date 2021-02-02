@@ -863,3 +863,10 @@ void qixis_dump_switch(void)
 	}
 }
 #endif
+
+#if defined(CONFIG_ENV_IS_IN_MMC) && defined(CONFIG_TARGET_LA1238MB)
+int mmc_get_env_dev(void)
+{
+	return 0;
+}
+#endif
