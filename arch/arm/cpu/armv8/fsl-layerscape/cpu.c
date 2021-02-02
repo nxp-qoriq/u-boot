@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2017-2020 NXP
+ * Copyright 2017-2021 NXP
  * Copyright 2014-2015 Freescale Semiconductor, Inc.
  */
 
@@ -792,7 +792,7 @@ enum boot_src get_boot_src(void)
 }
 
 #ifdef CONFIG_ENV_IS_IN_MMC
-int mmc_get_env_dev(void)
+__weak int mmc_get_env_dev(void)
 {
 	enum boot_src src = get_boot_src();
 	int dev = CONFIG_SYS_MMC_ENV_DEV;
