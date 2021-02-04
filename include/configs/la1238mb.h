@@ -8,6 +8,24 @@
 
 #include "lx2160a_common.h"
 
+#define PCAL_BUS_NO		1
+#define BOOT_FROM_XSPI		1
+#define BOOT_FROM_EMMC		2
+#define PCAL_CPU_ADDR		0x20
+#define PCAL_MODEM_ADDR		0x21
+#define PCAL_INPUT_PORT		0x00
+#define PCAL_OUTPUT_PORT	0x01
+#define PCAL_POL_INV		0x02
+#define PCAL_CONFIG		0x03
+#define PCAL_ODS_0		0x40
+#define PCAL_ODS_1		0x41
+#define PCAL_INPUT_LATCH	0x42
+#define PCAL_PU_PD_ENABLE	0x43
+#define PCAL_PU_PD_SEL		0x44
+#define PCAL_INT_MASK		0x45
+#define PCAL_INT_STATUS		0x46
+#define PCAL_OUT_PORT_CONFIG	0x47
+
 #undef BOOT_TARGET_DEVICES
 #define BOOT_TARGET_DEVICES(func) \
 	func(MMC, mmc, 1) \

@@ -870,3 +870,67 @@ int mmc_get_env_dev(void)
 	return 0;
 }
 #endif
+
+#if defined(CONFIG_TARGET_LA1238MB)
+static int switch_boot_source(int src_id)
+{
+	int ret;
+	struct udevice *dev;
+	u8 data;
+
+	ret = i2c_get_chip_for_busnum(PCAL_BUS_NO, PCAL_CPU_ADDR, 1, &dev);
+	if (ret) {
+		printf("%s: Cannot find udev for a bus %d\n", __func__,
+		       PCAL_BUS_NO);
+		return -ENXIO;
+	}
+
+	/* Make all rcw src pin output, don't touch svr pins */
+	data = 0xf0;
+	ret = dm_i2c_write(dev, PCAL_CONFIG, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u\n",
+		       PCAL_CPU_ADDR, PCAL_CONFIG, data);
+		return ret;
+	}
+
+	switch (src_id) {
+	case BOOT_FROM_XSPI:
+		data = 0xf0;
+		break;
+	case BOOT_FROM_EMMC:
+		data = 0x90;
+		break;
+	}
+
+	ret = dm_i2c_write(dev, PCAL_OUTPUT_PORT, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u\n",
+		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, data);
+		return ret;
+	}
+
+	return run_command("reset", 0);
+}
+
+static int select_boot_source(cmd_tbl_t *cmdtp, int flag, int argc,
+			      char *const argv[])
+{
+	if (argc <= 1)
+		return CMD_RET_USAGE;
+	else if (strcmp(argv[1], "xspi") == 0)
+		switch_boot_source(BOOT_FROM_XSPI);
+	else if (strcmp(argv[1], "emmc") == 0)
+		switch_boot_source(BOOT_FROM_EMMC);
+	else
+		return CMD_RET_USAGE;
+
+	return 0;
+}
+
+U_BOOT_CMD(boot_source, 2, 0, select_boot_source,
+	   "Boot source Selection Control",
+	   "boot_source xspi : reset to FlexSPI\n"
+	   "boot_source emmc : reset to emmc\n"
+);
+#endif
