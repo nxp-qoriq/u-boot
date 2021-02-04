@@ -11,6 +11,8 @@
 #define PCAL_BUS_NO		1
 #define BOOT_FROM_XSPI		1
 #define BOOT_FROM_EMMC		2
+#define BOOT_FROM_PCIE		2
+#define BOOT_FROM_PEB		3
 #define PCAL_CPU_ADDR		0x20
 #define PCAL_MODEM_ADDR		0x21
 #define PCAL_INPUT_PORT		0x00

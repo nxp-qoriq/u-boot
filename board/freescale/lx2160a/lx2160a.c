@@ -880,8 +880,8 @@ static int switch_boot_source(int src_id)
 
 	ret = i2c_get_chip_for_busnum(PCAL_BUS_NO, PCAL_CPU_ADDR, 1, &dev);
 	if (ret) {
-		printf("%s: Cannot find udev for a bus %d\n", __func__,
-		       PCAL_BUS_NO);
+		printf("%s: Cannot find udev for a bus %d, addr :%d\n",
+		       __func__, PCAL_BUS_NO, PCAL_CPU_ADDR);
 		return -ENXIO;
 	}
 
@@ -895,12 +895,15 @@ static int switch_boot_source(int src_id)
 	}
 
 	switch (src_id) {
-	case BOOT_FROM_XSPI:
+	case BOOT_FROM_XSPI: /* RCW_SRC[3:0] = 1111 */
 		data = 0xf0;
 		break;
-	case BOOT_FROM_EMMC:
+	case BOOT_FROM_EMMC: /* RCW_SRC[3:0] = 1001 */
 		data = 0x90;
 		break;
+	default:
+		printf("CPU boot source error: %d\n", src_id);
+		return -ENXIO;
 	}
 
 	ret = dm_i2c_write(dev, PCAL_OUTPUT_PORT, &data, 1);
@@ -933,4 +936,76 @@ U_BOOT_CMD(boot_source, 2, 0, select_boot_source,
 	   "boot_source xspi : reset to FlexSPI\n"
 	   "boot_source emmc : reset to emmc\n"
 );
+
+static int switch_boot_source_modem(int src_id)
+{
+	int ret;
+	struct udevice *dev;
+	u8 data;
+
+	ret = i2c_get_chip_for_busnum(PCAL_BUS_NO, PCAL_MODEM_ADDR, 1, &dev);
+	if (ret) {
+		printf("%s: Cannot find udev for a bus %d, addr :%d\n",
+		       __func__, PCAL_BUS_NO, PCAL_MODEM_ADDR);
+		return -ENXIO;
+	}
+
+	/* Make modem boot source control pins output, Don't touch other pins */
+	data = 0x06;
+	ret = dm_i2c_write(dev, PCAL_CONFIG, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u\n",
+		       PCAL_CPU_ADDR, PCAL_CONFIG, data);
+		return ret;
+	}
+
+	switch (src_id) {
+	case BOOT_FROM_XSPI:
+		data = 0x02; /* SW_CFG_BOOT_SRC[1:0] = 01 */
+		break;
+	case BOOT_FROM_PCIE:
+		data = 0x06; /* SW_CFG_BOOT_SRC[1:0] = 11 */
+		break;
+	case BOOT_FROM_PEB:
+		data = 0; /* SW_CFG_BOOT_SRC[1:0] = 00 */
+		break;
+	default:
+		printf("Modem boot source error: %d\n", src_id);
+		return -ENXIO;
+	}
+
+	ret = dm_i2c_write(dev, PCAL_OUTPUT_PORT, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u\n",
+		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, data);
+		return ret;
+	}
+
+	return run_command("reset", 0);
+}
+
+static int select_boot_source_modem(cmd_tbl_t *cmdtp, int flag, int argc,
+				    char *const argv[])
+{
+	if (argc <= 1)
+		return CMD_RET_USAGE;
+	else if (strcmp(argv[1], "xspi") == 0)
+		switch_boot_source_modem(BOOT_FROM_XSPI);
+	else if (strcmp(argv[1], "pcie") == 0)
+		switch_boot_source_modem(BOOT_FROM_PCIE);
+	else if (strcmp(argv[1], "peb") == 0)
+		switch_boot_source_modem(BOOT_FROM_PEB);
+	else
+		return CMD_RET_USAGE;
+
+	return 0;
+}
+
+U_BOOT_CMD(boot_source_modem, 2, 0, select_boot_source_modem,
+	   "Modem boot source Selection Control",
+	   "boot_source_modem xspi : reset to FlexSPI\n"
+	   "boot_source_modem pcie : reset to pcie\n"
+	   "boot_source_modem peb : reset to preloaded peb\n"
+);
+
 #endif
