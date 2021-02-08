@@ -214,8 +214,7 @@ int board_fix_fdt(void *fdt)
 }
 #endif
 
-#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS) || \
-	defined(CONFIG_TARGET_LA1238MB)
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 void esdhc_dspi_status_fixup(void *blob)
 {
 	const char esdhc0_path[] = "/soc/esdhc@2140000";
@@ -283,8 +282,7 @@ void esdhc_dspi_status_fixup(void *blob)
 
 int esdhc_status_fixup(void *blob, const char *compat)
 {
-#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS) || \
-	defined(CONFIG_TARGET_LA1238MB)
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
 #else
