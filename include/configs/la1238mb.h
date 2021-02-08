@@ -108,7 +108,9 @@
 		"env exists secureboot && mmc read $kernelheader_addr_r "\
 		"$kernelhdr_addr_sd $kernelhdr_size_sd "	\
 		" && esbc_validate ${kernelheader_addr_r};"	\
-		"bootm $load_addr#$BOARD\0"
+		"bootm $load_addr#$BOARD\0"			\
+	"othbootargs=default_hugepagesz=1024m hugepagesz=1024m"	\
+		" hugepages=2 mem=14G\0"
 
 #include <asm/fsl_secure_boot.h>
 
