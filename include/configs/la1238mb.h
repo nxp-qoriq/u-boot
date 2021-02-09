@@ -42,8 +42,7 @@
 #undef CONFIG_SYS_NXP_SRDS_3
 
 /* VID */
-/* TBD */
-#define I2C_MUX_CH_VOL_MONITOR		0xA
+#define I2C_MUX_CH_VOL_MONITOR		0x2
 /* Voltage monitor on channel 2*/
 #define I2C_VOL_MONITOR_ADDR		0x63
 #define I2C_VOL_MONITOR_BUS_V_OFFSET	0x2
