@@ -100,6 +100,7 @@ int select_i2c_ch_pca9547(u8 ch)
 	return 0;
 }
 
+#if !defined(CONFIG_TARGET_LA1238MB)
 int select_i2c_ch_pca9547_sec(u8 ch)
 {
 	int ret;
@@ -120,6 +121,7 @@ int select_i2c_ch_pca9547_sec(u8 ch)
 
 	return 0;
 }
+#endif
 
 static void uart_get_clock(void)
 {

@@ -41,6 +41,10 @@
 
 #undef CONFIG_SYS_NXP_SRDS_3
 
+/* Make channel 0 default */
+#undef I2C_MUX_CH_DEFAULT
+#define I2C_MUX_CH_DEFAULT		1
+
 /* VID */
 #define I2C_MUX_CH_VOL_MONITOR		0x2
 /* Voltage monitor on channel 2*/
