@@ -88,6 +88,28 @@
 #define CONFIG_SYS_I2C_EEPROM_ADDR		0x52
 /* Rest of the EEPROM related configs come from common include file */
 
+#undef SD2_MC_INIT_CMD
+#define SD2_MC_INIT_CMD				\
+	"mmc dev 0; mmc read 0x80a00000 0x5000 0x1200;"	\
+	"mmc read 0x80e00000 0x7000 0x800;"	\
+	"env exists secureboot && "		\
+	"mmc read 0x80640000 0x3200 0x20 && "	\
+	"mmc read 0x80680000 0x3400 0x20 && "	\
+	"esbc_validate 0x80640000 && "		\
+	"esbc_validate 0x80680000 ;"		\
+	"fsl_mc start mc 0x80a00000 0x80e00000\0"
+
+#undef SD2_BOOTCOMMAND
+#define SD2_BOOTCOMMAND						\
+	"mmc dev 0; env exists mcinitcmd && mmcinfo; "	\
+	"mmc read 0x80d00000 0x6800 0x800; "		\
+	"env exists mcinitcmd && env exists secureboot "	\
+	" && mmc read 0x806C0000 0x3600 0x20 "		\
+	"&& esbc_validate 0x806C0000;env exists mcinitcmd "	\
+	"&& fsl_mc lazyapply dpl 0x80d00000;"		\
+	"run distro_bootcmd;run sd2_bootcmd;"		\
+	"env exists secureboot && esbc_halt;"
+
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
@@ -101,7 +123,7 @@
 		"$kernelheader_size && esbc_validate ${kernelheader_addr_r}; "\
 		" bootm $load_addr#$BOARD\0"			\
 	"emmc_bootcmd=echo Trying load from emmc card..;"	\
-		"mmc dev 1; mmcinfo; mmc read $load_addr "	\
+		"mmc dev 0; mmcinfo; mmc read $load_addr "	\
 		"$kernel_addr_sd $kernel_size_sd ;"		\
 		"env exists secureboot && mmc read $kernelheader_addr_r "\
 		"$kernelhdr_addr_sd $kernelhdr_size_sd "	\
