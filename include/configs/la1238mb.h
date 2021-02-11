@@ -8,6 +8,26 @@
 
 #include "lx2160a_common.h"
 
+#define PCAL_BUS_NO		1
+#define BOOT_FROM_XSPI		1
+#define BOOT_FROM_EMMC		2
+#define BOOT_FROM_PCIE		2
+#define BOOT_FROM_PEB		3
+#define PCAL_CPU_ADDR		0x20
+#define PCAL_MODEM_ADDR		0x21
+#define PCAL_INPUT_PORT		0x00
+#define PCAL_OUTPUT_PORT	0x01
+#define PCAL_POL_INV		0x02
+#define PCAL_CONFIG		0x03
+#define PCAL_ODS_0		0x40
+#define PCAL_ODS_1		0x41
+#define PCAL_INPUT_LATCH	0x42
+#define PCAL_PU_PD_ENABLE	0x43
+#define PCAL_PU_PD_SEL		0x44
+#define PCAL_INT_MASK		0x45
+#define PCAL_INT_STATUS		0x46
+#define PCAL_OUT_PORT_CONFIG	0x47
+
 #undef BOOT_TARGET_DEVICES
 #define BOOT_TARGET_DEVICES(func) \
 	func(MMC, mmc, 1) \
@@ -21,9 +41,12 @@
 
 #undef CONFIG_SYS_NXP_SRDS_3
 
+/* Make channel 0 default */
+#undef I2C_MUX_CH_DEFAULT
+#define I2C_MUX_CH_DEFAULT		1
+
 /* VID */
-/* TBD */
-#define I2C_MUX_CH_VOL_MONITOR		0xA
+#define I2C_MUX_CH_VOL_MONITOR		0x2
 /* Voltage monitor on channel 2*/
 #define I2C_VOL_MONITOR_ADDR		0x63
 #define I2C_VOL_MONITOR_BUS_V_OFFSET	0x2
@@ -61,14 +84,9 @@
 #endif
 
 /* EEPROM */
-/* TBD */
-#define CONFIG_ID_EEPROM
-#define CONFIG_SYS_I2C_EEPROM_NXID
-#define CONFIG_SYS_EEPROM_BUS_NUM		0
-#define CONFIG_SYS_I2C_EEPROM_ADDR		0x57
-#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN		1
-#define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS	3
-#define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS	5
+#undef CONFIG_SYS_I2C_EEPROM_ADDR
+#define CONFIG_SYS_I2C_EEPROM_ADDR		0x52
+/* Rest of the EEPROM related configs come from common include file */
 
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
@@ -88,7 +106,9 @@
 		"env exists secureboot && mmc read $kernelheader_addr_r "\
 		"$kernelhdr_addr_sd $kernelhdr_size_sd "	\
 		" && esbc_validate ${kernelheader_addr_r};"	\
-		"bootm $load_addr#$BOARD\0"
+		"bootm $load_addr#$BOARD\0"			\
+	"othbootargs=default_hugepagesz=1024m hugepagesz=1024m"	\
+		" hugepages=2 mem=14G\0"
 
 #include <asm/fsl_secure_boot.h>
 
