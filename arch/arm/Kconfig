@@ -1256,8 +1256,8 @@ config TARGET_LX2162AQDS
 	  Support for NXP LX2162AQDS platform.
 	  The lx2162aqds support is based on LX2160A Layerscape Architecture processor.
 
-config TARGET_LA1238MB
-	bool "Support la1238mb"
+config TARGET_LA1238RDB
+	bool "Support la1238rdb"
 	select ARCH_LX2162A
 	select ARCH_MISC_INIT
 	select ARM64
@@ -1265,8 +1265,8 @@ config TARGET_LA1238MB
 	select ARCH_SUPPORT_TFABOOT
 	select BOARD_LATE_INIT
 	help
-	  Support for NXP LA1238MB platform.
-	  The la1238mb support is based on LX2162A Layerscape Architecture processor.
+	  Support for NXP LA1238RDB platform.
+	  The la1238rdb support is based on LX2162A Layerscape Architecture processor.
 
 config TARGET_HIKEY
 	bool "Support HiKey 96boards Consumer Edition Platform"

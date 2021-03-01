@@ -39,7 +39,7 @@
 
 #define GIC_LPI_SIZE                             0x200000
 #if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS) || \
-	defined(CONFIG_TARGET_LA1238MB)
+	defined(CONFIG_TARGET_LA1238RDB)
 #define CFG_MUX_I2C_SDHC(reg, value)		((reg & 0x3f) | value)
 #define SET_CFG_MUX1_SDHC1_SDHC(reg)		(reg & 0x3f)
 #define SET_CFG_MUX2_SDHC1_SPI(reg, value)	((reg & 0xcf) | value)
@@ -100,7 +100,7 @@ int select_i2c_ch_pca9547(u8 ch)
 	return 0;
 }
 
-#if !defined(CONFIG_TARGET_LA1238MB)
+#if !defined(CONFIG_TARGET_LA1238RDB)
 int select_i2c_ch_pca9547_sec(u8 ch)
 {
 	int ret;
@@ -317,7 +317,7 @@ int init_func_vid(void)
 }
 #endif
 
-#if defined(CONFIG_TARGET_LA1238MB)
+#if defined(CONFIG_TARGET_LA1238RDB)
 static inline uint32_t get_board_version(void)
 {
 	struct ccsr_gpio *pgpio = (void *)(GPIO3_BASE_ADDR);
@@ -341,13 +341,13 @@ int checkboard(void)
 
 	switch (rev) {
 	case 0x00:
-		puts("Board: LA1238MB, Rev: A, boot from ");
+		puts("Board: LA1238-RDB, Rev: A, boot from ");
 		break;
 	case 0x01:
-		puts("Board: LA1238MB, Rev: B, boot from ");
+		puts("Board: LA1238-RDB, Rev: B, boot from ");
 		break;
 	default:
-		puts("Board: LA1238MB, Rev: Unknown, boot from ");
+		puts("Board: LA1238-RDB, Rev: Unknown, boot from ");
 		break;
 	}
 
@@ -629,7 +629,7 @@ int config_board_mux(void)
 	return 0;
 }
 #else
-/* TBD for CONFIG_TARGET_LA1238MB */
+/* TBD for CONFIG_TARGET_LA1238RDB */
 #if defined(CONFIG_BOARD_EARLY_INIT_R)
 int board_early_init_r(void)
 {
@@ -680,7 +680,7 @@ unsigned long get_board_ddr_clk(void)
 #endif
 }
 
-/* TBD for CONFIG_TARGET_LA1238MB */
+/* TBD for CONFIG_TARGET_LA1238RDB */
 int board_init(void)
 {
 #if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LX2160ARDB)
@@ -848,7 +848,7 @@ int ft_board_setup(void *blob, bd_t *bd)
 	return 0;
 }
 #endif
-#if !defined(CONFIG_TARGET_LA1238MB)
+#if !defined(CONFIG_TARGET_LA1238RDB)
 void qixis_dump_switch(void)
 {
 	int i, nr_of_cfgsw;
@@ -864,14 +864,14 @@ void qixis_dump_switch(void)
 }
 #endif
 
-#if defined(CONFIG_ENV_IS_IN_MMC) && defined(CONFIG_TARGET_LA1238MB)
+#if defined(CONFIG_ENV_IS_IN_MMC) && defined(CONFIG_TARGET_LA1238RDB)
 int mmc_get_env_dev(void)
 {
 	return 0;
 }
 #endif
 
-#if defined(CONFIG_TARGET_LA1238MB)
+#if defined(CONFIG_TARGET_LA1238RDB)
 static int switch_boot_source(int src_id)
 {
 	int ret;
