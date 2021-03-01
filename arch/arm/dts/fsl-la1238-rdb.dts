@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+ OR X11
 /*
- * NXP LA1238MB device tree source
+ * NXP LA1238RDB device tree source
  *
  * Copyright 2021 NXP
  *
@@ -11,8 +11,8 @@
 #include "fsl-lx2160a.dtsi"
 
 / {
-	model = "NXP Layerscape LA1238MB Board";
-	compatible = "fsl,la1238mb", "fsl,lx2160a";
+	model = "NXP Layerscape LA1238-RDB Board";
+	compatible = "fsl,la1238rdb", "fsl,lx2160a";
 
 	aliases {
 		spi0 = &fspi;

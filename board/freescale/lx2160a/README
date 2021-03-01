@@ -328,7 +328,7 @@ SERDES2	|CARDS
 	|Connect I/O cable to IO_SLOT8(J131)
 ------------------------------------------------------------------------
 
-LA1238MB board Overview
+LA1238RDB board Overview
 ----------------------
 DDR Memory
 	One ports of 72-bits (8-bits ECC) DDR4.

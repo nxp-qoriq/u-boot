@@ -35,11 +35,11 @@ F:	include/configs/lx2162aqds.h
 F:	configs/lx2162aqds_tfa_defconfig
 F:	arch/arm/dts/fsl-lx2162a-qds.dts
 
-LA1238MB BOARD
+LA1238RDB BOARD
 M:	Priyanka Jain <priyanka.jain@nxp.com>
 M:	Jagdish Gediya <jagdish.gediya@nxp.com>
 S:	Maintained
-F:	board/freescale/lx2160a/eth_la1238mb.c
-F:	include/configs/la1238mb.h
-F:	configs/la1238mb_tfa_defconfig
-F:	arch/arm/dts/fsl-la1238mb.dts
+F:	board/freescale/lx2160a/eth_la1238rdb.c
+F:	include/configs/la1238rdb.h
+F:	configs/la1238rdb_tfa_defconfig
+F:	arch/arm/dts/fsl-la1238-rdb.dts

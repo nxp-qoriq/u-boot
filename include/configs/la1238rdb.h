@@ -3,8 +3,8 @@
  * Copyright 2021 NXP
  */
 
-#ifndef __LA1238_MB_H
-#define __LA1238_MB_H
+#ifndef __LA1238_RDB_H
+#define __LA1238_RDB_H
 
 #include "lx2160a_common.h"
 
@@ -33,11 +33,11 @@
 	func(MMC, mmc, 1) \
 	func(DHCP, dhcp, na)
 /*
- * Need to override existing (lx2160a) with la1238mb so set_board_info will
+ * Need to override existing (lx2160a) with la1238-rdb so set_board_info will
  * use proper prefix when creating full board_name (SYS_BOARD + type)
  */
 #undef CONFIG_SYS_BOARD
-#define CONFIG_SYS_BOARD                "la1238mb"
+#define CONFIG_SYS_BOARD                "la1238-rdb"
 
 #undef CONFIG_SYS_NXP_SRDS_3
 
@@ -52,7 +52,7 @@
 #define I2C_VOL_MONITOR_BUS_V_OFFSET	0x2
 #define I2C_VOL_MONITOR_BUS_V_OVF	0x1
 #define I2C_VOL_MONITOR_BUS_V_SHIFT	3
-#define CONFIG_VID_FLS_ENV		"la1238mb_vdd_mv"
+#define CONFIG_VID_FLS_ENV		"la1238rdb_vdd_mv"
 #define CONFIG_VID
 
 /* The lowest and highest voltage allowed*/
@@ -113,9 +113,9 @@
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
-	"boot_scripts=la1238mb_boot.scr\0"	\
-	"boot_script_hdr=hdr_la1238mb_bs.out\0"	\
-	"BOARD=la1238mb\0"			\
+	"boot_scripts=la1238rdb_boot.scr\0"	\
+	"boot_script_hdr=hdr_la1238rdb_bs.out\0"	\
+	"BOARD=la1238-rdb\0"			\
 	"xspi_bootcmd=echo Trying load from flexspi..;"		\
 		"sf probe 0:0 && sf read $load_addr "		\
 		"$kernel_start $kernel_size ; env exists secureboot &&"	\
@@ -134,4 +134,4 @@
 
 #include <asm/fsl_secure_boot.h>
 
-#endif /* __LA1238_MB_H */
+#endif /* __LA1238_RDB_H */
