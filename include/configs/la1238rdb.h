@@ -79,8 +79,12 @@
 #define BOARD_REV_MASK		0x03
 #define GPIO3_BASE_ADDR		(CONFIG_SYS_IMMR + 0x1320000)
 
-/* MAC/PHY configuration TBD */
+/* MAC/PHY configuration */
 #if defined(CONFIG_FSL_MC_ENET)
+#define CONFIG_MII
+#define CONFIG_ETHPRIME		"DPMAC3@usxgmii"
+#define AQR113_PHY_ADDR		0x8
+#define AQR113_IRQ_MASK		0x800 /* IRQ-11 */
 #endif
 
 /* EEPROM */

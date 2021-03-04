@@ -680,12 +680,17 @@ unsigned long get_board_ddr_clk(void)
 #endif
 }
 
-/* TBD for CONFIG_TARGET_LA1238RDB */
+void set_phy_irq_polarity_inv(u32 irq_mask)
+{
+	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
+	u32 irq_cr = in_le32(irq_ccsr + IRQCR_OFFSET);
+
+	/* use irq_mask to set the corresponding bits for inverting polarity */
+	out_le32(irq_ccsr + IRQCR_OFFSET, irq_cr | irq_mask);
+}
+
 int board_init(void)
 {
-#if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LX2160ARDB)
-	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
-#endif
 #ifdef CONFIG_ENV_IS_NOWHERE
 	gd->env_addr = (ulong)&default_environment[0];
 #endif
@@ -693,8 +698,10 @@ int board_init(void)
 	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
 
 #if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LX2160ARDB)
-	/* invert AQR107 IRQ pins polarity */
-	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR107_IRQ_MASK);
+	set_phy_irq_polarity_inv(AQR107_IRQ_MASK);
+#endif
+#if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LA1238RDB)
+	set_phy_irq_polarity_inv(AQR113_IRQ_MASK);
 #endif
 
 #ifdef CONFIG_FSL_CAAM
