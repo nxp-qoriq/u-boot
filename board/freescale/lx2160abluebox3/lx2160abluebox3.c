@@ -66,19 +66,24 @@ U_BOOT_DEVICE(nxp_serial1) = {
 	.platdata = &serial1,
 };
 
+static int select_i2c_ch(int busnum, int muxaddr, u8 ch)
+{
+	int ret;
+
+	struct udevice *dev;
+
+	ret = i2c_get_chip_for_busnum(busnum, muxaddr, 1, &dev);
+	if (!ret)
+		ret = dm_i2c_write(dev, 0, &ch, 1);
+
+	return ret;
+}
+
 int select_i2c_ch_pca9547(u8 ch)
 {
 	int ret;
 
-#ifndef CONFIG_DM_I2C
-	ret = i2c_write(I2C_MUX_PCA_ADDR_PRI, 0, 1, &ch, 1);
-#else
-	struct udevice *dev;
-
-	ret = i2c_get_chip_for_busnum(0, I2C_MUX_PCA_ADDR_PRI, 1, &dev);
-	if (!ret)
-		ret = dm_i2c_write(dev, 0, &ch, 1);
-#endif
+	ret = select_i2c_ch(0, I2C_MUX_PCA_ADDR_PRI, ch);
 	if (ret) {
 		puts("PCA: failed to select proper channel\n");
 		return ret;
@@ -91,21 +96,195 @@ int select_i2c_ch_pca9547_sec(u8 ch)
 {
 	int ret;
 
-#ifndef CONFIG_DM_I2C
-	ret = i2c_write(I2C_MUX_PCA_ADDR_SEC, 0, 1, &ch, 1);
-#else
-	struct udevice *dev;
-
-	ret = i2c_get_chip_for_busnum(0, I2C_MUX_PCA_ADDR_SEC, 1, &dev);
-	if (!ret)
-		ret = dm_i2c_write(dev, 0, &ch, 1);
-#endif
+	ret = select_i2c_ch(0, I2C_MUX_PCA_ADDR_SEC, ch);
 	if (ret) {
 		puts("PCA: failed to select proper channel\n");
 		return ret;
 	}
 
 	return 0;
+}
+
+static int select_i2c_ch_t6slot6ctrl(void)
+{
+	int ret;
+
+	ret = select_i2c_ch(I2C_PCIE_BUS_NUM, I2C_PCIE_MUX_PCA9846_ADDR_PRI, I2C_PCIE_MUX_CH_PCIE_MB2);
+	if (!ret)
+		ret = select_i2c_ch(I2C_PCIE_BUS_NUM, I2C_T6_PCA9546_ADDR, I2C_T6_MUX_CH_SLOT6CTRL);
+
+	return ret;
+}
+
+static void configure_t6slot6(void)
+{
+	char buf[HWCONFIG_BUFFER_SIZE];
+	int ret;
+	int equalizerschanged = 0;
+	int lanes = -1;
+	struct udevice *dev_pcal6408;
+	struct udevice *dev_ptn3944_0;
+	struct udevice *dev_ptn3944_1;
+	struct udevice *dev_ptn3944_2;
+	struct udevice *dev_ptn3944_3;
+	u8 pins, eq_is0to3, eq_is4to7, eq_should;
+
+	/* We assume autoconfig without hwconfig specified */
+	lanes = -1;
+
+	/*
+	 * Extract hwconfig from environment since we have not properly setup
+	 * the environment but need it for T6 params
+	 */
+	if (env_get_f("hwconfig", buf, sizeof(buf)) < 0)
+		buf[0] = '\0';
+
+	if (hwconfig_sub_f("pcie", "t6slot6", buf)) {
+		if (hwconfig_subarg_cmp_f("pcie", "t6slot6", "off", buf))
+			lanes = 0;
+		else if (hwconfig_subarg_cmp_f("pcie", "t6slot6", "auto", buf))
+			lanes = 256;
+		else if (hwconfig_subarg_cmp_f("pcie", "t6slot6", "x1", buf))
+			lanes = 1;
+		else if (hwconfig_subarg_cmp_f("pcie", "t6slot6", "x2", buf))
+			lanes = 2;
+		else if (hwconfig_subarg_cmp_f("pcie", "t6slot6", "x4", buf))
+			lanes = 4;
+		else if (hwconfig_subarg_cmp_f("pcie", "t6slot6", "x8", buf))
+			lanes = 8;
+		else if (hwconfig_subarg_cmp_f("pcie", "t6slot6", "x16", buf))
+			lanes = 16;
+	}
+
+	debug("T6slot6: %d lanes hwconfig '%s'\n", lanes, buf);
+
+	/*
+	 * Fail silently and gracefully if there is no T6 riser only
+	 * if we do not request a config through the environment!
+	 * We may run a system with T2 or without riser.
+	 */
+	if (select_i2c_ch_t6slot6ctrl()) {
+		if (lanes >= 0)
+			puts("T6 riser not detected, hwconfig pcie:t6slot6 setting will be ignored!\n");
+		return;
+	}
+
+	/* No specific T6slot6 setting means auto config! */
+	if (lanes < 0 || lanes >= 256) {
+		if (i2c_get_chip_for_busnum(I2C_PCIE_BUS_NUM, I2C_T6_PCAL6408_ADDR, 1, &dev_pcal6408)) {
+			puts("T6 slot6: Cannot find PCAL6408!\n");
+			return;
+		}
+
+		/* Determine the number of plugged lanes by presence detect */
+		ret = dm_i2c_read(dev_pcal6408, I2C_T6_PCAL6408_INPUT_PORT, (void *)&pins, 1);
+		if (ret) {
+			puts("T6 slot6: Cannot read PCAL6408!\n");
+			return;
+		}
+
+		pins &= I2C_T6_PCAL6408_PRESENCE_DETECT_MASK;
+		pins ^= I2C_T6_PCAL6408_PRESENCE_DETECT_MASK;
+
+		lanes = (pins & 0x8) ? 16 :
+			(pins & 0x4) ? 8 :
+			(pins & 0x2) ? 4 :
+			(pins & 0x1) ? 1 : 0;
+
+		/*
+		 * We don't waste time if no card is plugged in.
+		 * This should only happen for auto config!
+		 */
+		if (!lanes)
+			return;
+
+		printf("T6 slot6: Detected card width of %d lanes\n", lanes);
+	}
+
+	if (i2c_get_chip_for_busnum(I2C_PCIE_BUS_NUM, I2C_T6_PTN3944_BASE_ADDR + 0, 1, &dev_ptn3944_0) ||
+	    i2c_get_chip_for_busnum(I2C_PCIE_BUS_NUM, I2C_T6_PTN3944_BASE_ADDR + 1, 1, &dev_ptn3944_1) ||
+	    i2c_get_chip_for_busnum(I2C_PCIE_BUS_NUM, I2C_T6_PTN3944_BASE_ADDR + 2, 1, &dev_ptn3944_2) ||
+	    i2c_get_chip_for_busnum(I2C_PCIE_BUS_NUM, I2C_T6_PTN3944_BASE_ADDR + 3, 1, &dev_ptn3944_3)) {
+		puts("T6 slot6: Cannot find equalizers on T6 riser I2C!\n");
+		return;
+	}
+
+	/* Check and update the equalizers */
+	ret = dm_i2c_read(dev_ptn3944_0, PTN3944_LINK_CTRL_STATUS, (void *)&eq_is0to3, 1);
+	ret |= dm_i2c_read(dev_ptn3944_2, PTN3944_LINK_CTRL_STATUS, (void *)&eq_is4to7, 1);
+	if (ret) {
+		printf("T6 slot6: Cannot read equalizer settings on T6 riser I2C\n");
+		return;
+	}
+	debug("eq_is0to3: %02x\n", eq_is0to3);
+	debug("eq_is4to7: %02x\n", eq_is4to7);
+
+	/* First check lanes 0-3, then 4-7 */
+	eq_should = (lanes >= 4) ? PTN3944_LCS_4CHANNELS :
+		    (lanes >= 2) ? PTN3944_LCS_2CHANNELS :
+		    (lanes >= 1) ? PTN3944_LCS_1CHANNELS :
+		    PTN3944_LCS_0CHANNELS;
+	if ((eq_is0to3 & PTN3944_LCS_CHANNEL_MASK) != eq_should) {
+		ret |= dm_i2c_write(dev_ptn3944_0, PTN3944_LINK_CTRL_STATUS, (void *)&eq_should, 1);
+		ret |= dm_i2c_write(dev_ptn3944_1, PTN3944_LINK_CTRL_STATUS, (void *)&eq_should, 1);
+		equalizerschanged = 1;
+	}
+
+	eq_should = (lanes >= 8) ? PTN3944_LCS_4CHANNELS :
+		    PTN3944_LCS_0CHANNELS;
+	if ((eq_is4to7 & PTN3944_LCS_CHANNEL_MASK) != eq_should) {
+		ret |= dm_i2c_write(dev_ptn3944_2, PTN3944_LINK_CTRL_STATUS, (void *)&eq_should, 1);
+		ret |= dm_i2c_write(dev_ptn3944_3, PTN3944_LINK_CTRL_STATUS, (void *)&eq_should, 1);
+		equalizerschanged = 1;
+	}
+
+	if (ret) {
+		printf("T6 slot6: Updating the equalizer settings failed\n");
+		return;
+	}
+
+	/*
+	 * Unfortunately we have to reboot after the equalizer change
+	 * because the PCIe controller can get stuck in compliance
+	 * pattern handling and we do not have a spec compliant way to
+	 * reset just the LTSSM properly. If we can come up with a way
+	 * to just reset the LTSSM, it would be much nicer.
+	 */
+	if (equalizerschanged) {
+		enum boot_src src = get_boot_src();
+
+		printf("T6 slot6: Reconfigured to %d lanes, rebooting ...\n", lanes);
+
+		/* Trying hard to preserve the boot source */
+		if (src == BOOT_SOURCE_SD_MMC) {
+			run_command("qixis_reset sd", 0);
+		} else if (src == BOOT_SOURCE_SD_MMC2) {
+			run_command("qixis_reset emmc", 0);
+		} else {
+			u8 sw;
+
+			sw = QIXIS_READ(brdcfg[0]);
+			sw = (sw >> QIXIS_XMAP_SHIFT) & QIXIS_XMAP_MASK;
+			switch (sw) {
+			case 0:
+				run_command("qixis_reset qspi", 0);
+				break;
+			case 1:
+				run_command("qixis_reset altbank", 0);
+				break;
+			default:
+				/* generic reset for any other combination */
+				run_command("reset", 0);
+				break;
+			}
+		}
+		/*
+		 * It takes a little while until the Qixis reset kicks
+		 * in. We want to wait until it does
+		 */
+		while (1)
+			/* do nothing */;
+	}
 }
 
 static void uart_get_clock(void)
@@ -343,6 +522,13 @@ int board_init(void)
 #ifdef CONFIG_ENV_IS_NOWHERE
 	gd->env_addr = (ulong)&default_environment[0];
 #endif
+
+	/*
+	 * Ensure the PCIe slot 6 on the T6 riser is preconfigured
+	 * properly for the inserted card. This is benign and silent
+	 * if the riser is not inserted as it carefully probes the I2C.
+	 */
+	configure_t6slot6();
 
 	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
 

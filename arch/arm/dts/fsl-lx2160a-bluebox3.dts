@@ -80,4 +80,11 @@
 
 &i2c5 {
 	status = "okay";
+
+	pca9846@77 {
+		compatible = "nxp,pca9646";
+		reg = <0x77>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
 };
