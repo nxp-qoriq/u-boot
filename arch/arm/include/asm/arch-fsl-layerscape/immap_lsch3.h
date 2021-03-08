@@ -2,7 +2,7 @@
 /*
  * LayerScape Internal Memory Map
  *
- * Copyright 2017-2020 NXP
+ * Copyright 2017-2021 NXP
  * Copyright 2014 Freescale Semiconductor, Inc.
  */
 
@@ -65,6 +65,9 @@
 #define I2C7_BASE_ADDR				(CONFIG_SYS_IMMR + 0x01060000)
 #define I2C8_BASE_ADDR				(CONFIG_SYS_IMMR + 0x01070000)
 #endif
+#define GPIO1_BASE_ADDR				(CONFIG_SYS_IMMR + 0x01300000)
+#define GPIO2_BASE_ADDR				(CONFIG_SYS_IMMR + 0x01310000)
+#define GPIO3_BASE_ADDR				(CONFIG_SYS_IMMR + 0x01320000)
 #define GPIO4_BASE_ADDR				(CONFIG_SYS_IMMR + 0x01330000)
 #define GPIO4_GPDIR_ADDR			(GPIO4_BASE_ADDR + 0x0)
 #define GPIO4_GPDAT_ADDR			(GPIO4_BASE_ADDR + 0x8)

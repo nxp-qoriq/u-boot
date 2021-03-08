@@ -53,6 +53,20 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#if defined(CONFIG_TARGET_LA1238RDB)
+enum gpio_dir {
+	GPIO_DIR_IN,
+	GPIO_DIR_OUT
+};
+
+static u64 gpio_ports[] = {
+	GPIO1_BASE_ADDR,
+	GPIO2_BASE_ADDR,
+	GPIO3_BASE_ADDR,
+	GPIO4_BASE_ADDR
+};
+#endif
+
 static struct pl01x_serial_platdata serial0 = {
 #if CONFIG_CONS_INDEX == 0
 	.base = CONFIG_SYS_SERIAL0,
@@ -318,16 +332,151 @@ int init_func_vid(void)
 #endif
 
 #if defined(CONFIG_TARGET_LA1238RDB)
+static int gpio_set_dir(u32 port, u32 gpio, enum gpio_dir dir)
+{
+	struct ccsr_gpio *regs;
+	u32 val;
+
+	if (port > ARRAY_SIZE(gpio_ports) || port == 0 || gpio >= 32)
+		return -1;
+
+	gpio = 31 - gpio;
+	regs = (void *)gpio_ports[port - 1];
+	val = in_le32(&regs->gpdir);
+
+	switch (dir) {
+	case GPIO_DIR_OUT:
+		val |= 1 << gpio;
+		break;
+	case GPIO_DIR_IN:
+		val &= ~(1 << gpio);
+	}
+
+	/* Set direction */
+	out_le32(&regs->gpdir, val);
+
+	/* Input buffer enable */
+	val = in_le32(&regs->gpibe);
+	val |= 1 << gpio;
+	out_le32(&regs->gpibe, val);
+
+	return 0;
+}
+
+static int gpio_set_value(u32 port, u32 gpio, u32 val)
+{
+	struct ccsr_gpio *regs;
+	u32 rval;
+
+	if (port > ARRAY_SIZE(gpio_ports) || port == 0 || gpio >= 32)
+		return -1;
+
+	val = !!val;
+	gpio = 31 - gpio;
+	regs = (void *)gpio_ports[port - 1];
+	rval = in_le32(&regs->gpdat);
+
+	if (val)
+		rval |= 1 << gpio;
+	else
+		rval &= ~(1 << gpio);
+
+	out_le32(&regs->gpdat, rval);
+
+	return 0;
+}
+
+static int gpio_get_value(u32 port, u32 gpio)
+{
+	struct ccsr_gpio *regs;
+	u32 val;
+
+	if (port > ARRAY_SIZE(gpio_ports) || port == 0 || gpio >= 32)
+		return -1;
+
+	gpio = 31 - gpio;
+	regs = (void *)gpio_ports[port - 1];
+	val = in_le32(&regs->gpdat);
+
+	return !!(val & (1 << gpio));
+}
+
+static void toggle_la1238_jtag_tck_gpio(void)
+{
+	int i;
+
+	gpio_set_dir(4, 3, GPIO_DIR_OUT); /* LA1238 JTAG TCK/TMS MUX CONTROL */
+
+	for (i = 0; i < 10; i++) {
+		gpio_set_value(4, 3, 0);
+		mdelay(1);
+		gpio_set_value(4, 3, 1);
+		mdelay(1);
+	}
+}
+
+static void la1238rdb_gpio_init(void)
+{
+	gpio_set_dir(4, 7, GPIO_DIR_OUT); /* SW_LEA_6T_RST_B */
+	gpio_set_dir(4, 6, GPIO_DIR_OUT); /* SW_MODEM_PORST_B */
+	gpio_set_dir(4, 8, GPIO_DIR_OUT); /* SW_AQR113_RST_B */
+	gpio_set_dir(4, 9, GPIO_DIR_OUT); /* SW_NLM_RST_B */
+	gpio_set_dir(4, 0, GPIO_DIR_OUT); /* SW_MODEM_WARM_RST_B */
+	gpio_set_dir(3, 15, GPIO_DIR_OUT); /* SW_SI5518_RST_B */
+	gpio_set_dir(1, 23, GPIO_DIR_OUT); /* STATUS LED */
+	gpio_set_dir(4, 1, GPIO_DIR_OUT); /* CPU_GPIO_LED2_B */
+	gpio_set_dir(4, 2, GPIO_DIR_OUT); /* CPU_GPIO_LED1_B */
+	gpio_set_dir(4, 10, GPIO_DIR_OUT); /* GPIO_FUSE_PROG */
+	gpio_set_dir(4, 25, GPIO_DIR_OUT); /* CFG_MUX_1PPS_S */
+	gpio_set_dir(4, 26, GPIO_DIR_OUT); /* CFG_MUX_1PPS_S */
+	gpio_set_dir(1, 22, GPIO_DIR_OUT); /* LEA_6T_EXTINT0 */
+
+	gpio_set_dir(4, 5, GPIO_DIR_IN); /* GPIO_NLM_CPU */
+	gpio_set_dir(1, 26, GPIO_DIR_IN); /* SI5518_GPIO */
+	gpio_set_dir(1, 27, GPIO_DIR_IN); /* SI5518_GPIO */
+	gpio_set_dir(3, 12, GPIO_DIR_IN); /* SI5518_GPIO */
+	gpio_set_dir(4, 4, GPIO_DIR_IN); /* CPU_GPIO_TO_LA1238 */
+	gpio_set_dir(4, 11, GPIO_DIR_IN); /* CPU_GPIO_TO_LA1238 */
+
+	/* Unused mux */
+	gpio_set_dir(1, 15, GPIO_DIR_IN);
+	gpio_set_dir(1, 16, GPIO_DIR_IN);
+	gpio_set_dir(1, 17, GPIO_DIR_IN);
+	gpio_set_dir(1, 18, GPIO_DIR_IN);
+	gpio_set_dir(1, 19, GPIO_DIR_IN);
+	gpio_set_dir(1, 20, GPIO_DIR_IN);
+	gpio_set_dir(1, 21, GPIO_DIR_IN);
+	gpio_set_dir(1, 5, GPIO_DIR_IN);
+	gpio_set_dir(1, 4, GPIO_DIR_IN);
+	gpio_set_dir(3, 16, GPIO_DIR_IN);
+	gpio_set_dir(4, 24, GPIO_DIR_IN);
+
+	gpio_set_value(4, 7, 1); /* SW_LEA_6T_RST_B */
+	gpio_set_value(4, 6, 1); /* SW_MODEM_PORST_B */
+	gpio_set_value(4, 8, 1); /* SW_AQR113_RST_B */
+	gpio_set_value(4, 9, 1); /* SW_NLM_RST_B */
+	gpio_set_value(4, 0, 1); /* SW_MODEM_WARM_RST_B */
+	gpio_set_value(3, 15, 1); /* SW_SI5518_RST_B */
+	gpio_set_value(1, 23, 0); /* STATUS LED */
+	gpio_set_value(4, 1, 0); /* CPU_GPIO_LED2_B */
+	gpio_set_value(4, 2, 0); /* CPU_GPIO_LED1_B */
+	gpio_set_value(4, 10, 1); /* GPIO_FUSE_PROG */
+	gpio_set_value(4, 25, 1); /* CFG_MUX_1PPS_S */
+	gpio_set_value(4, 26, 1); /* CFG_MUX_1PPS_S */
+	gpio_set_value(1, 22, 1); /* LEA_6T_EXTINT0 */
+}
+
 static inline uint32_t get_board_version(void)
 {
-	struct ccsr_gpio *pgpio = (void *)(GPIO3_BASE_ADDR);
+	int val_13, val_14;
 
-	/* GPIO 13 and GPIO 14 are used for Board Rev */
-	u32 gpio_val = ((in_be32(&pgpio->gpdat) >> BOARD_REV_GPIO_SHIFT))
-		& BOARD_REV_MASK;
+	gpio_set_dir(3, 13, GPIO_DIR_IN);
+	gpio_set_dir(3, 14, GPIO_DIR_IN);
 
-	/* GPIOs' are 0..31 in Big Endiness, swap GPIO 13 and GPIO 14 */
-	return ((gpio_val >> 1) | (gpio_val << 1)) & BOARD_REV_MASK;
+	val_13 = gpio_get_value(3, 13);
+	val_14 = gpio_get_value(3, 14);
+
+	return (val_14 << 1) | val_13;
 }
 
 int checkboard(void)
@@ -707,7 +856,10 @@ int board_init(void)
 #ifdef CONFIG_FSL_CAAM
 	sec_init();
 #endif
-
+#if defined(CONFIG_TARGET_LA1238RDB)
+	toggle_la1238_jtag_tck_gpio();
+	la1238rdb_gpio_init();
+#endif
 	return 0;
 }
 

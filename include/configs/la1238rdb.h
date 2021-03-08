@@ -70,14 +70,7 @@
 #define CONFIG_VOL_MONITOR_LTC3882_READ
 
 /* RTC */
-/* TBD */
 #define CONFIG_SYS_RTC_BUS_NUM		0
-#define I2C_MUX_CH_RTC			0xB
-
-/* Board revision */
-#define BOARD_REV_GPIO_SHIFT	17
-#define BOARD_REV_MASK		0x03
-#define GPIO3_BASE_ADDR		(CONFIG_SYS_IMMR + 0x1320000)
 
 /* MAC/PHY configuration */
 #if defined(CONFIG_FSL_MC_ENET)
