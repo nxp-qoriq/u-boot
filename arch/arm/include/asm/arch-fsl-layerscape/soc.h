@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * Copyright 2017-2020 NXP
+ * Copyright 2017-2021 NXP
  * Copyright 2015 Freescale Semiconductor
  */
 
@@ -82,10 +82,13 @@ enum boot_src get_boot_src(void);
 #define SVR_MAJ(svr)		(((svr) >> 4) & 0xf)
 #define SVR_MIN(svr)		(((svr) >> 0) & 0xf)
 #define SVR_REV(svr)		(((svr) >> 0) & 0xff)
-#define SVR_SOC_VER(svr)	(((svr) >> 8) & SVR_WO_E)
 #define IS_E_PROCESSOR(svr)	(!((svr >> 8) & 0x1))
 #if defined(CONFIG_ARCH_LX2160A) || defined(CONFIG_ARCH_LX2162A)
 #define IS_C_PROCESSOR(svr)	(!((svr >> 12) & 0x1))
+#define SVR_WO_CE              0xFFFFEE
+#define SVR_SOC_VER(svr)       (((svr) >> 8) & SVR_WO_CE)
+#else
+#define SVR_SOC_VER(svr)       (((svr) >> 8) & SVR_WO_E)
 #endif
 #ifdef CONFIG_ARCH_LS1028A
 #define IS_MULTIMEDIA_EN(svr)	(!((svr >> 10) & 0x1))
@@ -130,6 +133,10 @@ void erratum_a010315(void);
 
 bool soc_has_dp_ddr(void);
 bool soc_has_aiop(void);
+
+#ifdef CONFIG_GIC_V3_ITS
+int ls_gic_rd_tables_init(void *blob);
+#endif
 #endif
 
 #endif /* _ASM_ARMV8_FSL_LAYERSCAPE_SOC_H_ */
