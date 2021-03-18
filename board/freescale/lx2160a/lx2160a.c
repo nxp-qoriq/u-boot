@@ -437,17 +437,28 @@ static void la1238rdb_gpio_init(void)
 	gpio_set_dir(4, 11, GPIO_DIR_IN); /* CPU_GPIO_TO_LA1238 */
 
 	/* Unused mux */
-	gpio_set_dir(1, 15, GPIO_DIR_IN);
-	gpio_set_dir(1, 16, GPIO_DIR_IN);
-	gpio_set_dir(1, 17, GPIO_DIR_IN);
-	gpio_set_dir(1, 18, GPIO_DIR_IN);
-	gpio_set_dir(1, 19, GPIO_DIR_IN);
-	gpio_set_dir(1, 20, GPIO_DIR_IN);
-	gpio_set_dir(1, 21, GPIO_DIR_IN);
-	gpio_set_dir(1, 5, GPIO_DIR_IN);
-	gpio_set_dir(1, 4, GPIO_DIR_IN);
-	gpio_set_dir(3, 16, GPIO_DIR_IN);
-	gpio_set_dir(4, 24, GPIO_DIR_IN);
+	gpio_set_dir(1, 15, GPIO_DIR_OUT);
+	gpio_set_dir(1, 16, GPIO_DIR_OUT);
+	gpio_set_dir(1, 17, GPIO_DIR_OUT);
+	gpio_set_dir(1, 18, GPIO_DIR_OUT);
+	gpio_set_dir(1, 19, GPIO_DIR_OUT);
+	gpio_set_dir(1, 20, GPIO_DIR_OUT);
+	gpio_set_dir(1, 21, GPIO_DIR_OUT);
+	gpio_set_dir(1, 5, GPIO_DIR_OUT);
+	gpio_set_dir(1, 4, GPIO_DIR_OUT);
+	gpio_set_dir(3, 16, GPIO_DIR_OUT);
+	gpio_set_dir(4, 24, GPIO_DIR_OUT);
+	gpio_set_value(1, 15, 0);
+	gpio_set_value(1, 16, 0);
+	gpio_set_value(1, 17, 0);
+	gpio_set_value(1, 18, 0);
+	gpio_set_value(1, 19, 0);
+	gpio_set_value(1, 20, 0);
+	gpio_set_value(1, 21, 0);
+	gpio_set_value(1, 5, 0);
+	gpio_set_value(1, 4, 0);
+	gpio_set_value(3, 16, 0);
+	gpio_set_value(4, 24, 0);
 
 	gpio_set_value(4, 7, 1); /* SW_LEA_6T_RST_B */
 	gpio_set_value(4, 6, 1); /* SW_MODEM_PORST_B */
