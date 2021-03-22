@@ -127,7 +127,7 @@
 		" && esbc_validate ${kernelheader_addr_r};"	\
 		"bootm $load_addr#$BOARD\0"			\
 	"othbootargs=default_hugepagesz=1024m hugepagesz=1024m"	\
-		" hugepages=2 mem=14G\0"
+		" hugepages=2 mem=13726M\0"
 
 #include <asm/fsl_secure_boot.h>
 
