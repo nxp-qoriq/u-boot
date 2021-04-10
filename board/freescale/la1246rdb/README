@@ -1,0 +1,69 @@
+Overview
+--------
+The LA1246  Rdb Board is a high-performance computing,
+evaluation, and development platform that supports the QorIQ LS1046A
+LayerScape Architecture processor.
+
+LA1246 SoC Overview
+--------------------
+Please refer arch/arm/cpu/armv8/fsl-layerscape/doc/README.soc for LS1046A
+SoC overview.
+
+ LA1246RDB board Overview
+ -----------------------
+ - SERDES1 Connections, 4 lanes supporting:
+      - Lane0: 2.5G SGMII
+      - Lane1: 2.5G SGMII
+      - Lane2: Unused
+      - Lane3: Unused
+ - SERDES2 Connections, 4 lanes supporting:
+	- Lane0: PCIe1 x1
+	- Lane1: unused
+	- Lane2,3: PCIe3 with PCIe x2 slot
+ - DDR Controller
+     - 8GB 64bits DDR4 SDRAM. Support rates of up to 2133 MT/s
+ -IFC/Local Bus
+    - One 512 MB NAND flash with ECC support
+ - USB 3.0
+    - One Type A port
+ - SDHC: connects directly to a full microSD slot
+ - QSPI: 64 MB high-speed flash Memory for boot code and storage
+ - 4 I2C controllers
+ - UART
+ - ARM JTAG support
+
+Memory map from core's view
+----------------------------
+Start Address	 End Address	 Description		Size
+0x00_0000_0000 - 0x00_000F_FFFF  Secure Boot ROM	1MB
+0x00_0100_0000 - 0x00_0FFF_FFFF  CCSRBAR		240MB
+0x00_1000_0000 - 0x00_1000_FFFF  OCRAM0 		64KB
+0x00_1001_0000 - 0x00_1001_FFFF  OCRAM1 		64KB
+0x00_2000_0000 - 0x00_20FF_FFFF  DCSR			16MB
+0x00_7E80_0000 - 0x00_7E80_FFFF  IFC - NAND Flash	64KB
+0x00_7FB0_0000 - 0x00_7FB0_0FFF  IFC - CPLD		4KB
+0x00_8000_0000 - 0x00_FFFF_FFFF  DRAM1			2GB
+0x05_0000_0000 - 0x05_07FF_FFFF  QMAN S/W Portal	128M
+0x05_0800_0000 - 0x05_0FFF_FFFF  BMAN S/W Portal	128M
+0x08_8000_0000 - 0x09_FFFF_FFFF  DRAM2			6GB
+0x40_0000_0000 - 0x47_FFFF_FFFF  PCI Express1		32G
+0x48_0000_0000 - 0x4F_FFFF_FFFF  PCI Express2		32G
+0x50_0000_0000 - 0x57_FFFF_FFFF  PCI Express3		32G
+
+QSPI flash map:
+Start Address    End Address     Description		                 Size
+0x00_4000_0000 - 0x00_400F_FFFF  RCW + PBI + BL2		              1MB
+0x00_4010_0000 - 0x00_404F_FFFF  TF-A FIP Image + U-Boot       		4MB
+0x00_4050_0000 - 0x00_405F_FFFF  U-Boot Env		                    1MB
+0x00_4060_0000 - 0x00_407F_FFFF  Secure Boot Headers			        2MB
+0x00_4080_0000 - 0x00_4087_FFFF  Secure header or DDR PHY FW      512KB 
+0x00_4088_0000 - 0x00_408F_FFFF  Fuse Provisioning Header		      512KB
+0x00_4090_0000 - 0x00_4093_FFFF  DPAA1 FMan ucode	                256KB
+0x00_4094_0000 - 0x00_4097_FFFF  QE Firmware or DP Firmware   		256KB
+0x00_4098_0000 - 0x00_409B_FFFF  Ethernet PHY Firmware        		256KB
+0x00_409C_0000 - 0x00_409F_FFFF  Script for flashing image     		256KB
+
+Booting Options
+---------------
+a) QSPI boot
+b) SD boot

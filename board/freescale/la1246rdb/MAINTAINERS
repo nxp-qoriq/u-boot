@@ -1,0 +1,7 @@
+LA1246RDB BOARD
+M:	Amrit Pal Singh <amrit.palsingh@nxp.com>
+S:	Maintained
+F:	board/freescale/la1246rdb/
+F:	board/freescale/la1246rdb/la1246rdb.c
+F:	include/configs/la1246rdb.h
+F:	configs/la1246rdb_tfa_defconfig
