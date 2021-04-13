@@ -447,7 +447,6 @@ static void la1238rdb_gpio_init(void)
 	gpio_set_dir(1, 5, GPIO_DIR_OUT);
 	gpio_set_dir(1, 4, GPIO_DIR_OUT);
 	gpio_set_dir(3, 16, GPIO_DIR_OUT);
-	gpio_set_dir(4, 24, GPIO_DIR_OUT);
 	gpio_set_value(1, 15, 0);
 	gpio_set_value(1, 16, 0);
 	gpio_set_value(1, 17, 0);
@@ -458,7 +457,6 @@ static void la1238rdb_gpio_init(void)
 	gpio_set_value(1, 5, 0);
 	gpio_set_value(1, 4, 0);
 	gpio_set_value(3, 16, 0);
-	gpio_set_value(4, 24, 0);
 
 	gpio_set_value(4, 7, 1); /* SW_LEA_6T_RST_B */
 	gpio_set_value(4, 6, 1); /* SW_MODEM_PORST_B */
@@ -485,27 +483,39 @@ static inline uint32_t get_board_version(void)
 	val_13 = gpio_get_value(3, 13);
 	val_14 = gpio_get_value(3, 14);
 
-	return (val_14 << 1) | val_13;
+	return ((val_14 << 1) | val_13);
 }
 
 int checkboard(void)
 {
 	enum boot_src src = get_boot_src();
 	u32 rev = get_board_version();
+	int mode;
 	char buf[64];
 
 	cpu_name(buf);
 	printf("CPU: %s\n", buf);
 
+	gpio_set_dir(4, 24, GPIO_DIR_IN);
+	mode = gpio_get_value(4, 24);
+	switch (mode) {
+	case 0:
+		puts("Board: LA1234-RDB, ");
+		break;
+	case 1:
+		puts("Board: LA1238-RDB, ");
+		break;
+	}
+
 	switch (rev) {
 	case 0x00:
-		puts("Board: LA1238-RDB, Rev: A, boot from ");
+		puts("Rev: A, boot from ");
 		break;
 	case 0x01:
-		puts("Board: LA1238-RDB, Rev: B, boot from ");
+		puts("Rev: B, boot from ");
 		break;
 	default:
-		puts("Board: LA1238-RDB, Rev: Unknown, boot from ");
+		puts("Rev: Unknown, boot from ");
 		break;
 	}
 
@@ -521,6 +531,31 @@ int checkboard(void)
 
 	return 0;
 }
+
+void fdt_fixup_board_model(void *blob)
+{
+	gpio_set_dir(4, 24, GPIO_DIR_IN);
+	if (gpio_get_value(4, 24) == 0)
+		do_fixup_by_path(blob, "/", "model",
+				 "NXP Layerscape LA1234-RDB",
+				 sizeof("NXP Layerscape LA1234-RDB"), 1);
+}
+
+#if defined(CONFIG_DISPLAY_BOARDINFO)
+int show_board_info(void)
+{
+#ifdef CONFIG_OF_CONTROL
+	gpio_set_dir(4, 24, GPIO_DIR_IN);
+	if (gpio_get_value(4, 24) == 0)
+		do_fixup_by_path((void *)gd->fdt_blob, "/", "model",
+				 "NXP Layerscape LA1234-RDB",
+				 sizeof("NXP Layerscape LA1234-RDB"), 1);
+	printf("Model: %s\n",
+	       (char *)fdt_getprop(gd->fdt_blob, 0, "model", NULL));
+#endif
+	return checkboard();
+}
+#endif
 #else
 int checkboard(void)
 {
@@ -990,7 +1025,9 @@ int ft_board_setup(void *blob, bd_t *bd)
 	fdt_fixup_board_enet(blob);
 #endif
 	fdt_fixup_icid(blob);
-
+#if defined(CONFIG_TARGET_LA1238RDB)
+	fdt_fixup_board_model(blob);
+#endif
 	return 0;
 }
 #endif
