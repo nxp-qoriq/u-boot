@@ -30,7 +30,7 @@
 
 #undef BOOT_TARGET_DEVICES
 #define BOOT_TARGET_DEVICES(func) \
-	func(MMC, mmc, 1) \
+	func(MMC, mmc, 0) \
 	func(DHCP, dhcp, na)
 /*
  * Need to override existing (lx2160a) with la1238-rdb so set_board_info will
@@ -104,7 +104,7 @@
 	" && mmc read 0x806C0000 0x3600 0x20 "		\
 	"&& esbc_validate 0x806C0000;env exists mcinitcmd "	\
 	"&& fsl_mc lazyapply dpl 0x80d00000;"		\
-	"run distro_bootcmd;run sd2_bootcmd;"		\
+	"run distro_bootcmd;run emmc_bootcmd;"		\
 	"env exists secureboot && esbc_halt;"
 
 /* Initial environment variables */
