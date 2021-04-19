@@ -112,7 +112,7 @@
 	EXTRA_ENV_SETTINGS			\
 	"boot_scripts=la1238rdb_boot.scr\0"	\
 	"boot_script_hdr=hdr_la1238rdb_bs.out\0"	\
-	"BOARD=la1238-rdb\0"			\
+	"BOARD=la1238rdb\0"			\
 	"xspi_bootcmd=echo Trying load from flexspi..;"		\
 		"sf probe 0:0 && sf read $load_addr "		\
 		"$kernel_start $kernel_size ; env exists secureboot &&"	\
