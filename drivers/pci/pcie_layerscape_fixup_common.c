@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2019-2020 NXP
+ * Copyright 2019-2021 NXP
  *
  * PCIe DT fixup for NXP Layerscape SoCs
  * Author: Wasim Khan <wasim.khan@nxp.com>
@@ -40,7 +40,6 @@ int lx2_board_fix_fdt(void *fdt)
 		{ "config_axi_slave", "config" }
 	};
 	int off = -1, i;
-	u32 val;
 
 	off = fdt_node_offset_by_compatible(fdt, -1, "fsl,lx2160a-pcie");
 	while (off != -FDT_ERR_NOTFOUND) {
