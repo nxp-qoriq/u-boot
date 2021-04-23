@@ -79,6 +79,22 @@
 	status = "okay";
 };
 
+&gpio0 {
+	u-boot,dm-pre-reloc;
+};
+
+&gpio1 {
+	u-boot,dm-pre-reloc;
+};
+
+&gpio2 {
+	u-boot,dm-pre-reloc;
+};
+
+&gpio3 {
+	u-boot,dm-pre-reloc;
+};
+
 &pcie1 {
 	status = "disabled";
 };

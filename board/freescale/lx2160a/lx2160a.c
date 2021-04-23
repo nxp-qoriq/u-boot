@@ -31,6 +31,7 @@
 #include <fsl_immap.h>
 #include <asm/arch-fsl-layerscape/fsl_icid.h>
 #include <cpu_func.h>
+#include <asm/gpio.h>
 
 #ifdef CONFIG_EMC2305
 #include "../common/emc2305.h"
@@ -50,20 +51,6 @@
 #endif /* CONFIG_TARGET_LX2160AQDS or CONFIG_TARGET_LX2162AQDS */
 
 DECLARE_GLOBAL_DATA_PTR;
-
-#if defined(CONFIG_TARGET_LA1238RDB)
-enum gpio_dir {
-	GPIO_DIR_IN,
-	GPIO_DIR_OUT
-};
-
-static u64 gpio_ports[] = {
-	GPIO1_BASE_ADDR,
-	GPIO2_BASE_ADDR,
-	GPIO3_BASE_ADDR,
-	GPIO4_BASE_ADDR
-};
-#endif
 
 static struct pl01x_serial_platdata serial0 = {
 #if CONFIG_CONS_INDEX == 0
@@ -330,158 +317,101 @@ int init_func_vid(void)
 #endif
 
 #if defined(CONFIG_TARGET_LA1238RDB)
-static int gpio_set_dir(u32 port, u32 gpio, enum gpio_dir dir)
-{
-	struct ccsr_gpio *regs;
-	u32 val;
 
-	if (port > ARRAY_SIZE(gpio_ports) || port == 0 || gpio >= 32)
-		return -1;
-
-	gpio = 31 - gpio;
-	regs = (void *)gpio_ports[port - 1];
-	val = in_le32(&regs->gpdir);
-
-	switch (dir) {
-	case GPIO_DIR_OUT:
-		val |= 1 << gpio;
-		break;
-	case GPIO_DIR_IN:
-		val &= ~(1 << gpio);
-	}
-
-	/* Set direction */
-	out_le32(&regs->gpdir, val);
-
-	/* Input buffer enable */
-	val = in_le32(&regs->gpibe);
-	val |= 1 << gpio;
-	out_le32(&regs->gpibe, val);
-
-	return 0;
-}
-
-static int gpio_set_value(u32 port, u32 gpio, u32 val)
-{
-	struct ccsr_gpio *regs;
-	u32 rval;
-
-	if (port > ARRAY_SIZE(gpio_ports) || port == 0 || gpio >= 32)
-		return -1;
-
-	val = !!val;
-	gpio = 31 - gpio;
-	regs = (void *)gpio_ports[port - 1];
-	rval = in_le32(&regs->gpdat);
-
-	if (val)
-		rval |= 1 << gpio;
-	else
-		rval &= ~(1 << gpio);
-
-	out_le32(&regs->gpdat, rval);
-
-	return 0;
-}
-
-static int gpio_get_value(u32 port, u32 gpio)
-{
-	struct ccsr_gpio *regs;
-	u32 val;
-
-	if (port > ARRAY_SIZE(gpio_ports) || port == 0 || gpio >= 32)
-		return -1;
-
-	gpio = 31 - gpio;
-	regs = (void *)gpio_ports[port - 1];
-	val = in_le32(&regs->gpdat);
-
-	return !!(val & (1 << gpio));
-}
+#define LS_GPIO_NUMBER(port, gpio) ((((port) - 1) * 32) + ((gpio) & 31))
 
 static void toggle_la1238_jtag_tck_gpio(void)
 {
 	int i;
 
-	gpio_set_dir(4, 3, GPIO_DIR_OUT); /* LA1238 JTAG TCK/TMS MUX CONTROL */
+	gpio_request(LS_GPIO_NUMBER(4, 3), "JTAG_TCK_TMS_MUX");
+	gpio_direction_output(LS_GPIO_NUMBER(4, 3), 0);
 
 	for (i = 0; i < 10; i++) {
-		gpio_set_value(4, 3, 0);
+		gpio_set_value(LS_GPIO_NUMBER(4, 3), 0);
 		mdelay(1);
-		gpio_set_value(4, 3, 1);
+		gpio_set_value(LS_GPIO_NUMBER(4, 3), 1);
 		mdelay(1);
 	}
 }
 
 static void la1238rdb_gpio_init(void)
 {
-	gpio_set_dir(4, 7, GPIO_DIR_OUT); /* SW_LEA_6T_RST_B */
-	gpio_set_dir(4, 6, GPIO_DIR_OUT); /* SW_MODEM_PORST_B */
-	gpio_set_dir(4, 8, GPIO_DIR_OUT); /* SW_AQR113_RST_B */
-	gpio_set_dir(4, 9, GPIO_DIR_OUT); /* SW_NLM_RST_B */
-	gpio_set_dir(4, 0, GPIO_DIR_OUT); /* SW_MODEM_WARM_RST_B */
-	gpio_set_dir(3, 15, GPIO_DIR_OUT); /* SW_SI5518_RST_B */
-	gpio_set_dir(1, 23, GPIO_DIR_OUT); /* STATUS LED */
-	gpio_set_dir(4, 1, GPIO_DIR_OUT); /* CPU_GPIO_LED2_B */
-	gpio_set_dir(4, 2, GPIO_DIR_OUT); /* CPU_GPIO_LED1_B */
-	gpio_set_dir(4, 10, GPIO_DIR_OUT); /* GPIO_FUSE_PROG */
-	gpio_set_dir(4, 25, GPIO_DIR_OUT); /* CFG_MUX_1PPS_S */
-	gpio_set_dir(4, 26, GPIO_DIR_OUT); /* CFG_MUX_1PPS_S */
-	gpio_set_dir(1, 22, GPIO_DIR_OUT); /* LEA_6T_EXTINT0 */
+	gpio_request(LS_GPIO_NUMBER(4, 7), "SW_LEA_6T_RST_B");
+	gpio_request(LS_GPIO_NUMBER(4, 6), "SW_MODEM_PORST_B");
+	gpio_request(LS_GPIO_NUMBER(4, 8), "SW_AQR113_RST_B");
+	gpio_request(LS_GPIO_NUMBER(4, 9), "SW_NLM_RST_B");
+	gpio_request(LS_GPIO_NUMBER(4, 0), "SW_MODEM_WARM_RST_B");
+	gpio_request(LS_GPIO_NUMBER(3, 15), "SW_SI5518_RST_B");
+	gpio_request(LS_GPIO_NUMBER(1, 23), "STATUS_LED");
+	gpio_request(LS_GPIO_NUMBER(4, 1), "CPU_GPIO_LED2_B");
+	gpio_request(LS_GPIO_NUMBER(4, 2), "CPU_GPIO_LED1_B");
+	gpio_request(LS_GPIO_NUMBER(4, 10), "GPIO_FUSE_PROG");
+	gpio_request(LS_GPIO_NUMBER(4, 25), "CFG_MUX_1PPS_S1");
+	gpio_request(LS_GPIO_NUMBER(4, 26), "CFG_MUX_1PPS_S2");
+	gpio_request(LS_GPIO_NUMBER(1, 22), "LEA_6T_EXTINT0");
+	gpio_request(LS_GPIO_NUMBER(4, 5), "GPIO_NLM_CPU");
+	gpio_request(LS_GPIO_NUMBER(1, 26), "SI5518_GPIO1");
+	gpio_request(LS_GPIO_NUMBER(1, 27), "SI5518_GPIO2");
+	gpio_request(LS_GPIO_NUMBER(3, 12), "SI5518_GPIO3");
+	gpio_request(LS_GPIO_NUMBER(4, 4), "CPU_GPIO_TO_LA1238_1");
+	gpio_request(LS_GPIO_NUMBER(4, 11), "CPU_GPIO_TO_LA1238_2");
+	gpio_request(LS_GPIO_NUMBER(1, 15), "unused_mux1");
+	gpio_request(LS_GPIO_NUMBER(1, 16), "unused_mux2");
+	gpio_request(LS_GPIO_NUMBER(1, 17), "unused_mux3");
+	gpio_request(LS_GPIO_NUMBER(1, 18), "unused_mux4");
+	gpio_request(LS_GPIO_NUMBER(1, 19), "unused_mux5");
+	gpio_request(LS_GPIO_NUMBER(1, 20), "unused_mux6");
+	gpio_request(LS_GPIO_NUMBER(1, 21), "unused_mux7");
+	gpio_request(LS_GPIO_NUMBER(1, 5), "unused_mux8");
+	gpio_request(LS_GPIO_NUMBER(1, 4), "unused_mux9");
+	gpio_request(LS_GPIO_NUMBER(3, 16), "unused_mux10");
 
-	gpio_set_dir(4, 5, GPIO_DIR_IN); /* GPIO_NLM_CPU */
-	gpio_set_dir(1, 26, GPIO_DIR_IN); /* SI5518_GPIO */
-	gpio_set_dir(1, 27, GPIO_DIR_IN); /* SI5518_GPIO */
-	gpio_set_dir(3, 12, GPIO_DIR_IN); /* SI5518_GPIO */
-	gpio_set_dir(4, 4, GPIO_DIR_IN); /* CPU_GPIO_TO_LA1238 */
-	gpio_set_dir(4, 11, GPIO_DIR_IN); /* CPU_GPIO_TO_LA1238 */
+	gpio_direction_output(LS_GPIO_NUMBER(4, 7), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 6), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 8), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 9), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 0), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(3, 15), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 23), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 1), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 2), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 10), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 25), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 26), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 22), 1);
 
-	/* Unused mux */
-	gpio_set_dir(1, 15, GPIO_DIR_OUT);
-	gpio_set_dir(1, 16, GPIO_DIR_OUT);
-	gpio_set_dir(1, 17, GPIO_DIR_OUT);
-	gpio_set_dir(1, 18, GPIO_DIR_OUT);
-	gpio_set_dir(1, 19, GPIO_DIR_OUT);
-	gpio_set_dir(1, 20, GPIO_DIR_OUT);
-	gpio_set_dir(1, 21, GPIO_DIR_OUT);
-	gpio_set_dir(1, 5, GPIO_DIR_OUT);
-	gpio_set_dir(1, 4, GPIO_DIR_OUT);
-	gpio_set_dir(3, 16, GPIO_DIR_OUT);
-	gpio_set_value(1, 15, 0);
-	gpio_set_value(1, 16, 0);
-	gpio_set_value(1, 17, 0);
-	gpio_set_value(1, 18, 0);
-	gpio_set_value(1, 19, 0);
-	gpio_set_value(1, 20, 0);
-	gpio_set_value(1, 21, 0);
-	gpio_set_value(1, 5, 0);
-	gpio_set_value(1, 4, 0);
-	gpio_set_value(3, 16, 0);
+	gpio_direction_input(LS_GPIO_NUMBER(4, 5));
+	gpio_direction_input(LS_GPIO_NUMBER(1, 26));
+	gpio_direction_input(LS_GPIO_NUMBER(1, 27));
+	gpio_direction_input(LS_GPIO_NUMBER(3, 12));
+	gpio_direction_input(LS_GPIO_NUMBER(4, 4));
+	gpio_direction_input(LS_GPIO_NUMBER(4, 11));
 
-	gpio_set_value(4, 7, 1); /* SW_LEA_6T_RST_B */
-	gpio_set_value(4, 6, 1); /* SW_MODEM_PORST_B */
-	gpio_set_value(4, 8, 1); /* SW_AQR113_RST_B */
-	gpio_set_value(4, 9, 1); /* SW_NLM_RST_B */
-	gpio_set_value(4, 0, 1); /* SW_MODEM_WARM_RST_B */
-	gpio_set_value(3, 15, 1); /* SW_SI5518_RST_B */
-	gpio_set_value(1, 23, 0); /* STATUS LED */
-	gpio_set_value(4, 1, 0); /* CPU_GPIO_LED2_B */
-	gpio_set_value(4, 2, 0); /* CPU_GPIO_LED1_B */
-	gpio_set_value(4, 10, 1); /* GPIO_FUSE_PROG */
-	gpio_set_value(4, 25, 1); /* CFG_MUX_1PPS_S */
-	gpio_set_value(4, 26, 1); /* CFG_MUX_1PPS_S */
-	gpio_set_value(1, 22, 1); /* LEA_6T_EXTINT0 */
+	gpio_direction_output(LS_GPIO_NUMBER(1, 15), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 16), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 17), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 18), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 19), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 20), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 21), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 5), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 4), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(3, 16), 0);
 }
 
 static inline uint32_t get_board_version(void)
 {
 	int val_13, val_14;
 
-	gpio_set_dir(3, 13, GPIO_DIR_IN);
-	gpio_set_dir(3, 14, GPIO_DIR_IN);
+	gpio_request(LS_GPIO_NUMBER(3, 13), "gpio_ver_1");
+	gpio_request(LS_GPIO_NUMBER(3, 14), "gpio_ver_2");
 
-	val_13 = gpio_get_value(3, 13);
-	val_14 = gpio_get_value(3, 14);
+	gpio_direction_input(LS_GPIO_NUMBER(3, 13));
+	gpio_direction_input(LS_GPIO_NUMBER(3, 14));
+
+	val_13 = gpio_get_value(LS_GPIO_NUMBER(3, 13));
+	val_14 = gpio_get_value(LS_GPIO_NUMBER(3, 14));
 
 	return ((val_14 << 1) | val_13);
 }
@@ -496,8 +426,7 @@ int checkboard(void)
 	cpu_name(buf);
 	printf("CPU: %s\n", buf);
 
-	gpio_set_dir(4, 24, GPIO_DIR_IN);
-	mode = gpio_get_value(4, 24);
+	mode = gpio_get_value(LS_GPIO_NUMBER(4, 24));
 	switch (mode) {
 	case 0:
 		puts("Board: LA1234-RDB, ");
@@ -534,8 +463,9 @@ int checkboard(void)
 
 void fdt_fixup_board_model(void *blob)
 {
-	gpio_set_dir(4, 24, GPIO_DIR_IN);
-	if (gpio_get_value(4, 24) == 0)
+	gpio_request(LS_GPIO_NUMBER(4, 24), "board_rev");
+	gpio_direction_input(LS_GPIO_NUMBER(4, 24));
+	if (gpio_get_value(LS_GPIO_NUMBER(4, 24)) == 0)
 		do_fixup_by_path(blob, "/", "model",
 				 "NXP Layerscape LA1234-RDB",
 				 sizeof("NXP Layerscape LA1234-RDB"), 1);
@@ -545,8 +475,9 @@ void fdt_fixup_board_model(void *blob)
 int show_board_info(void)
 {
 #ifdef CONFIG_OF_CONTROL
-	gpio_set_dir(4, 24, GPIO_DIR_IN);
-	if (gpio_get_value(4, 24) == 0)
+	gpio_request(LS_GPIO_NUMBER(4, 24), "board_rev");
+	gpio_direction_input(LS_GPIO_NUMBER(4, 24));
+	if (gpio_get_value(LS_GPIO_NUMBER(4, 24)) == 0)
 		do_fixup_by_path((void *)gd->fdt_blob, "/", "model",
 				 "NXP Layerscape LA1234-RDB",
 				 sizeof("NXP Layerscape LA1234-RDB"), 1);
