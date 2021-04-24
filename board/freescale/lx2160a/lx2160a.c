@@ -88,11 +88,15 @@ int select_i2c_ch_pca9547(u8 ch)
 	struct udevice *dev;
 
 	ret = i2c_get_chip_for_busnum(0, I2C_MUX_PCA_ADDR_PRI, 1, &dev);
-	if (!ret)
+	if (ret) {
+		printf("PCA: failed to get udev : %d\n", ret);
+		return ret;
+	} else {
 		ret = dm_i2c_write(dev, 0, &ch, 1);
+	}
 #endif
 	if (ret) {
-		puts("PCA: failed to select proper channel\n");
+		printf("PCA: failed to select channel : %d\n", ret);
 		return ret;
 	}
 
@@ -994,26 +998,40 @@ static int switch_boot_source(int src_id)
 
 	ret = i2c_get_chip_for_busnum(PCAL_BUS_NO, PCAL_CPU_ADDR, 1, &dev);
 	if (ret) {
-		printf("%s: Cannot find udev for a bus %d, addr :%d\n",
-		       __func__, PCAL_BUS_NO, PCAL_CPU_ADDR);
+		printf("%s: Cannot find udev for a bus %d, addr :%d, ret: %d\n",
+		       __func__, PCAL_BUS_NO, PCAL_CPU_ADDR, ret);
 		return -ENXIO;
 	}
 
 	/* Make all rcw src pin output, don't touch svr pins */
-	data = 0xf0;
+	ret = dm_i2c_read(dev, PCAL_CONFIG, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_CONFIG, ret);
+		return ret;
+	}
+	/* Clear bit 4 to 7 (RCW_SRC0 to RCW_SRC3) to make then input */
+	data &= 0x0f;
 	ret = dm_i2c_write(dev, PCAL_CONFIG, &data, 1);
 	if (ret) {
-		printf("i2c write error addr: %u reg: %u data: %u\n",
-		       PCAL_CPU_ADDR, PCAL_CONFIG, data);
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_CONFIG, data, ret);
 		return ret;
 	}
 
+	ret = dm_i2c_read(dev, PCAL_OUTPUT_PORT, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, ret);
+		return ret;
+	}
+	data &= 0x0f;
 	switch (src_id) {
 	case BOOT_FROM_XSPI: /* RCW_SRC[3:0] = 1111 */
-		data = 0xf0;
+		data |= 0xf0;
 		break;
 	case BOOT_FROM_EMMC: /* RCW_SRC[3:0] = 1001 */
-		data = 0x90;
+		data |= 0x90;
 		break;
 	default:
 		printf("CPU boot source error: %d\n", src_id);
@@ -1022,8 +1040,8 @@ static int switch_boot_source(int src_id)
 
 	ret = dm_i2c_write(dev, PCAL_OUTPUT_PORT, &data, 1);
 	if (ret) {
-		printf("i2c write error addr: %u reg: %u data: %u\n",
-		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, data);
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, data, ret);
 		return ret;
 	}
 
@@ -1059,29 +1077,42 @@ static int switch_boot_source_modem(int src_id)
 
 	ret = i2c_get_chip_for_busnum(PCAL_BUS_NO, PCAL_MODEM_ADDR, 1, &dev);
 	if (ret) {
-		printf("%s: Cannot find udev for a bus %d, addr :%d\n",
-		       __func__, PCAL_BUS_NO, PCAL_MODEM_ADDR);
+		printf("%s: Cannot find udev for a bus %d, addr :%d, ret: %d\n",
+		       __func__, PCAL_BUS_NO, PCAL_MODEM_ADDR, ret);
 		return -ENXIO;
 	}
 
 	/* Make modem boot source control pins output, Don't touch other pins */
-	data = 0x06;
+	ret = dm_i2c_read(dev, PCAL_CONFIG, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       PCAL_MODEM_ADDR, PCAL_CONFIG, ret);
+		return ret;
+	}
+	data = data & 0xf9;
 	ret = dm_i2c_write(dev, PCAL_CONFIG, &data, 1);
 	if (ret) {
-		printf("i2c write error addr: %u reg: %u data: %u\n",
-		       PCAL_CPU_ADDR, PCAL_CONFIG, data);
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_CONFIG, data, ret);
 		return ret;
 	}
 
+	ret = dm_i2c_read(dev, PCAL_OUTPUT_PORT, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       PCAL_MODEM_ADDR, PCAL_OUTPUT_PORT, ret);
+		return ret;
+	}
+	data &= 0xf9;
 	switch (src_id) {
 	case BOOT_FROM_XSPI:
-		data = 0x02; /* SW_CFG_BOOT_SRC[1:0] = 01 */
+		data |= 0x02; /* SW_CFG_BOOT_SRC[1:0] = 01 */
 		break;
 	case BOOT_FROM_PCIE:
-		data = 0x06; /* SW_CFG_BOOT_SRC[1:0] = 11 */
+		data |= 0x06; /* SW_CFG_BOOT_SRC[1:0] = 11 */
 		break;
 	case BOOT_FROM_PEB:
-		data = 0; /* SW_CFG_BOOT_SRC[1:0] = 00 */
+		data |= 0; /* SW_CFG_BOOT_SRC[1:0] = 00 */
 		break;
 	default:
 		printf("Modem boot source error: %d\n", src_id);
@@ -1090,8 +1121,8 @@ static int switch_boot_source_modem(int src_id)
 
 	ret = dm_i2c_write(dev, PCAL_OUTPUT_PORT, &data, 1);
 	if (ret) {
-		printf("i2c write error addr: %u reg: %u data: %u\n",
-		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, data);
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, data, ret);
 		return ret;
 	}
 
