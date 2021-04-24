@@ -482,11 +482,10 @@ int show_board_info(void)
 	gpio_request(LS_GPIO_NUMBER(4, 24), "board_rev");
 	gpio_direction_input(LS_GPIO_NUMBER(4, 24));
 	if (gpio_get_value(LS_GPIO_NUMBER(4, 24)) == 0)
-		do_fixup_by_path((void *)gd->fdt_blob, "/", "model",
-				 "NXP Layerscape LA1234-RDB",
-				 sizeof("NXP Layerscape LA1234-RDB"), 1);
-	printf("Model: %s\n",
-	       (char *)fdt_getprop(gd->fdt_blob, 0, "model", NULL));
+		printf("Model: NXP Layerscape LA1234-RDB\n");
+	else
+		printf("Model: %s\n",
+		       (char *)fdt_getprop(gd->fdt_blob, 0, "model", NULL));
 #endif
 	return checkboard();
 }
