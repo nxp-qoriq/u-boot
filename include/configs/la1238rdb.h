@@ -30,8 +30,7 @@
 
 #undef BOOT_TARGET_DEVICES
 #define BOOT_TARGET_DEVICES(func) \
-	func(MMC, mmc, 0) \
-	func(DHCP, dhcp, na)
+	func(MMC, mmc, 0)
 /*
  * Need to override existing (lx2160a) with la1238-rdb so set_board_info will
  * use proper prefix when creating full board_name (SYS_BOARD + type)
