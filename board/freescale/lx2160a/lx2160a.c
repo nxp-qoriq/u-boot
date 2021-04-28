@@ -78,6 +78,18 @@ U_BOOT_DEVICE(nxp_serial1) = {
 	.platdata = &serial1,
 };
 
+#if defined(CONFIG_TARGET_LA1238RDB)
+static struct pl01x_serial_platdata serial2 = {
+	.base = CONFIG_SYS_SERIAL2,
+	.type = TYPE_PL011,
+};
+
+U_BOOT_DEVICE(nxp_serial2) = {
+	.name = "serial_pl01x",
+	.platdata = &serial2,
+};
+#endif
+
 int select_i2c_ch_pca9547(u8 ch)
 {
 	int ret;
@@ -130,6 +142,9 @@ static void uart_get_clock(void)
 {
 	serial0.clock = get_serial_clock();
 	serial1.clock = get_serial_clock();
+#if defined(CONFIG_TARGET_LA1238RDB)
+	serial2.clock = get_serial_clock();
+#endif
 }
 
 int board_early_init_f(void)

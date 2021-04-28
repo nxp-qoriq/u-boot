@@ -168,9 +168,18 @@ int serial_init(void)
 }
 
 /* Called after relocation */
-void serial_initialize(void)
+int serial_initialize(void)
 {
-	serial_init();
+	/* Scanning uclass to probe devices */
+	if (IS_ENABLED(CONFIG_SERIAL_PROBE_ALL)) {
+		int ret;
+
+		ret  = uclass_probe_all(UCLASS_SERIAL);
+		if (ret)
+			return ret;
+	}
+
+	return serial_init();
 }
 
 static void _serial_putc(struct udevice *dev, char ch)
