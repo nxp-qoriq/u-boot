@@ -486,7 +486,7 @@ int adjust_vdd(ulong vdd_override)
 	int ret, i2caddress = 0;
 	unsigned long vdd_string_override;
 	char *vdd_string;
-#if defined(CONFIG_ARCH_LX2160A) || defined(CONFIG_ARCH_LX2162A)
+#if defined(CONFIG_ARCH_LX2160A)
 	static const u16 vdd[32] = {
 		8250,
 		7875,
@@ -506,6 +506,42 @@ int adjust_vdd(ulong vdd_override)
 		0,      /* reserved */
 		8000,
 		8125,
+		8250,
+		0,      /* reserved */
+		8500,
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+	};
+#else
+#ifdef CONFIG_ARCH_LX2162A
+	static const u16 vdd[32] = {
+		8500,
+		0,      /* reserved */
+		7750,
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		0,      /* reserved */
+		8000,
+		0,      /* reserved */
 		8250,
 		0,      /* reserved */
 		8500,
@@ -593,6 +629,7 @@ int adjust_vdd(ulong vdd_override)
 		0,      /* reserved */
 		0,      /* reserved */
 	};
+#endif
 #endif
 #endif
 	struct vdd_drive {
