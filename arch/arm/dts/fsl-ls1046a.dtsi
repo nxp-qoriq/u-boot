@@ -3,6 +3,7 @@
  * Device Tree Include file for Freescale Layerscape-1046A family SoC.
  *
  * Copyright (C) 2016, Freescale Semiconductor
+ * Copyright 2020-2021 NXP
  *
  * Mingkai Hu <mingkai.hu@nxp.com>
  */
@@ -300,6 +301,16 @@
 			interrupts = <0 69 4>;
 			clocks = <&clockgen 4 1>;
 			status = "disabled";
+    };
+
+    wdog0: watchdog@2ad0000 {
+      compatible = "fsl,imx21-wdt";
+      reg = <0x0 0x2ad0000 0x0 0x10000>;
+      interrupts = <0 115 4>;
+      clocks = <&clockgen 4 1>;
+      clock-names = "wdog-en";
+      big-endian;
+      status = "disabled";
 		};
 	};
 };
