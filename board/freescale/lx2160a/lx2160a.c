@@ -1073,8 +1073,9 @@ int ft_board_setup(void *blob, bd_t *bd)
 	fdt_fixup_board_enet(blob);
 #endif
 	fdt_fixup_icid(blob);
+#if defined(CONFIG_TARGET_LA1224RDB)
 	fdt_fixup_dspi2_status(blob);
-
+#endif
 	return 0;
 }
 #endif
