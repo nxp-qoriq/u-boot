@@ -145,17 +145,19 @@
 	"kernelhdr_size_sd=0x10\0"		\
 	"console=ttyS0,115200\0"                \
 	 CONFIG_MTDPARTS_DEFAULT "\0"		\
+	BOOTENV					\
 	"boot_scripts=la1246rdb_boot.scr\0"	\
 	"boot_script_hdr=hdr_la1246rdb_bs.out\0"	\
 	"scan_dev_for_boot_part="               \
 		"part list ${devtype} ${devnum} devplist; "   \
-		"env exists bootdev || setenv bootdev 1; "     \
-		"setenv distro_bootpart ${bootdev}; "     \
+		"env exists devplist || setenv devplist 1; "     \
+		"for distro_bootpart in ${devplist}; do "	\
 		  "if fstype ${devtype} "                  \
 			"${devnum}:${distro_bootpart} "      \
 			"bootfstype; then "                  \
 			"run scan_dev_for_boot; "            \
-		  "fi;\0 "                                   \
+		  "fi;"                                   \
+		"done\0"					\
 	"scan_dev_for_boot="				  \
 		"echo Scanning ${devtype} "		  \
 				"${devnum}:${distro_bootpart}...; "  \
