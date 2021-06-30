@@ -2,7 +2,7 @@
 /*
  * NXP LX2160A BLUEBOX3 device tree source
  *
- * Copyright 2020 NXP
+ * Copyright 2020-2021 NXP
  *
  */
 
@@ -25,10 +25,6 @@
 &esdhc1 {
 	status = "okay";
 	mmc-hs200-1_8v;
-};
-
-&usb1 {
-	status = "disabled";
 };
 
 &fspi {
@@ -87,4 +83,8 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 	};
+};
+
+&usb1 {
+	status = "okay";
 };
