@@ -1,15 +1,12 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * Copyright 2020 NXP
+ * Copyright 2020-2021 NXP
  */
 
 #ifndef __LX2_BLUEBOX3_H
 #define __LX2_BLUEBOX3_H
 
 #include "lx2160a_common.h"
-
-/* USB */
-#define CONFIG_USB_MAX_CONTROLLER_COUNT 1
 
 /* Qixis */
 #define QIXIS_XMAP_MASK			0x01

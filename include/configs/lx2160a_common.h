@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * Copyright 2018-2020 NXP
+ * Copyright 2018-2021 NXP
  */
 
 #ifndef __LX2_COMMON_H
@@ -162,9 +162,7 @@
 /* USB */
 #ifdef CONFIG_USB
 #define CONFIG_HAS_FSL_XHCI_USB
-#ifndef CONFIG_TARGET_LX2160ABLUEBOX3
 #define CONFIG_USB_MAX_CONTROLLER_COUNT	2
-#endif
 #endif
 
 /* FlexSPI */
