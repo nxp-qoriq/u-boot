@@ -914,18 +914,18 @@ static int caam_jr_probe(struct udevice *dev)
 	struct caam_regs *caam = dev_get_priv(dev);
 	const void *fdt = gd->fdt_blob;
 	int node = dev_of_offset(dev);
-	struct fdt_resource res;
-	int subnode, ret;
+	fdt_addr_t addr;
+	int subnode;
 	unsigned int jr_node = 0;
 
 	caam_dev = dev;
 
-	ret = fdt_get_resource(fdt, node, "reg", 0, &res);
-	if (ret) {
-		printf("caam_jr: resource not found\n");
-		return ret;
+	addr = dev_read_addr(dev);
+	if (addr == FDT_ADDR_T_NONE) {
+		printf("caam_jr: crypto not found\n");
+		return -EINVAL;
 	}
-	caam->sec = (ccsr_sec_t *)res.start;
+	caam->sec = (ccsr_sec_t *)(uintptr_t)addr;
 	caam->regs = (struct jr_regs *)caam->sec;
 
 	/* Check for enabled job ring subnode */
@@ -941,9 +941,8 @@ static int caam_jr_probe(struct udevice *dev)
 			}
 			caam->jrid = jr_node - 1;
 #ifdef CONFIG_ARCH_IMX8
-			ret = jr_power_on(subnode);
-			if (ret)
-				return ret;
+			if (jr_power_on(subnode))
+				return -EINVAL;
 #endif
 			break;
 		}

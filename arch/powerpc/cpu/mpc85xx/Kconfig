@@ -29,6 +29,10 @@ config TARGET_P3041DS
 	select PHYS_64BIT
 	select ARCH_P3041
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply PANIC_HANG
 
@@ -37,6 +41,10 @@ config TARGET_P4080DS
 	select PHYS_64BIT
 	select ARCH_P4080
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply PANIC_HANG
 
@@ -45,6 +53,10 @@ config TARGET_P5040DS
 	select PHYS_64BIT
 	select ARCH_P5040
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply PANIC_HANG
 
@@ -119,6 +131,10 @@ config TARGET_P2041RDB
 	select ARCH_P2041
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
 	select PHYS_64BIT
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply FSL_SATA
 
@@ -134,6 +150,10 @@ config TARGET_T1023RDB
 	select SUPPORT_SPL
 	select PHYS_64BIT
 	select FSL_DDR_INTERACTIVE
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_EEPROM
 	imply PANIC_HANG
 
@@ -144,6 +164,10 @@ config TARGET_T1024RDB
 	select SUPPORT_SPL
 	select PHYS_64BIT
 	select FSL_DDR_INTERACTIVE
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_EEPROM
 	imply PANIC_HANG
 
@@ -153,6 +177,10 @@ config TARGET_T1040RDB
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
 	select SUPPORT_SPL
 	select PHYS_64BIT
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply PANIC_HANG
 
@@ -162,6 +190,10 @@ config TARGET_T1040D4RDB
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
 	select SUPPORT_SPL
 	select PHYS_64BIT
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply PANIC_HANG
 
@@ -171,6 +203,10 @@ config TARGET_T1042RDB
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
 	select SUPPORT_SPL
 	select PHYS_64BIT
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 
 config TARGET_T1042D4RDB
@@ -179,6 +215,10 @@ config TARGET_T1042D4RDB
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
 	select SUPPORT_SPL
 	select PHYS_64BIT
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply PANIC_HANG
 
@@ -188,6 +228,10 @@ config TARGET_T1042RDB_PI
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
 	select SUPPORT_SPL
 	select PHYS_64BIT
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply PANIC_HANG
 
@@ -199,6 +243,10 @@ config TARGET_T2080QDS
 	select PHYS_64BIT
 	select FSL_DDR_FIRST_SLOT_QUAD_CAPABLE
 	select FSL_DDR_INTERACTIVE
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 
 config TARGET_T2080RDB
@@ -207,6 +255,10 @@ config TARGET_T2080RDB
 	select BOARD_LATE_INIT if CHAIN_OF_TRUST
 	select SUPPORT_SPL
 	select PHYS_64BIT
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply PANIC_HANG
 
@@ -217,12 +269,20 @@ config TARGET_T2081QDS
 	select PHYS_64BIT
 	select FSL_DDR_FIRST_SLOT_QUAD_CAPABLE
 	select FSL_DDR_INTERACTIVE
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 
 config TARGET_T4160RDB
 	bool "Support T4160RDB"
 	select ARCH_T4160
 	select SUPPORT_SPL
 	select PHYS_64BIT
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply PANIC_HANG
 
 config TARGET_T4240RDB
@@ -231,6 +291,10 @@ config TARGET_T4240RDB
 	select SUPPORT_SPL
 	select PHYS_64BIT
 	select FSL_DDR_FIRST_SLOT_QUAD_CAPABLE
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select ARCH_MISC_INIT
 	imply CMD_SATA
 	imply PANIC_HANG
 

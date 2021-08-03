@@ -56,6 +56,9 @@
 #ifdef CONFIG_U_QE
 #include <fsl_qe.h>
 #endif
+#include <dm.h>
+#include <dm/uclass-internal.h>
+#include <dm/device-internal.h>
 
 #ifdef CONFIG_SYS_FSL_SINGLE_SOURCE_CLK
 /*
@@ -974,8 +977,6 @@ int cpu_init_r(void)
 #endif
 
 #ifdef CONFIG_FSL_CAAM
-	sec_init();
-
 #if defined(CONFIG_ARCH_C29X)
 	if ((SVR_SOC_VER(svr) == SVR_C292) ||
 	    (SVR_SOC_VER(svr) == SVR_C293))
@@ -1013,6 +1014,21 @@ int cpu_init_r(void)
 
 	return 0;
 }
+
+#ifdef CONFIG_ARCH_MISC_INIT
+int arch_misc_init(void)
+{
+	struct udevice *dev;
+
+	uclass_find_first_device(UCLASS_MISC, &dev);
+	for (; dev; uclass_find_next_device(&dev)) {
+		if (device_probe(dev))
+			continue;
+	}
+
+	return 0;
+}
+#endif
 
 void arch_preboot_os(void)
 {
