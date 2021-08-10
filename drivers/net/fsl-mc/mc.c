@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2014 Freescale Semiconductor, Inc.
- * Copyright 2017-2018, 2020 NXP
+ * Copyright 2017-2021 NXP
  */
 #include <common.h>
 #include <command.h>
@@ -374,6 +374,74 @@ static int mc_fixup_dpc_mac_addr(void *blob, int dpmac_id,
 				 MC_FIXUP_DPC);
 }
 
+static int mc_fixup_dpc_enet_if(void *blob, int dpmac_id)
+{
+	int nodeoffset = fdt_path_offset(blob, "/board_info/ports"), noff;
+	int err = 0, size;
+	char mac_name[10];
+	const char propname[] = "enet_if";
+	const char enet_if_type[] = "RGMII";
+
+	sprintf(mac_name, "mac@%d", dpmac_id);
+
+	/* If port is enabled, node will be created by MAC fixup address */
+	noff = fdt_subnode_offset(blob, nodeoffset, (const char *)mac_name);
+	if (noff >= 0) {
+		/* Ethernet interface type property not present */
+		if (!fdt_get_property(blob, noff, propname, NULL)) {
+			size = MC_DT_INCREASE_SIZE + strlen(propname) +
+				strlen(enet_if_type);
+			/* make room for Ethernet interface type property */
+			err = fdt_increase_size(blob, size);
+			if (err) {
+				printf("fdt_increase_size: err=%s\n",
+				       fdt_strerror(err));
+				return err;
+			}
+		}
+
+		err = fdt_setprop_string(blob, noff, propname,
+					 enet_if_type);
+		if (err) {
+			printf("fdt_setprop_string: err=%s\n",
+			       fdt_strerror(err));
+			return err;
+		}
+	}
+
+	return err;
+}
+
+static int mc_fixup_dpc_enet_ifs(void *blob)
+{
+	int i, err = 0, ret = 0;
+	char ethname[ETH_NAME_LEN];
+	struct eth_device *eth_dev;
+
+	for (i = WRIOP1_DPMAC1; i < NUM_WRIOP_PORTS; i++) {
+		/* port not enabled */
+		if (wriop_is_enabled_dpmac(i) != 1)
+			continue;
+
+		snprintf(ethname, ETH_NAME_LEN, "DPMAC%d@%s", i,
+			 phy_interface_strings[wriop_get_enet_if(i)]);
+
+		eth_dev = eth_get_dev_by_name(ethname);
+		if (!eth_dev)
+			continue;
+
+		if (i == WRIOP1_DPMAC17)
+			err = mc_fixup_dpc_enet_if(blob, i);
+
+		if (err)
+			printf("fsl-mc: ERROR fixing interface type for %s\n",
+			       ethname);
+		ret |= err;
+	}
+
+	return ret;
+}
+
 static int mc_fixup_mac_addrs(void *blob, enum mc_fixup_type type)
 {
 	int i, err = 0, ret = 0;
@@ -454,6 +522,14 @@ static int mc_fixup_dpc(u64 dpc_addr)
 	}
 
 	err = mc_fixup_mac_addrs(blob, MC_FIXUP_DPC);
+	/* fixup Ethernet interface type for LA1224RDB board
+	 * MAC17 will be enabled as RGMII even thought
+	 * SerDes2 enables it as SGMII
+	 * It is needed to fixup the DPC file to Sync with MC firmware
+	 */
+#ifdef CONFIG_TARGET_LA1224RDB
+	err = mc_fixup_dpc_enet_ifs(blob);
+#endif
 
 out:
 	flush_dcache_range(dpc_addr, dpc_addr + fdt_totalsize(blob));

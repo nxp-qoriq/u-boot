@@ -33,6 +33,11 @@
 #include <cpu_func.h>
 #include <asm/gpio.h>
 
+#ifdef CONFIG_TARGET_LA1224RDB
+#include <fsl_dspi.h>
+#include "../board/freescale/lx2160a/la1224rdb_defines.h"
+#endif
+
 #ifdef CONFIG_EMC2305
 #include "../common/emc2305.h"
 #endif
@@ -50,6 +55,7 @@
 #define IIC5_PMUX_SPI3				3
 #endif /* CONFIG_TARGET_LX2160AQDS or CONFIG_TARGET_LX2162AQDS */
 
+
 DECLARE_GLOBAL_DATA_PTR;
 
 static struct pl01x_serial_platdata serial0 = {
@@ -57,6 +63,12 @@ static struct pl01x_serial_platdata serial0 = {
 	.base = CONFIG_SYS_SERIAL0,
 #elif CONFIG_CONS_INDEX == 1
 	.base = CONFIG_SYS_SERIAL1,
+#ifdef CONFIG_TARGET_LA1224RDB
+#elif CONFIG_CONS_INDEX == 2
+	.base = CONFIG_SYS_SERIAL2,
+#elif CONFIG_CONS_INDEX == 3
+	.base = CONFIG_SYS_SERIAL3,
+#endif
 #else
 #error "Unsupported console index value."
 #endif
@@ -88,6 +100,63 @@ U_BOOT_DEVICE(nxp_serial2) = {
 	.name = "serial_pl01x",
 	.platdata = &serial2,
 };
+#endif
+
+#ifdef CONFIG_TARGET_LA1224RDB
+static struct pl01x_serial_platdata serial2 = {
+	.base = CONFIG_SYS_SERIAL2,
+	.type = TYPE_PL011,
+};
+
+U_BOOT_DEVICE(nxp_serial2) = {
+	.name = "serial_pl01x",
+	.platdata = &serial2,
+};
+
+static struct pl01x_serial_platdata serial3 = {
+	.base = CONFIG_SYS_SERIAL3,
+	.type = TYPE_PL011,
+};
+
+U_BOOT_DEVICE(nxp_serial3) = {
+	.name = "serial_pl01x",
+	.platdata = &serial3,
+};
+#endif
+
+// Get the Board revision number of LA1224RDB Board
+#if defined(CONFIG_TARGET_LA1224RDB)
+int board_revision_num(void)
+{
+	struct udevice *dev;
+	//Input port defalut value 0xFF(1 each bit)
+	u8 val = 0xff, io_port1_val, ret;
+	// Get IO expander 0x20 of I2c bus 0
+	ret = i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI, 1, &dev);
+	if (!ret) {
+		// Enable Port1 as input of IO expander PACL6416A
+		ret = dm_i2c_write(dev, IO_EXAPNDER_CONF_REG, &val, 1);
+		if (!ret) {
+			// read Port1 value of I2C expander PACL6416A
+			ret = dm_i2c_read(dev, 1, &io_port1_val, 1);
+			if (ret) {
+				printf("Warning: port1 read fail PCAL6461A");
+				return ret;
+			}
+		} else {
+			printf("Warning:Fail to enable Port1 as input");
+			return ret;
+		}
+	} else {
+		printf("Fail to select IO expander from I2C Bus\n");
+		return ret;
+	}
+	// Port1[6:7]
+	//      00 = RevA
+	//      01 = RevB
+	//      10 = RevC
+	return ((io_port1_val >> BOARD_REV_SHIFT_MASK) & BOARD_REV_MASK);
+}
 #endif
 
 int select_i2c_ch_pca9547(u8 ch)
@@ -144,6 +213,11 @@ static void uart_get_clock(void)
 	serial1.clock = get_serial_clock();
 #if defined(CONFIG_TARGET_LA1238RDB)
 	serial2.clock = get_serial_clock();
+#endif
+#ifdef CONFIG_TARGET_LA1224RDB
+ 	serial2.clock = get_serial_clock();
+	serial2.clock = get_serial_clock();
+	serial3.clock = get_serial_clock();
 #endif
 }
 
@@ -306,7 +380,7 @@ int esdhc_status_fixup(void *blob, const char *compat)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
 #else
-	/* Enable both esdhc DT nodes for LX2160ARDB */
+	/* Enable both esdhc DT nodes for LX2160ARDB and LA1224RDB */
 	do_fixup_by_compat(blob, compat, "status", "okay",
 			   sizeof("okay"), 1);
 #endif
@@ -316,11 +390,23 @@ int esdhc_status_fixup(void *blob, const char *compat)
 #if defined(CONFIG_VID)
 int i2c_multiplexer_select_vid_channel(u8 channel)
 {
+// Software change for Erratum E-00011: VID Adjustment
+// RevA VID is fixed
+#if defined(CONFIG_TARGET_LA1224RDB)
+	if (board_revision_num() == REVA)
+		return 0;
+#endif
 	return select_i2c_ch_pca9547(channel);
 }
 
 int init_func_vid(void)
 {
+// Software change for Erratum E-00011: VID Adjustment
+// RevA VID is fixed
+#if defined(CONFIG_TARGET_LA1224RDB)
+	if (board_revision_num() == REVA)
+		return 0;
+#endif
 	int set_vid;
 
 	if (IS_SVR_REV(get_svr(), 1, 0))
@@ -505,6 +591,59 @@ int show_board_info(void)
 	return checkboard();
 }
 #endif
+#elif defined(CONFIG_TARGET_LA1224RDB)
+int checkboard(void)
+{
+	enum boot_src src = get_boot_src();
+	struct udevice *dev;
+	// conf  = 0xFB
+	// Enable Port1 UART bit as output of IO expander
+	u8 conf = 0xFB, val = 0;
+
+	printf("Board: LA1224-RDB, ");
+
+	printf("Board version: %c, boot from ", board_revision_num() + 'A');
+	// enabling Port1 as a output register of IO expander
+	// enable  UART 2,3 and 4
+	if (!(i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI, 1, &dev))) {
+		// conf  = 0xFB
+		// Enable Port1 UART bit as output of IO expander
+		// Port1[2] = UART enable bit(1111 1011)
+		if (!(dm_i2c_write(dev, IO_EXAPNDER_CONF_REG, &conf, 1))) {
+			// Read output Port1 value of IO expander PACL6416A
+			if (!dm_i2c_read(dev, 3, &val, 1)) {
+				// enable LX2_UART_EN of IO expander PACL6416A
+				val = val | UART_EN_MASK;
+				if ((dm_i2c_write(dev, 3, &val, 1)))
+					printf("write fail on IO expander\n");
+			} else {
+				printf("read fail of IO expander\n");
+			}
+		} else {
+			printf("fail to write config register of expander\n");
+		}
+	} else {
+		printf("failed to select IO expander\n");
+	}
+	if (src == BOOT_SOURCE_SD_MMC)
+		puts("SD\n");
+	else if (src == BOOT_SOURCE_XSPI_NOR)
+		puts("FlexSPI NOR\n");
+	else if (src == BOOT_SOURCE_SD_MMC2)
+		puts("eMMC\n");
+	else
+		printf("invalid boot source setting\n");
+
+	// Software change for Erratum E-00011
+	if (board_revision_num() == REVA)
+		puts("VID: Core voltage fixed at 825 mV\n");
+
+	puts("SERDES1 Reference: Clock1 = 100MHz Clock2 = 161.13MHz\n");
+	puts("SERDES2 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+	puts("SERDES3 Reference: Clock1 = 100MHz Clock2 = 100MHz\n");
+
+	return 0;
+}
 #else
 int checkboard(void)
 {
@@ -770,6 +909,109 @@ int config_board_mux(void)
 
 	return 0;
 }
+#elif defined(CONFIG_TARGET_LA1224RDB)
+static void set_dspi2_cs_signal_inactive(void)
+{
+	/* default: all CS signals inactive state is high */
+	u32 mcr_val;
+	u32 mcr_cfg_val = DSPI_MCR_MSTR | DSPI_MCR_PCSIS_MASK |
+			DSPI_MCR_CRXF | DSPI_MCR_CTXF;
+	mcr_val = in_le32(SPI_MCR_REG);
+	mcr_val |= DSPI_MCR_HALT;
+	out_le32(SPI_MCR_REG, mcr_val);
+	out_le32(SPI_MCR_REG, mcr_cfg_val);
+	mcr_val = in_le32(SPI_MCR_REG);
+	mcr_val &= ~DSPI_MCR_HALT;
+	out_le32(SPI_MCR_REG, mcr_val);
+}
+
+static void init_dspi2(void)
+{
+	/* extended spi mode with all CS signals inactive state is high */
+	u32 mcr_val;
+	u32 mcr_cfg_val = (DSPI_MCR_MSTR | DSPI_MCR_PCSIS_MASK |
+			DSPI_MCR_DTXF | DSPI_MCR_DRXF |
+			DSPI_MCR_CRXF | DSPI_MCR_CTXF |
+			DSPI_MCR_XSPI | DSPI_MCR_HALT);
+
+	mcr_val = in_le32(SPI_MCR_REG);
+	mcr_val |= DSPI_MCR_HALT;
+	out_le32(SPI_MCR_REG, mcr_val);
+	out_le32(SPI_MCR_REG, mcr_cfg_val);
+
+	u32 ctar_cfg_val = (DSPI_CTAR_TRSZ(0x0F) | DSPI_CTAR_PCSSCK(0x3) |
+				DSPI_CTAR_BR(0x7));
+	out_le32(SPI_CTAR0_REG, ctar_cfg_val);
+
+	u32 ctarx_cfg_val = DSPI_CTAR_X_TRSZ | DSPI_CTAR_X_DTCP(0x1);
+
+	out_le32(SPI_CTARE0_REG, ctarx_cfg_val);
+
+	u32 src_cfg_val = (DSPI_SR_TCF | DSPI_SR_EOQF | DSPI_SR_TFFF |
+			DSPI_SR_CMDTCF | DSPI_SR_SPEF | DSPI_SR_RFOF |
+			DSPI_SR_TFIWF | DSPI_SR_RFDF | DSPI_SR_CMDFFF);
+
+	out_le32(SPI_SR_REG, src_cfg_val);
+
+	mcr_val = in_le32(SPI_MCR_REG);
+	mcr_val &= ~DSPI_MCR_HALT;
+	out_le32(SPI_MCR_REG, mcr_val);
+}
+
+u8 chk_dspi2_enable(void)
+{
+	u32 sdhc1_ds_pmux;
+	u8 is_enable = 0;
+	struct ccsr_gur __iomem *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
+
+	sdhc1_ds_pmux = gur_in32(&gur->rcwsr[FSL_CHASSIS3_RCWSR27_REGSR - 1])
+				& FSL_CHASSIS3_SDHC1_DS_PMUX_MASK;
+	sdhc1_ds_pmux >>= FSL_CHASSIS3_SDHC1_DS_PMUX_SHIFT;
+
+	if (sdhc1_ds_pmux == SDHC1_DS_PMUX_DSPI)
+		is_enable = 1;
+
+	return is_enable;
+}
+
+void fdt_fixup_dspi2_status(void *blob)
+{
+	const char dspi2_path[] = "/soc/spi@2120000";
+	int offset;
+
+	if (chk_dspi2_enable()) {
+		/* DSPI and some SD signals are muxed,
+		 * so only legacy SD mode can run,
+		 * advanced modes like uhs needs to be disabled
+		 */
+		offset = fdt_path_offset(blob, "/soc/esdhc@2140000");
+		do_fixup_by_path(blob, dspi2_path, "status", "okay",
+				sizeof("okay"), 1);
+		fdt_delprop(blob, offset, "sd-uhs-sdr104");
+		fdt_delprop(blob, offset, "sd-uhs-sdr50");
+		fdt_delprop(blob, offset, "sd-uhs-sdr25");
+		fdt_delprop(blob, offset, "sd-uhs-sdr12");
+	} else
+		do_fixup_by_path(blob, dspi2_path, "status", "disabled",
+			sizeof("disabled"), 1);
+}
+
+int config_board_mux(void)
+{
+	if (chk_dspi2_enable())
+		init_dspi2();
+	else
+		set_dspi2_cs_signal_inactive();
+
+	return 0;
+}
+
+#if defined(CONFIG_BOARD_EARLY_INIT_R)
+int board_early_init_r(void)
+{
+	return 0;
+}
+#endif
 #else
 /* TBD for CONFIG_TARGET_LA1238RDB */
 #if defined(CONFIG_BOARD_EARLY_INIT_R)
@@ -831,6 +1073,63 @@ void set_phy_irq_polarity_inv(u32 irq_mask)
 	out_le32(irq_ccsr + IRQCR_OFFSET / 4, irq_cr | irq_mask);
 }
 
+#if defined(CONFIG_TARGET_LA1224RDB)
+/*
+ * Software Changes for ERRATA E-000014:HS DCS Firmware loading
+ */
+void gpio1_29_bit_toggle(void)
+{
+	uint8_t t_max = TCLK_TOGGLE_MAX_COUNT;
+	void __iomem *gpibe_addr = NULL, *gpodr_addr = NULL, *gpdir_addr = NULL;
+
+	gpibe_addr = (u32 __iomem *)GPIO1_INPUT_BUFFER_ENABLE;
+	gpdir_addr = (u32 __iomem *)GPIO1_DIR_REG;
+	gpodr_addr = (u32 __iomem *)GPIO1_DATA_REG;
+
+	if (board_revision_num() == REVB)
+		mdelay(2000);
+	// Enable GPIO buffer
+	out_le32(gpibe_addr, in_le32(GPIO1_INPUT_BUFFER_ENABLE)
+					  | GPIO1_ENABLE_INPUT);
+	// Set Output direction
+	out_le32(gpdir_addr, in_le32(GPIO1_DIR_REG)
+			       | GPIO1_PIN_29_HIGH);
+
+	if (board_revision_num() == REVA) {
+		while (t_max--) {
+			// Drive GPIO PIN high
+			out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
+						| GPIO1_PIN_29_HIGH);
+			mdelay(1);
+			// Drive GPIO PIN low
+			out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
+						& (~GPIO1_PIN_29_HIGH));
+			mdelay(1);
+			// Drive GPIO PIN  high
+			out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
+						| GPIO1_PIN_29_HIGH);
+			mdelay(1);
+			debug("%s: GPIO Toggle count (count %d)\n",
+			      __func__, t_max);
+		}
+	} else {
+		// RevB JTAG TCK Workaround
+		// Drive GPIO PIN high
+		out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
+					| GPIO1_PIN_29_HIGH);
+		// Drive GPIO PIN low
+		out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
+					& (~GPIO1_PIN_29_HIGH));
+		mdelay(10);
+		// Drive GPIO PIN  high
+		out_le32(gpodr_addr, in_le32(GPIO1_DATA_REG)
+					| GPIO1_PIN_29_HIGH);
+	}
+	// Set input direction
+	out_le32(gpdir_addr, GPIO1_PIN_29_LOW);
+}
+#endif
+
 int board_init(void)
 {
 #ifdef CONFIG_ENV_IS_NOWHERE
@@ -839,11 +1138,10 @@ int board_init(void)
 
 	select_i2c_ch_pca9547(I2C_MUX_CH_DEFAULT);
 
-#if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LX2160ARDB)
-	set_phy_irq_polarity_inv(AQR107_IRQ_MASK);
-#endif
-#if defined(CONFIG_FSL_MC_ENET) && defined(CONFIG_TARGET_LA1238RDB)
+#if defined(CONFIG_FSL_MC_ENET) && (defined(CONFIG_TARGET_LA1238RDB) ||  defined(CONFIG_TARGET_LA1224RDB))
 	set_phy_irq_polarity_inv(AQR113_IRQ_MASK);
+#elif defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_TARGET_LX2160AQDS)
+	set_phy_irq_polarity_inv(AQR107_IRQ_MASK);
 #endif
 
 #ifdef CONFIG_FSL_CAAM
@@ -872,6 +1170,11 @@ void detail_board_ddr_info(void)
 int misc_init_r(void)
 {
 	config_board_mux();
+
+#if defined(CONFIG_TARGET_LA1224RDB)
+	// ERRATA E-000014:HS DCS Firmware loading
+	gpio1_29_bit_toggle();
+#endif
 
 	return 0;
 }
@@ -974,6 +1277,9 @@ int ft_board_setup(void *blob, bd_t *bd)
 	fdt_fixup_board_enet(blob);
 #endif
 	fdt_fixup_icid(blob);
+#if defined(CONFIG_TARGET_LA1224RDB)
+	fdt_fixup_dspi2_status(blob);
+#endif
 #if defined(CONFIG_TARGET_LA1238RDB)
 	fdt_fixup_board_model(blob);
 #endif

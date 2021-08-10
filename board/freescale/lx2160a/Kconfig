@@ -74,3 +74,19 @@ config SYS_CONFIG_NAME
 
 source "board/freescale/common/Kconfig"
 endif
+
+if TARGET_LA1224RDB
+config SYS_BOARD
+        default "lx2160a"
+
+config SYS_VENDOR
+        default "freescale"
+
+config SYS_SOC
+        default "fsl-layerscape"
+
+config SYS_CONFIG_NAME
+        default "la1224rdb"
+
+source "board/freescale/common/Kconfig"
+endif

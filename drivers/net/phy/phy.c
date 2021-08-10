@@ -802,7 +802,7 @@ static struct phy_device *get_phy_device_by_mask(struct mii_dev *bus,
 
 	devad_cnt = sizeof(devad)/sizeof(int);
 	phydev = search_for_existing_phy(bus, phy_mask, interface);
-	if (phydev)
+	if (phydev && phy_mask != ~0)
 		return phydev;
 	/* try different access clauses  */
 	for (i = 0; i < devad_cnt; i++) {

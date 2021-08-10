@@ -10,3 +10,4 @@ obj-$(CONFIG_TARGET_LX2160ARDB) += eth_lx2160ardb.o
 obj-$(CONFIG_TARGET_LX2160AQDS) += eth_lx2160aqds.o
 obj-$(CONFIG_TARGET_LX2162AQDS) += eth_lx2162aqds.o
 obj-$(CONFIG_TARGET_LA1238RDB) += eth_la1238rdb.o
+obj-$(CONFIG_TARGET_LA1224RDB) += eth_la1224rdb.o

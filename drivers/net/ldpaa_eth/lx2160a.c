@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2020 NXP
+ * Copyright 2018, 2020-2021 NXP
  *
  * SPDX-License-Identifier: GPL-2.0+
  */
@@ -97,7 +97,7 @@ void fsl_rgmii_init(void)
 		wriop_init_dpmac_enet_if(17, PHY_INTERFACE_MODE_RGMII_ID);
 #endif
 
-#ifdef CONFIG_SYS_FSL_EC2
+#if defined(CONFIG_SYS_FSL_EC2) && !defined(CONFIG_TARGET_LA1224RDB)
 	ec = gur_in32(&gur->rcwsr[FSL_CHASSIS3_EC2_REGSR - 1])
 		& FSL_CHASSIS3_EC2_REGSR_PRTCL_MASK;
 	ec >>= FSL_CHASSIS3_EC2_REGSR_PRTCL_SHIFT;
