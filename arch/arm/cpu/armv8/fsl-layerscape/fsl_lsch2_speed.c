@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2015 Freescale Semiconductor, Inc.
- * Copyright 2019 NXP.
+ * Copyright 2019,2021 NXP
  */
 
 #include <common.h>
@@ -29,7 +29,8 @@ void get_sys_info(struct sys_info *sys_info)
  */
 #if defined(CONFIG_SYS_DPAA_FMAN) || \
 	    defined(CONFIG_TARGET_LS1046ARDB) || \
-	    defined(CONFIG_TARGET_LS1043ARDB)
+	    defined(CONFIG_TARGET_LS1043ARDB) || \
+	    defined(CONFIG_TARGET_LA1246RDB)
 	u32 rcw_tmp;
 #endif
 	struct ccsr_clk *clk = (void *)(CONFIG_SYS_FSL_CLK_ADDR);
@@ -128,7 +129,8 @@ void get_sys_info(struct sys_info *sys_info)
 
 #define HWA_CGA_M2_CLK_SEL	0x00000007
 #define HWA_CGA_M2_CLK_SHIFT	0
-#if defined(CONFIG_TARGET_LS1046ARDB) || defined(CONFIG_TARGET_LS1043ARDB)
+#if defined(CONFIG_TARGET_LS1046ARDB) || defined(CONFIG_TARGET_LS1043ARDB) || \
+	defined(CONFIG_TARGET_LA1246RDB)
 	rcw_tmp = in_be32(&gur->rcwsr[15]);
 	switch ((rcw_tmp & HWA_CGA_M2_CLK_SEL) >> HWA_CGA_M2_CLK_SHIFT) {
 	case 1:
