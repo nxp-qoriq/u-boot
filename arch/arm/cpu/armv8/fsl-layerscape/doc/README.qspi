@@ -10,6 +10,7 @@ QSPI Boot source support Overview
 	4. LS1046A
 		LS1046AQDS
 		LS1046ARDB
+		LA1246RDB
 
 Booting from QSPI
 -------------------
