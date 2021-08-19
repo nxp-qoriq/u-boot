@@ -1140,7 +1140,7 @@ int board_init(void)
 
 #if defined(CONFIG_FSL_MC_ENET) && (defined(CONFIG_TARGET_LA1238RDB) ||  defined(CONFIG_TARGET_LA1224RDB))
 	set_phy_irq_polarity_inv(AQR113_IRQ_MASK);
-#elif defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_TARGET_LX2160AQDS)
+#elif defined(CONFIG_FSL_MC_ENET) && !defined(CONFIG_TARGET_LX2160AQDS) && !defined(CONFIG_TARGET_LX2162AQDS)
 	set_phy_irq_polarity_inv(AQR107_IRQ_MASK);
 #endif
 
