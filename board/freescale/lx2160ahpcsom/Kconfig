@@ -1,0 +1,17 @@
+
+if TARGET_LX2160AHPCSOM
+
+config SYS_BOARD
+        default "lx2160ahpcsom"
+
+config SYS_VENDOR
+        default "freescale"
+
+config SYS_SOC
+        default "fsl-layerscape"
+
+config SYS_CONFIG_NAME
+        default "lx2160ahpcsom"
+
+source "board/freescale/common/Kconfig"
+endif

@@ -1,0 +1,63 @@
+Overview
+--------
+The HPCSOM platform is a high-performance computing platform that
+supports the QorIQ LX2160A Layerscape Architecture Processor and
+the S32V234 Automative Processor.
+
+LX2160A SoC Overview
+--------------------
+For details, please refer arch/arm/cpu/armv8/fsl-layerscape/doc/README.soc
+
+LX2160HPCSOM board Overview
+-----------------------------
+DDR Memory
+	Two ports of 72-bits (8-bits ECC) DDR4.
+	Each port supports 4GB memory with SDRAMs soldered.
+	Data rate upto 3.2 GT/s.
+
+SERDES ports
+	Thress serdes controllers (24 lanes)
+
+	Serdes1:
+	  Supports PCIe Gen2 x3, but not used
+	  Supports PCIe Gen2 x1 connectivity to S32V234
+	  Supports PCIe Gen3 x4 connectivity to baseboard
+
+	Serdes2:
+	  Support three SGMII lanes, but not used
+	  Supports one SGMII connectivity to baseboard
+	  Supports PCIe Gen3 x4 connectivity to baseboard
+
+	Serdes3: Not used
+
+eSDHC
+	eSDHC1: Supports a SD connector for connecting SD cards
+	eSDHC2: Supports 128GB eMMC memory MICRON MTFC128GAPALNS-AAT
+
+I2C	LTC3882, PMIC1, and PMIC2 accessible on I2C1
+	LX2 I2C3 and S32V I2C0 connected
+
+USB 3.0
+	One high speed USB 3.0 connectivity to baseboard
+
+Serial Ports	One UART port
+Ethernet	One RGMII interface
+Debug		ARM JTAG support
+
+Booting Options
+---------------
+a) eMMC boot
+b) SD boot
+
+Memory map for sd/eMMC card
+----------------------------
+Image							SD/eMMC card Offset
+bl2_sd.pbl (RCW+PBI+bl2.pbl)				0x00008
+fip.bin (bl31 + bl33(u-boot) +
+	 header for Secure-boot(secure-boot only))	0x00800
+Boot firmware Environment				0x02800
+DDR PHY Firmware (fip_ddr_all.bin)			0x04000
+DPAA2 MC Firmware					0x05000
+DPAA2 DPL						0x06800
+DPAA2 DPC						0x07000
+Kernel.itb						0x08000

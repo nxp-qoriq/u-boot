@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: GPL-2.0+ OR X11
+/*
+ * NXP LX2160A HPCSOM device tree source
+ *
+ * Copyright 2021 NXP
+ *
+ */
+
+/dts-v1/;
+
+#include "fsl-lx2160a.dtsi"
+
+/ {
+	model = "NXP Layerscape LX2160A HPCSOM";
+	compatible = "fsl,lx2160ahpcsom", "fsl,lx2160a";
+};
+
+&esdhc0 {
+	status = "okay";
+};
+
+&esdhc1 {
+	status = "okay";
+	mmc-hs200-1_8v;
+};

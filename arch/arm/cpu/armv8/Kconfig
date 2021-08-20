@@ -110,6 +110,7 @@ config PSCI_RESET
 		   !TARGET_LS1046AFRWY && \
 		   !TARGET_LS2081ARDB && !TARGET_LX2160ARDB && \
 		   !TARGET_LX2160AQDS && !TARGET_LX2160ABLUEBOX3 && \
+		   !TARGET_LX2160AHPCSOM && \
 		   !ARCH_UNIPHIER && !TARGET_S32V234EVB
 	help
 	  Most armv8 systems have PSCI support enabled in EL3, either through

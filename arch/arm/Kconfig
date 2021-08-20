@@ -1257,6 +1257,16 @@ config TARGET_LX2160ABLUEBOX3
 	  platform that supports the QorIQ LX2160A Layerscape Architecture
 	  Processor and the S32G274A Automative Processor
 
+config TARGET_LX2160AHPCSOM
+	bool "Support lx2160ahpcsom"
+	select ARCH_LX2160A
+	select ARM64
+	select ARMV8_MULTIENTRY
+	select ARCH_SUPPORT_TFABOOT
+	select BOARD_LATE_INIT
+	help
+	  Support for NXP LX2160A HPCSOM platform.
+
 config TARGET_HIKEY
 	bool "Support HiKey 96boards Consumer Edition Platform"
 	select ARM64
@@ -1865,6 +1875,7 @@ source "board/freescale/ls1012ardb/Kconfig"
 source "board/freescale/ls1012afrdm/Kconfig"
 source "board/freescale/lx2160a/Kconfig"
 source "board/freescale/lx2160abluebox3/Kconfig"
+source "board/freescale/lx2160ahpcsom/Kconfig"
 source "board/freescale/mx35pdk/Kconfig"
 source "board/freescale/s32v234evb/Kconfig"
 source "board/grinn/chiliboard/Kconfig"
