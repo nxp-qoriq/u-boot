@@ -61,6 +61,7 @@ phy_interface_t wriop_dpmac_enet_if(int dpmac_id, int lane_prtcl)
 	if (is_device_disabled(dpmac_id))
 		return PHY_INTERFACE_MODE_NONE;
 
+#ifndef CONFIG_TARGET_LA1224RDB
 	if (lane_prtcl >= SGMII1 && lane_prtcl <= SGMII18)
 		return PHY_INTERFACE_MODE_SGMII;
 
@@ -78,6 +79,13 @@ phy_interface_t wriop_dpmac_enet_if(int dpmac_id, int lane_prtcl)
 
 	if (lane_prtcl >= _100GE1 && lane_prtcl <= _100GE2)
 		return PHY_INTERFACE_MODE_CAUI4;
+#else
+       if (lane_prtcl >= XFI3 && lane_prtcl <= XFI4)
+               return PHY_INTERFACE_MODE_XGMII;
+
+       if (lane_prtcl == _25GE5)
+               return PHY_INTERFACE_MODE_25G_AUI;
+#endif
 
 	return PHY_INTERFACE_MODE_NONE;
 }
