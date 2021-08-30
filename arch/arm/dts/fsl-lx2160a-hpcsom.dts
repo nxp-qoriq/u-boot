@@ -23,3 +23,19 @@
 	status = "okay";
 	mmc-hs200-1_8v;
 };
+
+&i2c0 {
+	status = "okay";
+};
+
+&i2c2 {
+	status = "okay";
+};
+
+&i2c3 {
+	status = "okay";
+};
+
+&i2c5 {
+	status = "okay";
+};
