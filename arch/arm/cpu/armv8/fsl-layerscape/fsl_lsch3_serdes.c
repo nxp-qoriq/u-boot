@@ -160,7 +160,7 @@ void serdes_init(u32 sd, u32 sd_addr, u32 rcwsr, u32 sd_prctl_mask,
 				wriop_init_dpmac(sd, xfi_dpmac[lane_prtcl],
 						 (int)lane_prtcl);
 
-			if (lane_prtcl >= SGMII1 && lane_prtcl <= SGMII18)
+			if (lane_prtcl >= SGMII1 && lane_prtcl <= SGMII16)
 				wriop_init_dpmac(sd, sgmii_dpmac[lane_prtcl],
 						 (int)lane_prtcl);
 
