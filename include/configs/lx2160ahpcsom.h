@@ -29,7 +29,7 @@
 /* VID */
 
 #define I2C_MUX_CH_VOL_MONITOR		0xA
-/* Voltage monitor LTC7132 on channel 2*/
+/* Voltage monitor LTC3882 on channel 2 */
 #define I2C_VOL_MONITOR_ADDR		0x63
 #define I2C_VOL_MONITOR_BUS_V_OFFSET	0x2
 #define I2C_VOL_MONITOR_BUS_V_OVF	0x1
@@ -37,11 +37,11 @@
 #define CONFIG_VID_FLS_ENV		"lx2160hpcsom_vdd_mv"
 #define CONFIG_VID
 
-/* The lowest and highest voltage allowed*/
+/* The lowest and highest voltage allowed */
 #define VDD_MV_MIN			775
 #define VDD_MV_MAX			855
 
-/* PM Bus commands code for LTC7132*/
+/* PM Bus commands code for LTC3882 */
 #define PMBUS_CMD_PAGE                  0x0
 #define PMBUS_CMD_READ_VOUT             0x8B
 #define PMBUS_CMD_PAGE_PLUS_WRITE       0x05

@@ -158,7 +158,7 @@ int esdhc_status_fixup(void *blob, const char *compat)
 }
 
 #if defined(CONFIG_VID)
-int init_func_vid(void)
+int fsl_board_late_init(void)
 {
 	int set_vid;
 
