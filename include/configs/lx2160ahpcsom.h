@@ -86,6 +86,29 @@
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS     3
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 5
 
+#undef SD_BOOTCOMMAND
+#define SD_BOOTCOMMAND						\
+		"env exists mcinitcmd && mmcinfo; "		\
+		"mmc read 0x80d00000 0x6800 0x800; "		\
+		"env exists mcinitcmd && env exists secureboot "	\
+		" && mmc read 0x806C0000 0x3600 0x20 "		\
+		"&& esbc_validate 0x806C0000;env exists mcinitcmd "	\
+		"&& fsl_mc lazyapply dpl 0x80d00000;"		\
+		"run sd_bootcmd;"		\
+		"env exists secureboot && esbc_halt;"
+
+#undef SD2_BOOTCOMMAND
+#define SD2_BOOTCOMMAND						\
+		"mmc dev 1; env exists mcinitcmd && mmcinfo; "	\
+		"mmc read 0x80d00000 0x6800 0x800; "		\
+		"env exists mcinitcmd && env exists secureboot "	\
+		" && mmc read 0x806C0000 0x3600 0x20 "		\
+		"&& esbc_validate 0x806C0000;env exists mcinitcmd "	\
+		"&& fsl_mc lazyapply dpl 0x80d00000;"		\
+		"run sd2_bootcmd;"		\
+		"env exists secureboot && esbc_halt;"
+
+
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
