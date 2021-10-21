@@ -70,6 +70,12 @@ static void uart_get_clock(void)
 
 int board_early_init_f(void)
 {
+	/* GPIO3[14]/EVT_B[2] is used as reset signal of M.2 slot. Reset here. */
+	out_le32(GPIO3_GPDIR_ADDR, (1 << 14 | in_le32(GPIO3_GPDIR_ADDR)));
+	out_le32(GPIO3_GPDAT_ADDR, (~(1 << 14) & in_le32(GPIO3_GPDAT_ADDR)));
+	udelay(100);
+	out_le32(GPIO3_GPDAT_ADDR, ((1 << 14) | in_le32(GPIO3_GPDAT_ADDR)));
+
 #ifdef CONFIG_SYS_I2C_EARLY_INIT
 	i2c_early_init_f();
 #endif
