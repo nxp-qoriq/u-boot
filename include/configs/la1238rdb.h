@@ -9,6 +9,7 @@
 #include "lx2160a_common.h"
 
 #define PCAL_BUS_NO		2
+#define PCAL_BUS_NO_REVB	3
 #define BOOT_FROM_XSPI		1
 #define BOOT_FROM_EMMC		2
 #define BOOT_FROM_SD		3

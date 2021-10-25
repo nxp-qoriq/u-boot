@@ -1326,16 +1326,36 @@ int mmc_get_env_dev(void)
 #endif
 
 #if defined(CONFIG_TARGET_LA1238RDB)
+int get_pcal_bus(void)
+{
+	u32 rev = get_board_version();
+
+	switch (rev) {
+	case REVA:
+		return PCAL_BUS_NO;
+	case REVB:
+		return PCAL_BUS_NO_REVB;
+	default:
+		return -1;
+	}
+}
+
 static int switch_boot_source(int src_id)
 {
 	int ret;
 	struct udevice *dev;
 	u8 data;
+	int pcal_bus = get_pcal_bus();
 
-	ret = i2c_get_chip_for_busnum(PCAL_BUS_NO, PCAL_CPU_ADDR, 1, &dev);
+	if (pcal_bus == -1) {
+		printf("Unable to get pcal bus\n");
+		return -ENXIO;
+	}
+
+	ret = i2c_get_chip_for_busnum(pcal_bus, PCAL_CPU_ADDR, 1, &dev);
 	if (ret) {
 		printf("%s: Cannot find udev for a bus %d, addr :%d, ret: %d\n",
-		       __func__, PCAL_BUS_NO, PCAL_CPU_ADDR, ret);
+		       __func__, pcal_bus, PCAL_CPU_ADDR, ret);
 		return -ENXIO;
 	}
 
@@ -1423,11 +1443,17 @@ static int switch_boot_source_modem(int src_id)
 	int ret;
 	struct udevice *dev;
 	u8 data;
+	int pcal_bus = get_pcal_bus();
 
-	ret = i2c_get_chip_for_busnum(PCAL_BUS_NO, PCAL_MODEM_ADDR, 1, &dev);
+	if (pcal_bus == -1) {
+		printf("Unable to get pcal bus\n");
+		return -ENXIO;
+	}
+
+	ret = i2c_get_chip_for_busnum(pcal_bus, PCAL_MODEM_ADDR, 1, &dev);
 	if (ret) {
 		printf("%s: Cannot find udev for a bus %d, addr :%d, ret: %d\n",
-		       __func__, PCAL_BUS_NO, PCAL_MODEM_ADDR, ret);
+		       __func__, pcal_bus, PCAL_MODEM_ADDR, ret);
 		return -ENXIO;
 	}
 
