@@ -556,10 +556,10 @@ int checkboard(void)
 	}
 
 	switch (rev) {
-	case 0x00:
+	case REVA:
 		puts("Rev: A, boot from ");
 		break;
-	case 0x01:
+	case REVB:
 		puts("Rev: B, boot from ");
 		break;
 	default:
@@ -1454,13 +1454,13 @@ static int switch_boot_source_modem(int src_id)
 	}
 	data &= 0xf9;
 	switch (src_id) {
-	case BOOT_FROM_XSPI:
+	case BOOT_FROM_XSPI_MODEM:
 		data |= 0x02; /* SW_CFG_BOOT_SRC[1:0] = 01 */
 		break;
-	case BOOT_FROM_PCIE:
+	case BOOT_FROM_PCIE_MODEM:
 		data |= 0x06; /* SW_CFG_BOOT_SRC[1:0] = 11 */
 		break;
-	case BOOT_FROM_PEB:
+	case BOOT_FROM_PEB_MODEM:
 		data |= 0; /* SW_CFG_BOOT_SRC[1:0] = 00 */
 		break;
 	default:
@@ -1484,11 +1484,11 @@ static int select_boot_source_modem(cmd_tbl_t *cmdtp, int flag, int argc,
 	if (argc <= 1)
 		return CMD_RET_USAGE;
 	else if (strcmp(argv[1], "xspi") == 0)
-		switch_boot_source_modem(BOOT_FROM_XSPI);
+		switch_boot_source_modem(BOOT_FROM_XSPI_MODEM);
 	else if (strcmp(argv[1], "pcie") == 0)
-		switch_boot_source_modem(BOOT_FROM_PCIE);
+		switch_boot_source_modem(BOOT_FROM_PCIE_MODEM);
 	else if (strcmp(argv[1], "peb") == 0)
-		switch_boot_source_modem(BOOT_FROM_PEB);
+		switch_boot_source_modem(BOOT_FROM_PEB_MODEM);
 	else
 		return CMD_RET_USAGE;
 
