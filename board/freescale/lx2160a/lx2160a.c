@@ -124,6 +124,10 @@ U_BOOT_DEVICE(nxp_serial3) = {
 };
 #endif
 
+#if defined(CONFIG_TARGET_LA1238RDB)
+static inline uint32_t get_board_version(void);
+#endif
+
 // Get the Board revision number of LA1224RDB Board
 #if defined(CONFIG_TARGET_LA1224RDB)
 int board_revision_num(void)
@@ -379,6 +383,16 @@ int esdhc_status_fixup(void *blob, const char *compat)
 #if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
+
+#elif defined(CONFIG_TARGET_LA1238RDB)
+	/* Enable esdhc0 for LA1238RDB REV B */
+
+	if (get_board_version() == REVB) {
+		const char esdhc0_path[] = "/soc/esdhc@2140000";
+
+		do_fixup_by_path(blob, esdhc0_path, "status", "okay",
+				 sizeof("okay"), 1);
+	}
 #else
 	/* Enable both esdhc DT nodes for LX2160ARDB and LA1224RDB */
 	do_fixup_by_compat(blob, compat, "status", "okay",
@@ -553,7 +567,9 @@ int checkboard(void)
 		break;
 	}
 
-	if (src == BOOT_SOURCE_SD_MMC2)
+	if (src == BOOT_SOURCE_SD_MMC)
+		puts("SD\n");
+	else if (src == BOOT_SOURCE_SD_MMC2)
 		puts("eMMC\n");
 	else if (src == BOOT_SOURCE_XSPI_NOR)
 		puts("FlexSPI NOR\n");
@@ -1350,6 +1366,9 @@ static int switch_boot_source(int src_id)
 	case BOOT_FROM_XSPI: /* RCW_SRC[3:0] = 1111 */
 		data |= 0xf0;
 		break;
+	case BOOT_FROM_SD: /* RCW_SRC[3:0] = 1000 */
+		data |= 0x80;
+		break;
 	case BOOT_FROM_EMMC: /* RCW_SRC[3:0] = 1001 */
 		data |= 0x90;
 		break;
@@ -1375,6 +1394,15 @@ static int select_boot_source(cmd_tbl_t *cmdtp, int flag, int argc,
 		return CMD_RET_USAGE;
 	else if (strcmp(argv[1], "xspi") == 0)
 		switch_boot_source(BOOT_FROM_XSPI);
+	else if (strcmp(argv[1], "sd") == 0) {
+
+		if (get_board_version() == REVA) {
+			printf("SD boot is not defined for REV A\n");
+			return CMD_RET_FAILURE;
+		}
+
+		switch_boot_source(BOOT_FROM_SD);
+	}
 	else if (strcmp(argv[1], "emmc") == 0)
 		switch_boot_source(BOOT_FROM_EMMC);
 	else
@@ -1386,6 +1414,7 @@ static int select_boot_source(cmd_tbl_t *cmdtp, int flag, int argc,
 U_BOOT_CMD(boot_source, 2, 0, select_boot_source,
 	   "Boot source Selection Control",
 	   "boot_source xspi : reset to FlexSPI\n"
+	   "boot_source sd : reset to sd\n"
 	   "boot_source emmc : reset to emmc\n"
 );
 

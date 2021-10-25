@@ -13,6 +13,7 @@
 #define BOOT_FROM_EMMC		2
 #define BOOT_FROM_PCIE		2
 #define BOOT_FROM_PEB		3
+#define BOOT_FROM_SD		3
 #define PCAL_CPU_ADDR		0x20
 #define PCAL_MODEM_ADDR		0x21
 #define PCAL_INPUT_PORT		0x00
@@ -30,6 +31,7 @@
 
 #undef BOOT_TARGET_DEVICES
 #define BOOT_TARGET_DEVICES(func) \
+	func(MMC, mmc, 1)	\
 	func(MMC, mmc, 0)
 /*
  * Need to override existing (lx2160a) with la1238-rdb so set_board_info will
@@ -37,6 +39,9 @@
  */
 #undef CONFIG_SYS_BOARD
 #define CONFIG_SYS_BOARD                "la1238rdb"
+
+#define REVA			0x00
+#define REVB			0x01
 
 #undef CONFIG_SYS_NXP_SRDS_3
 
@@ -84,28 +89,6 @@
 #define CONFIG_SYS_I2C_EEPROM_ADDR		0x52
 /* Rest of the EEPROM related configs come from common include file */
 
-#undef SD2_MC_INIT_CMD
-#define SD2_MC_INIT_CMD				\
-	"mmc dev 0; mmc read 0x80a00000 0x5000 0x1200;"	\
-	"mmc read 0x80e00000 0x7000 0x800;"	\
-	"env exists secureboot && "		\
-	"mmc read 0x80640000 0x3200 0x20 && "	\
-	"mmc read 0x80680000 0x3400 0x20 && "	\
-	"esbc_validate 0x80640000 && "		\
-	"esbc_validate 0x80680000 ;"		\
-	"fsl_mc start mc 0x80a00000 0x80e00000\0"
-
-#undef SD2_BOOTCOMMAND
-#define SD2_BOOTCOMMAND						\
-	"mmc dev 0; env exists mcinitcmd && mmcinfo; "	\
-	"mmc read 0x80d00000 0x6800 0x800; "		\
-	"env exists mcinitcmd && env exists secureboot "	\
-	" && mmc read 0x806C0000 0x3600 0x20 "		\
-	"&& esbc_validate 0x806C0000;env exists mcinitcmd "	\
-	"&& fsl_mc lazyapply dpl 0x80d00000;"		\
-	"run distro_bootcmd;run emmc_bootcmd;"		\
-	"env exists secureboot && esbc_halt;"
-
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
@@ -117,8 +100,15 @@
 		"sf read $kernelheader_addr_r $kernelheader_start "	\
 		"$kernelheader_size && esbc_validate ${kernelheader_addr_r}; "\
 		" bootm $load_addr#$board\0"			\
+	"sd_bootcmd=echo Trying load from sd card..;"		\
+		"mmc dev 0;mmcinfo; mmc read $load_addr "	\
+		"$kernel_addr_sd $kernel_size_sd ;"		\
+		"env exists secureboot && mmc read $kernelheader_addr_r "\
+		"$kernelhdr_addr_sd $kernelhdr_size_sd "	\
+		" && esbc_validate ${kernelheader_addr_r};"	\
+		"bootm $load_addr#$board\0"				\
 	"emmc_bootcmd=echo Trying load from emmc card..;"	\
-		"mmc dev 0; mmcinfo; mmc read $load_addr "	\
+		"mmc dev 1; mmcinfo; mmc read $load_addr "	\
 		"$kernel_addr_sd $kernel_size_sd ;"		\
 		"env exists secureboot && mmc read $kernelheader_addr_r "\
 		"$kernelhdr_addr_sd $kernelhdr_size_sd "	\
