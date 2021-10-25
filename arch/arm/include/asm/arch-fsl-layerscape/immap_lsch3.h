@@ -2,7 +2,7 @@
 /*
  * LayerScape Internal Memory Map
  *
- * Copyright 2017-2020 NXP
+ * Copyright 2017-2021 NXP
  * Copyright 2014 Freescale Semiconductor, Inc.
  */
 
@@ -68,6 +68,7 @@
 #define GPIO3_BASE_ADDR				(CONFIG_SYS_IMMR + 0x01320000)
 #define GPIO3_GPDIR_ADDR			(GPIO3_BASE_ADDR + 0x0)
 #define GPIO3_GPDAT_ADDR			(GPIO3_BASE_ADDR + 0x8)
+#define GPIO3_GPIBE_ADDR			(GPIO3_BASE_ADDR + 0x18)
 #define GPIO4_BASE_ADDR				(CONFIG_SYS_IMMR + 0x01330000)
 #define GPIO4_GPDIR_ADDR			(GPIO4_BASE_ADDR + 0x0)
 #define GPIO4_GPDAT_ADDR			(GPIO4_BASE_ADDR + 0x8)
