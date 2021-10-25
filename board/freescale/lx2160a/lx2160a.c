@@ -472,7 +472,6 @@ static void la1238rdb_gpio_init(void)
 	gpio_request(LS_GPIO_NUMBER(4, 5), "GPIO_NLM_CPU");
 	gpio_request(LS_GPIO_NUMBER(1, 26), "SI5518_GPIO1");
 	gpio_request(LS_GPIO_NUMBER(1, 27), "SI5518_GPIO2");
-	gpio_request(LS_GPIO_NUMBER(3, 12), "SI5518_GPIO3");
 	gpio_request(LS_GPIO_NUMBER(4, 4), "CPU_GPIO_TO_LA1238_1");
 	gpio_request(LS_GPIO_NUMBER(4, 11), "CPU_GPIO_TO_LA1238_2");
 	gpio_request(LS_GPIO_NUMBER(1, 15), "unused_mux1");
@@ -484,7 +483,6 @@ static void la1238rdb_gpio_init(void)
 	gpio_request(LS_GPIO_NUMBER(1, 21), "unused_mux7");
 	gpio_request(LS_GPIO_NUMBER(1, 5), "unused_mux8");
 	gpio_request(LS_GPIO_NUMBER(1, 4), "unused_mux9");
-	gpio_request(LS_GPIO_NUMBER(3, 16), "unused_mux10");
 
 	gpio_direction_output(LS_GPIO_NUMBER(4, 7), 1);
 	gpio_direction_output(LS_GPIO_NUMBER(4, 6), 1);
@@ -503,7 +501,6 @@ static void la1238rdb_gpio_init(void)
 	gpio_direction_input(LS_GPIO_NUMBER(4, 5));
 	gpio_direction_input(LS_GPIO_NUMBER(1, 26));
 	gpio_direction_input(LS_GPIO_NUMBER(1, 27));
-	gpio_direction_input(LS_GPIO_NUMBER(3, 12));
 	gpio_direction_input(LS_GPIO_NUMBER(4, 4));
 	gpio_direction_input(LS_GPIO_NUMBER(4, 11));
 
@@ -516,7 +513,22 @@ static void la1238rdb_gpio_init(void)
 	gpio_direction_output(LS_GPIO_NUMBER(1, 21), 0);
 	gpio_direction_output(LS_GPIO_NUMBER(1, 5), 0);
 	gpio_direction_output(LS_GPIO_NUMBER(1, 4), 0);
-	gpio_direction_output(LS_GPIO_NUMBER(3, 16), 0);
+
+	u32 rev = get_board_version();
+
+	if (rev == REVA) {
+		gpio_request(LS_GPIO_NUMBER(3, 12), "SI5518_GPIO3");
+		gpio_request(LS_GPIO_NUMBER(3, 16), "unused_mux10");
+		gpio_direction_input(LS_GPIO_NUMBER(3, 12));
+		gpio_direction_output(LS_GPIO_NUMBER(3, 16), 0);
+	} else if (rev == REVB) {
+		gpio_request(LS_GPIO_NUMBER(3, 12), "CPU_EVT0_B");
+		gpio_request(LS_GPIO_NUMBER(3, 16), "SI5518_GPIO3");
+		gpio_direction_input(LS_GPIO_NUMBER(3, 12));
+		gpio_direction_input(LS_GPIO_NUMBER(3, 16));
+	} else {
+		printf("Unknown - Board rev %x\n", rev);
+	}
 }
 
 static inline uint32_t get_board_version(void)
