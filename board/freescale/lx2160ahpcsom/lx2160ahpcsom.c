@@ -75,7 +75,7 @@ int board_early_init_f(void)
 	out_le32(GPIO3_GPIBE_ADDR, 0xffffffff);
 
 	out_le32(GPIO3_GPDAT_ADDR, (~(1 << 17) & in_le32(GPIO3_GPDAT_ADDR)));
-	udelay(100);
+	mdelay(100);
 	out_le32(GPIO3_GPDAT_ADDR, ((1 << 17) | in_le32(GPIO3_GPDAT_ADDR)));
 
 #ifdef CONFIG_SYS_I2C_EARLY_INIT
