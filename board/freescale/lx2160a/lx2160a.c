@@ -124,6 +124,10 @@ U_BOOT_DEVICE(nxp_serial3) = {
 };
 #endif
 
+#if defined(CONFIG_TARGET_LA1238RDB)
+static inline uint32_t get_board_version(void);
+#endif
+
 // Get the Board revision number of LA1224RDB Board
 #if defined(CONFIG_TARGET_LA1224RDB)
 int board_revision_num(void)
@@ -379,6 +383,16 @@ int esdhc_status_fixup(void *blob, const char *compat)
 #if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
+
+#elif defined(CONFIG_TARGET_LA1238RDB)
+	/* Enable esdhc0 for LA1238RDB REV B */
+
+	if (get_board_version() == REVB) {
+		const char esdhc0_path[] = "/soc/esdhc@2140000";
+
+		do_fixup_by_path(blob, esdhc0_path, "status", "okay",
+				 sizeof("okay"), 1);
+	}
 #else
 	/* Enable both esdhc DT nodes for LX2160ARDB and LA1224RDB */
 	do_fixup_by_compat(blob, compat, "status", "okay",
@@ -458,7 +472,6 @@ static void la1238rdb_gpio_init(void)
 	gpio_request(LS_GPIO_NUMBER(4, 5), "GPIO_NLM_CPU");
 	gpio_request(LS_GPIO_NUMBER(1, 26), "SI5518_GPIO1");
 	gpio_request(LS_GPIO_NUMBER(1, 27), "SI5518_GPIO2");
-	gpio_request(LS_GPIO_NUMBER(3, 12), "SI5518_GPIO3");
 	gpio_request(LS_GPIO_NUMBER(4, 4), "CPU_GPIO_TO_LA1238_1");
 	gpio_request(LS_GPIO_NUMBER(4, 11), "CPU_GPIO_TO_LA1238_2");
 	gpio_request(LS_GPIO_NUMBER(1, 15), "unused_mux1");
@@ -470,7 +483,6 @@ static void la1238rdb_gpio_init(void)
 	gpio_request(LS_GPIO_NUMBER(1, 21), "unused_mux7");
 	gpio_request(LS_GPIO_NUMBER(1, 5), "unused_mux8");
 	gpio_request(LS_GPIO_NUMBER(1, 4), "unused_mux9");
-	gpio_request(LS_GPIO_NUMBER(3, 16), "unused_mux10");
 
 	gpio_direction_output(LS_GPIO_NUMBER(4, 7), 1);
 	gpio_direction_output(LS_GPIO_NUMBER(4, 6), 1);
@@ -489,7 +501,6 @@ static void la1238rdb_gpio_init(void)
 	gpio_direction_input(LS_GPIO_NUMBER(4, 5));
 	gpio_direction_input(LS_GPIO_NUMBER(1, 26));
 	gpio_direction_input(LS_GPIO_NUMBER(1, 27));
-	gpio_direction_input(LS_GPIO_NUMBER(3, 12));
 	gpio_direction_input(LS_GPIO_NUMBER(4, 4));
 	gpio_direction_input(LS_GPIO_NUMBER(4, 11));
 
@@ -502,7 +513,22 @@ static void la1238rdb_gpio_init(void)
 	gpio_direction_output(LS_GPIO_NUMBER(1, 21), 0);
 	gpio_direction_output(LS_GPIO_NUMBER(1, 5), 0);
 	gpio_direction_output(LS_GPIO_NUMBER(1, 4), 0);
-	gpio_direction_output(LS_GPIO_NUMBER(3, 16), 0);
+
+	u32 rev = get_board_version();
+
+	if (rev == REVA) {
+		gpio_request(LS_GPIO_NUMBER(3, 12), "SI5518_GPIO3");
+		gpio_request(LS_GPIO_NUMBER(3, 16), "unused_mux10");
+		gpio_direction_input(LS_GPIO_NUMBER(3, 12));
+		gpio_direction_output(LS_GPIO_NUMBER(3, 16), 0);
+	} else if (rev == REVB) {
+		gpio_request(LS_GPIO_NUMBER(3, 12), "CPU_EVT0_B");
+		gpio_request(LS_GPIO_NUMBER(3, 16), "SI5518_GPIO3");
+		gpio_direction_input(LS_GPIO_NUMBER(3, 12));
+		gpio_direction_input(LS_GPIO_NUMBER(3, 16));
+	} else {
+		printf("Unknown - Board rev %x\n", rev);
+	}
 }
 
 static inline uint32_t get_board_version(void)
@@ -542,10 +568,10 @@ int checkboard(void)
 	}
 
 	switch (rev) {
-	case 0x00:
+	case REVA:
 		puts("Rev: A, boot from ");
 		break;
-	case 0x01:
+	case REVB:
 		puts("Rev: B, boot from ");
 		break;
 	default:
@@ -553,7 +579,9 @@ int checkboard(void)
 		break;
 	}
 
-	if (src == BOOT_SOURCE_SD_MMC2)
+	if (src == BOOT_SOURCE_SD_MMC)
+		puts("SD\n");
+	else if (src == BOOT_SOURCE_SD_MMC2)
 		puts("eMMC\n");
 	else if (src == BOOT_SOURCE_XSPI_NOR)
 		puts("FlexSPI NOR\n");
@@ -1310,16 +1338,36 @@ int mmc_get_env_dev(void)
 #endif
 
 #if defined(CONFIG_TARGET_LA1238RDB)
+int get_pcal_bus(void)
+{
+	u32 rev = get_board_version();
+
+	switch (rev) {
+	case REVA:
+		return PCAL_BUS_NO;
+	case REVB:
+		return PCAL_BUS_NO_REVB;
+	default:
+		return -1;
+	}
+}
+
 static int switch_boot_source(int src_id)
 {
 	int ret;
 	struct udevice *dev;
 	u8 data;
+	int pcal_bus = get_pcal_bus();
 
-	ret = i2c_get_chip_for_busnum(PCAL_BUS_NO, PCAL_CPU_ADDR, 1, &dev);
+	if (pcal_bus == -1) {
+		printf("Unable to get pcal bus\n");
+		return -ENXIO;
+	}
+
+	ret = i2c_get_chip_for_busnum(pcal_bus, PCAL_CPU_ADDR, 1, &dev);
 	if (ret) {
 		printf("%s: Cannot find udev for a bus %d, addr :%d, ret: %d\n",
-		       __func__, PCAL_BUS_NO, PCAL_CPU_ADDR, ret);
+		       __func__, pcal_bus, PCAL_CPU_ADDR, ret);
 		return -ENXIO;
 	}
 
@@ -1350,6 +1398,9 @@ static int switch_boot_source(int src_id)
 	case BOOT_FROM_XSPI: /* RCW_SRC[3:0] = 1111 */
 		data |= 0xf0;
 		break;
+	case BOOT_FROM_SD: /* RCW_SRC[3:0] = 1000 */
+		data |= 0x80;
+		break;
 	case BOOT_FROM_EMMC: /* RCW_SRC[3:0] = 1001 */
 		data |= 0x90;
 		break;
@@ -1375,6 +1426,15 @@ static int select_boot_source(cmd_tbl_t *cmdtp, int flag, int argc,
 		return CMD_RET_USAGE;
 	else if (strcmp(argv[1], "xspi") == 0)
 		switch_boot_source(BOOT_FROM_XSPI);
+	else if (strcmp(argv[1], "sd") == 0) {
+
+		if (get_board_version() == REVA) {
+			printf("SD boot is not defined for REV A\n");
+			return CMD_RET_FAILURE;
+		}
+
+		switch_boot_source(BOOT_FROM_SD);
+	}
 	else if (strcmp(argv[1], "emmc") == 0)
 		switch_boot_source(BOOT_FROM_EMMC);
 	else
@@ -1386,6 +1446,7 @@ static int select_boot_source(cmd_tbl_t *cmdtp, int flag, int argc,
 U_BOOT_CMD(boot_source, 2, 0, select_boot_source,
 	   "Boot source Selection Control",
 	   "boot_source xspi : reset to FlexSPI\n"
+	   "boot_source sd : reset to sd\n"
 	   "boot_source emmc : reset to emmc\n"
 );
 
@@ -1394,11 +1455,17 @@ static int switch_boot_source_modem(int src_id)
 	int ret;
 	struct udevice *dev;
 	u8 data;
+	int pcal_bus = get_pcal_bus();
 
-	ret = i2c_get_chip_for_busnum(PCAL_BUS_NO, PCAL_MODEM_ADDR, 1, &dev);
+	if (pcal_bus == -1) {
+		printf("Unable to get pcal bus\n");
+		return -ENXIO;
+	}
+
+	ret = i2c_get_chip_for_busnum(pcal_bus, PCAL_MODEM_ADDR, 1, &dev);
 	if (ret) {
 		printf("%s: Cannot find udev for a bus %d, addr :%d, ret: %d\n",
-		       __func__, PCAL_BUS_NO, PCAL_MODEM_ADDR, ret);
+		       __func__, pcal_bus, PCAL_MODEM_ADDR, ret);
 		return -ENXIO;
 	}
 
@@ -1425,13 +1492,13 @@ static int switch_boot_source_modem(int src_id)
 	}
 	data &= 0xf9;
 	switch (src_id) {
-	case BOOT_FROM_XSPI:
+	case BOOT_FROM_XSPI_MODEM:
 		data |= 0x02; /* SW_CFG_BOOT_SRC[1:0] = 01 */
 		break;
-	case BOOT_FROM_PCIE:
+	case BOOT_FROM_PCIE_MODEM:
 		data |= 0x06; /* SW_CFG_BOOT_SRC[1:0] = 11 */
 		break;
-	case BOOT_FROM_PEB:
+	case BOOT_FROM_PEB_MODEM:
 		data |= 0; /* SW_CFG_BOOT_SRC[1:0] = 00 */
 		break;
 	default:
@@ -1455,11 +1522,11 @@ static int select_boot_source_modem(cmd_tbl_t *cmdtp, int flag, int argc,
 	if (argc <= 1)
 		return CMD_RET_USAGE;
 	else if (strcmp(argv[1], "xspi") == 0)
-		switch_boot_source_modem(BOOT_FROM_XSPI);
+		switch_boot_source_modem(BOOT_FROM_XSPI_MODEM);
 	else if (strcmp(argv[1], "pcie") == 0)
-		switch_boot_source_modem(BOOT_FROM_PCIE);
+		switch_boot_source_modem(BOOT_FROM_PCIE_MODEM);
 	else if (strcmp(argv[1], "peb") == 0)
-		switch_boot_source_modem(BOOT_FROM_PEB);
+		switch_boot_source_modem(BOOT_FROM_PEB_MODEM);
 	else
 		return CMD_RET_USAGE;
 
