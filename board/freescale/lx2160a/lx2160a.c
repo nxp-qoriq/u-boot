@@ -1330,13 +1330,6 @@ void qixis_dump_switch(void)
 }
 #endif
 
-#if defined(CONFIG_ENV_IS_IN_MMC) && defined(CONFIG_TARGET_LA1238RDB)
-int mmc_get_env_dev(void)
-{
-	return 0;
-}
-#endif
-
 #if defined(CONFIG_TARGET_LA1238RDB)
 int get_pcal_bus(void)
 {
