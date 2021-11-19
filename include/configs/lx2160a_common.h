@@ -254,7 +254,7 @@ int select_i2c_ch_pca9547_sec(unsigned char ch);
 	"kernelhdr_size_sd=0x20\0"              \
 	"console=ttyAMA0,38400n8\0"		\
 	BOOTENV					\
-	"mcmemsize=0x70000000\0"		\
+	"mcmemsize=0x20000000\0"		\
 	XSPI_MC_INIT_CMD				\
 	"scan_dev_for_boot_part="		\
 		"part list ${devtype} ${devnum} devplist; "	\
