@@ -61,6 +61,9 @@
 #define CONFIG_VID_FLS_ENV		"la1238rdb_vdd_mv"
 #define CONFIG_VID
 
+#define CONFIG_SYS_MEMTEST_START	0x80000000
+#define CONFIG_SYS_MEMTEST_END		0x9fffffff
+
 /* The lowest and highest voltage allowed*/
 #define VDD_MV_MIN			775
 #define VDD_MV_MAX			925
