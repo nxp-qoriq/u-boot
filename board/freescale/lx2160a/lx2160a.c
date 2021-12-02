@@ -384,17 +384,8 @@ int esdhc_status_fixup(void *blob, const char *compat)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
 
-#elif defined(CONFIG_TARGET_LA1238RDB)
-	/* Enable esdhc0 for LA1238RDB REV B */
-
-	if (get_board_version() == REVB) {
-		const char esdhc0_path[] = "/soc/esdhc@2140000";
-
-		do_fixup_by_path(blob, esdhc0_path, "status", "okay",
-				 sizeof("okay"), 1);
-	}
 #else
-	/* Enable both esdhc DT nodes for LX2160ARDB and LA1224RDB */
+	/* Enable both esdhc DT nodes for LX2160ARDB, LA1224RDB and LA1238RDB */
 	do_fixup_by_compat(blob, compat, "status", "okay",
 			   sizeof("okay"), 1);
 #endif
