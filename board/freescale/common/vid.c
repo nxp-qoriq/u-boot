@@ -136,7 +136,7 @@ static int find_vid_chip_on_i2c(void)
 }
 
 /* Maximum loop count waiting for new voltage to take effect */
-#define MAX_LOOP_WAIT_NEW_VOL		100 /* ms due to udelay(1000) */
+#define MAX_LOOP_WAIT_NEW_VOL		255 /* ms due to udelay(1000) */
 /* Maximum loop count waiting for the voltage to be stable */
 #define MAX_LOOP_WAIT_VOL_STABLE	100 /* ms due to udelay(1000) */
 /*
