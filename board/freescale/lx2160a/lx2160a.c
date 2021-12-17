@@ -133,33 +133,51 @@ static inline uint32_t get_board_version(void);
 int board_revision_num(void)
 {
 	struct udevice *dev;
-	//Input port defalut value 0xFF(1 each bit)
-	u8 val = 0xff, io_port1_val, ret;
-	// Get IO expander 0x20 of I2c bus 0
-	ret = i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI, 1, &dev);
+	int ret;
+	u8  rev_port_val;
+	u32 conf_reg;
+	u32 input_reg;
+	u8  all_input = 0xff;
+
+	/*
+	 * LA1224RDB Rev C board has PCAL6524 i2c io expander and Rev A/B boards
+	 * have PCAL6416A i2c io expander, these both don't have a compatible
+	 * register map.
+	 *
+	 * I2C io expander's address is 0x22 on rev c board and 0x20 on rev a/b
+	 * boards. 1st try to search 0x22, if it is available then access i2c
+	 * io expander as per PCAL6524 register map, if 0x22 is not found
+	 * then try to find 0x20 and access i2c io expander as per PCAL6416A
+	 * register map.
+	 */
+	ret = i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI_REVC, 1, &dev);
+	if (ret) {
+		ret = i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI_REVAB, 1,
+					      &dev);
+		if (ret) {
+			printf("%s: I2C io expander not detected\n", __func__);
+			return ret;
+		}
+		conf_reg = IO_EXAPNDER_CONF_REG_REVAB;
+		input_reg = IO_EXAPNDER_INPUT_REG_REVAB;
+	} else {
+		conf_reg = IO_EXAPNDER_CONF_REG_REVC;
+		input_reg = IO_EXAPNDER_INPUT_REG_REVC;
+	}
+
+	ret = dm_i2c_write(dev, conf_reg, &all_input, 1);
 	if (!ret) {
-		// Enable Port1 as input of IO expander PACL6416A
-		ret = dm_i2c_write(dev, IO_EXAPNDER_CONF_REG, &val, 1);
-		if (!ret) {
-			// read Port1 value of I2C expander PACL6416A
-			ret = dm_i2c_read(dev, 1, &io_port1_val, 1);
-			if (ret) {
-				printf("Warning: port1 read fail PCAL6461A");
-				return ret;
-			}
-		} else {
-			printf("Warning:Fail to enable Port1 as input");
+		ret = dm_i2c_read(dev, input_reg, &rev_port_val, 1);
+		if (ret) {
+			printf("%s: rev port read failed\n", __func__);
 			return ret;
 		}
 	} else {
-		printf("Fail to select IO expander from I2C Bus\n");
+		printf("%s: failed to enable rev port as input\n", __func__);
 		return ret;
 	}
-	// Port1[6:7]
-	//      00 = RevA
-	//      01 = RevB
-	//      10 = RevC
-	return ((io_port1_val >> BOARD_REV_SHIFT_MASK) & BOARD_REV_MASK);
+
+	return ((rev_port_val >> BOARD_REV_SHIFT_MASK) & BOARD_REV_MASK);
 }
 #endif
 
@@ -615,35 +633,58 @@ int checkboard(void)
 {
 	enum boot_src src = get_boot_src();
 	struct udevice *dev;
-	// conf  = 0xFB
-	// Enable Port1 UART bit as output of IO expander
+	int board_rev;
+	u32 i2c_chip_addr;
+	u32 conf_reg;
+	u32 output_reg;
+	/* Enable UART bit as output of IO expander */
 	u8 conf = 0xFB, val = 0;
 
 	printf("Board: LA1224-RDB, ");
 
-	printf("Board version: %c, boot from ", board_revision_num() + 'A');
-	// enabling Port1 as a output register of IO expander
-	// enable  UART 2,3 and 4
-	if (!(i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI, 1, &dev))) {
-		// conf  = 0xFB
-		// Enable Port1 UART bit as output of IO expander
-		// Port1[2] = UART enable bit(1111 1011)
-		if (!(dm_i2c_write(dev, IO_EXAPNDER_CONF_REG, &conf, 1))) {
-			// Read output Port1 value of IO expander PACL6416A
-			if (!dm_i2c_read(dev, 3, &val, 1)) {
-				// enable LX2_UART_EN of IO expander PACL6416A
+	board_rev = board_revision_num();
+
+	printf("Board version: %c, boot from ", board_rev + 'A');
+
+	switch (board_rev + 'A') {
+	case 'A':
+	case 'B':
+		i2c_chip_addr = I2C_IO_EXP_ADDR_PRI_REVAB;
+		conf_reg = IO_EXAPNDER_CONF_REG_REVAB;
+		output_reg = IO_EXAPNDER_OUTPUT_REG_REVAB;
+		break;
+	case 'C':
+		i2c_chip_addr = I2C_IO_EXP_ADDR_PRI_REVC;
+		conf_reg = IO_EXAPNDER_CONF_REG_REVC;
+		output_reg = IO_EXAPNDER_OUTPUT_REG_REVC;
+		break;
+	default:
+		printf("Invalid board revision\n");
+		return -1;
+	};
+
+	if (!(i2c_get_chip_for_busnum(0, i2c_chip_addr, 1, &dev))) {
+		if (!(dm_i2c_write(dev, conf_reg, &conf, 1))) {
+			if (!dm_i2c_read(dev, output_reg, &val, 1)) {
+				/* enable LX2_UART_EN of IO expander */
 				val = val | UART_EN_MASK;
-				if ((dm_i2c_write(dev, 3, &val, 1)))
+				if ((dm_i2c_write(dev, output_reg, &val, 1))) {
 					printf("write fail on IO expander\n");
+					return -1;
+				}
 			} else {
 				printf("read fail of IO expander\n");
+				return -1;
 			}
 		} else {
 			printf("fail to write config register of expander\n");
+			return -1;
 		}
 	} else {
 		printf("failed to select IO expander\n");
+		return -1;
 	}
+
 	if (src == BOOT_SOURCE_SD_MMC)
 		puts("SD\n");
 	else if (src == BOOT_SOURCE_XSPI_NOR)

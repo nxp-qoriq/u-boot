@@ -23,9 +23,19 @@
 #define REVA                            0
 #define REVB                            1
 #define REVC                            2
-// PCAL6416A
-// GPIO IO Expander configuration register 7
-#define IO_EXAPNDER_CONF_REG            7
+
+/* IO expander addresses */
+#define I2C_IO_EXP_ADDR_PRI_REVAB	0x20
+#define I2C_IO_EXP_ADDR_SEC_REVAB       0x21
+#define I2C_IO_EXP_ADDR_PRI_REVC	0x22
+#define I2C_IO_EXP_ADDR_SEC_REVC        0x23
+
+#define IO_EXAPNDER_CONF_REG_REVAB	0x7
+#define IO_EXAPNDER_CONF_REG_REVC	0xE
+#define IO_EXAPNDER_INPUT_REG_REVAB	0x1
+#define IO_EXAPNDER_INPUT_REG_REVC	0x2
+#define IO_EXAPNDER_OUTPUT_REG_REVAB	0x3
+#define IO_EXAPNDER_OUTPUT_REG_REVC	0x6
 
 // Get the Port1[6:7] bit of PCAL6416A
 // bit position ( 7 6 5 4 3 2 1 0)
