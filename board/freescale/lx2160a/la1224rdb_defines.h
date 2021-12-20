@@ -37,6 +37,14 @@
 #define IO_EXAPNDER_OUTPUT_REG_REVAB	0x3
 #define IO_EXAPNDER_OUTPUT_REG_REVC	0x6
 
+#define IO_EXAPNDER_P0_CONF_REG_REVC	0xC
+#define IO_EXAPNDER_P0_INPUT_REG_REVC	0x0
+#define IO_EXAPNDER_P0_OUTPUT_REG_REVC	0x4
+
+#define BOOT_FROM_XSPI		1
+#define BOOT_FROM_EMMC		2
+#define BOOT_FROM_SD		3
+
 // Get the Port1[6:7] bit of PCAL6416A
 // bit position ( 7 6 5 4 3 2 1 0)
 #define BOARD_REV_SHIFT_MASK            6

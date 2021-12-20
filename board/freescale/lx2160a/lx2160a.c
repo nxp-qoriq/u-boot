@@ -1382,8 +1382,14 @@ static int switch_boot_source(int src_id)
 	int ret;
 	struct udevice *dev;
 	u8 data;
-	int pcal_bus = get_pcal_bus();
+	int pcal_bus;
 
+	if ((get_board_version() == REVA) && (src_id == BOOT_FROM_SD)) {
+		printf("SD boot is not defined for REV A\n");
+		return CMD_RET_FAILURE;
+	}
+
+	pcal_bus = get_pcal_bus();
 	if (pcal_bus == -1) {
 		printf("Unable to get pcal bus\n");
 		return -ENXIO;
@@ -1443,37 +1449,6 @@ static int switch_boot_source(int src_id)
 
 	return run_command("reset", 0);
 }
-
-static int select_boot_source(cmd_tbl_t *cmdtp, int flag, int argc,
-			      char *const argv[])
-{
-	if (argc <= 1)
-		return CMD_RET_USAGE;
-	else if (strcmp(argv[1], "xspi") == 0)
-		switch_boot_source(BOOT_FROM_XSPI);
-	else if (strcmp(argv[1], "sd") == 0) {
-
-		if (get_board_version() == REVA) {
-			printf("SD boot is not defined for REV A\n");
-			return CMD_RET_FAILURE;
-		}
-
-		switch_boot_source(BOOT_FROM_SD);
-	}
-	else if (strcmp(argv[1], "emmc") == 0)
-		switch_boot_source(BOOT_FROM_EMMC);
-	else
-		return CMD_RET_USAGE;
-
-	return 0;
-}
-
-U_BOOT_CMD(boot_source, 2, 0, select_boot_source,
-	   "Boot source Selection Control",
-	   "boot_source xspi : reset to FlexSPI\n"
-	   "boot_source sd : reset to sd\n"
-	   "boot_source emmc : reset to emmc\n"
-);
 
 static int switch_boot_source_modem(int src_id)
 {
@@ -1564,5 +1539,106 @@ U_BOOT_CMD(boot_source_modem, 2, 0, select_boot_source_modem,
 	   "boot_source_modem pcie : reset to pcie\n"
 	   "boot_source_modem peb : reset to preloaded peb\n"
 );
+#endif
 
+#if defined(CONFIG_TARGET_LA1224RDB)
+static int switch_boot_source(int src_id)
+{
+	int ret;
+	struct udevice *dev;
+	u8 data;
+
+	switch (board_revision_num() + 'A') {
+	case 'C':
+		break;
+	default:
+		printf("Boot source switching is not supported on this board\n");
+		return -1;
+	};
+
+	ret = i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI_REVC, 1, &dev);
+	if (ret) {
+		printf("%s: Cannot find udev for a bus 0 addr :%d, ret: %d\n",
+		       __func__, I2C_IO_EXP_ADDR_PRI_REVC, ret);
+		return -ENXIO;
+	}
+
+	ret = dm_i2c_read(dev, IO_EXAPNDER_P0_CONF_REG_REVC, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       I2C_IO_EXP_ADDR_PRI_REVC, IO_EXAPNDER_P0_CONF_REG_REVC,
+		       ret);
+		return ret;
+	}
+
+	/* Clear bit 4 to 7 (RCW_SRC0 to RCW_SRC3) to make them input */
+	data &= 0x0f;
+	ret = dm_i2c_write(dev, IO_EXAPNDER_P0_CONF_REG_REVC, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       I2C_IO_EXP_ADDR_PRI_REVC, IO_EXAPNDER_P0_CONF_REG_REVC,
+		       data, ret);
+		return ret;
+	}
+
+	ret = dm_i2c_read(dev, IO_EXAPNDER_P0_OUTPUT_REG_REVC, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       I2C_IO_EXP_ADDR_PRI_REVC,
+		       IO_EXAPNDER_P0_OUTPUT_REG_REVC, ret);
+		return ret;
+	}
+
+	data &= 0x0f;
+	switch (src_id) {
+	case BOOT_FROM_XSPI: /* RCW_SRC[3:0] = 1111 */
+		data |= 0xf0;
+		break;
+	case BOOT_FROM_SD: /* RCW_SRC[3:0] = 1000 */
+		data |= 0x80;
+		break;
+	case BOOT_FROM_EMMC: /* RCW_SRC[3:0] = 1001 */
+		data |= 0x90;
+		break;
+	default:
+		printf("CPU boot source error: %d\n", src_id);
+		return -ENXIO;
+	}
+
+	ret = dm_i2c_write(dev, IO_EXAPNDER_P0_OUTPUT_REG_REVC, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       I2C_IO_EXP_ADDR_PRI_REVC,
+		       IO_EXAPNDER_P0_OUTPUT_REG_REVC, data, ret);
+		return ret;
+	}
+
+	return run_command("reset", 0);
+}
+#endif
+
+#if defined(CONFIG_TARGET_LA1238RDB) || defined(CONFIG_TARGET_LA1224RDB)
+static int select_boot_source(cmd_tbl_t *cmdtp, int flag, int argc,
+			      char *const argv[])
+{
+	if (argc <= 1)
+		return CMD_RET_USAGE;
+	else if (strcmp(argv[1], "xspi") == 0)
+		switch_boot_source(BOOT_FROM_XSPI);
+	else if (strcmp(argv[1], "sd") == 0)
+		switch_boot_source(BOOT_FROM_SD);
+	else if (strcmp(argv[1], "emmc") == 0)
+		switch_boot_source(BOOT_FROM_EMMC);
+	else
+		return CMD_RET_USAGE;
+
+	return 0;
+}
+
+U_BOOT_CMD(boot_source, 2, 0, select_boot_source,
+	   "Boot source Selection Control",
+	   "boot_source xspi : reset to FlexSPI\n"
+	   "boot_source sd : reset to sd\n"
+	   "boot_source emmc : reset to emmc\n"
+);
 #endif
