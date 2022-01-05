@@ -58,10 +58,6 @@
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS     3
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS 5
 
-/* PACL6461A IO Expander*/
-#define I2C_IO_EXP_ADDR_PRI                  0x20
-#define I2C_IO_EXP_ADDR_SEC                  0x21
-
 /* Serial */
 #define UART_EN_MASK			      0x4
 
