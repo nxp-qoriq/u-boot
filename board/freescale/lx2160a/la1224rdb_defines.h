@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright 2022 NXP
+ */
+
 #ifndef __LA1224RDB_DEFINES_H_
 #define __LA1224RDB_DEFINES_H_
 #define GPIO1_BASE_ADDR           (CONFIG_SYS_IMMR +  0x01300000)
