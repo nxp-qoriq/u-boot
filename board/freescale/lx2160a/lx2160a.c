@@ -401,7 +401,14 @@ int esdhc_status_fixup(void *blob, const char *compat)
 #if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
-
+#elif defined(CONFIG_TARGET_LA1224RDB)
+        if (board_revision_num() == REVA) {
+                const char esdhc_path[] = "/soc/esdhc@2140000";
+		printf("####Disabling ESDHC on LA1224RDB Rev A platform: %s\n",
+			esdhc_path);
+                do_fixup_by_path(blob, esdhc_path, "status", "disabled",
+                        sizeof("disabled"), 1);
+        }
 #else
 	/* Enable both esdhc DT nodes for LX2160ARDB, LA1224RDB and LA1238RDB */
 	do_fixup_by_compat(blob, compat, "status", "okay",
@@ -970,21 +977,6 @@ int config_board_mux(void)
 	return 0;
 }
 #elif defined(CONFIG_TARGET_LA1224RDB)
-static void set_dspi2_cs_signal_inactive(void)
-{
-	/* default: all CS signals inactive state is high */
-	u32 mcr_val;
-	u32 mcr_cfg_val = DSPI_MCR_MSTR | DSPI_MCR_PCSIS_MASK |
-			DSPI_MCR_CRXF | DSPI_MCR_CTXF;
-	mcr_val = in_le32(SPI_MCR_REG);
-	mcr_val |= DSPI_MCR_HALT;
-	out_le32(SPI_MCR_REG, mcr_val);
-	out_le32(SPI_MCR_REG, mcr_cfg_val);
-	mcr_val = in_le32(SPI_MCR_REG);
-	mcr_val &= ~DSPI_MCR_HALT;
-	out_le32(SPI_MCR_REG, mcr_val);
-}
-
 static void init_dspi2(void)
 {
 	/* extended spi mode with all CS signals inactive state is high */
