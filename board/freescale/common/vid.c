@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2014 Freescale Semiconductor, Inc.
- * Copyright 2020 NXP
+ * Copyright 2020-2022 NXP
  */
 
 #include <common.h>
@@ -233,10 +233,6 @@ static int read_voltage_from_LTC(int i2caddress)
 		       PMBUS_CMD_READ_VOUT, 1, (void *)&vcode, 2);
 #else
 	ret = dm_i2c_read(dev, PMBUS_CMD_READ_VOUT, (void *)&vcode, 2);
-	if (ret) {
-		printf("VID: failed to read the volatge\n");
-		return ret;
-	}
 #endif
 	if (ret) {
 		printf("VID: failed to read the volatge\n");
