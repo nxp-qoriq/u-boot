@@ -401,7 +401,14 @@ int esdhc_status_fixup(void *blob, const char *compat)
 #if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
 	/* Enable esdhc and dspi DT nodes based on RCW fields */
 	esdhc_dspi_status_fixup(blob);
-
+#elif defined(CONFIG_TARGET_LA1224RDB)
+        if (board_revision_num() == REVA) {
+                const char esdhc_path[] = "/soc/esdhc@2140000";
+		printf("####Disabling ESDHC on LA1224RDB Rev A platform: %s\n",
+			esdhc_path);
+                do_fixup_by_path(blob, esdhc_path, "status", "disabled",
+                        sizeof("disabled"), 1);
+        }
 #else
 	/* Enable both esdhc DT nodes for LX2160ARDB, LA1224RDB and LA1238RDB */
 	do_fixup_by_compat(blob, compat, "status", "okay",
@@ -970,21 +977,6 @@ int config_board_mux(void)
 	return 0;
 }
 #elif defined(CONFIG_TARGET_LA1224RDB)
-static void set_dspi2_cs_signal_inactive(void)
-{
-	/* default: all CS signals inactive state is high */
-	u32 mcr_val;
-	u32 mcr_cfg_val = DSPI_MCR_MSTR | DSPI_MCR_PCSIS_MASK |
-			DSPI_MCR_CRXF | DSPI_MCR_CTXF;
-	mcr_val = in_le32(SPI_MCR_REG);
-	mcr_val |= DSPI_MCR_HALT;
-	out_le32(SPI_MCR_REG, mcr_val);
-	out_le32(SPI_MCR_REG, mcr_cfg_val);
-	mcr_val = in_le32(SPI_MCR_REG);
-	mcr_val &= ~DSPI_MCR_HALT;
-	out_le32(SPI_MCR_REG, mcr_val);
-}
-
 static void init_dspi2(void)
 {
 	/* extended spi mode with all CS signals inactive state is high */
@@ -1018,51 +1010,9 @@ static void init_dspi2(void)
 	out_le32(SPI_MCR_REG, mcr_val);
 }
 
-u8 chk_dspi2_enable(void)
-{
-	u32 sdhc1_ds_pmux;
-	u8 is_enable = 0;
-	struct ccsr_gur __iomem *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
-
-	sdhc1_ds_pmux = gur_in32(&gur->rcwsr[FSL_CHASSIS3_RCWSR27_REGSR - 1])
-				& FSL_CHASSIS3_SDHC1_DS_PMUX_MASK;
-	sdhc1_ds_pmux >>= FSL_CHASSIS3_SDHC1_DS_PMUX_SHIFT;
-
-	if (sdhc1_ds_pmux == SDHC1_DS_PMUX_DSPI)
-		is_enable = 1;
-
-	return is_enable;
-}
-
-void fdt_fixup_dspi2_status(void *blob)
-{
-	const char dspi2_path[] = "/soc/spi@2120000";
-	int offset;
-
-	if (chk_dspi2_enable()) {
-		/* DSPI and some SD signals are muxed,
-		 * so only legacy SD mode can run,
-		 * advanced modes like uhs needs to be disabled
-		 */
-		offset = fdt_path_offset(blob, "/soc/esdhc@2140000");
-		do_fixup_by_path(blob, dspi2_path, "status", "okay",
-				sizeof("okay"), 1);
-		fdt_delprop(blob, offset, "sd-uhs-sdr104");
-		fdt_delprop(blob, offset, "sd-uhs-sdr50");
-		fdt_delprop(blob, offset, "sd-uhs-sdr25");
-		fdt_delprop(blob, offset, "sd-uhs-sdr12");
-	} else
-		do_fixup_by_path(blob, dspi2_path, "status", "disabled",
-			sizeof("disabled"), 1);
-}
-
 int config_board_mux(void)
 {
-	if (chk_dspi2_enable())
-		init_dspi2();
-	else
-		set_dspi2_cs_signal_inactive();
-
+	init_dspi2();
 	return 0;
 }
 
@@ -1337,9 +1287,6 @@ int ft_board_setup(void *blob, bd_t *bd)
 	fdt_fixup_board_enet(blob);
 #endif
 	fdt_fixup_icid(blob);
-#if defined(CONFIG_TARGET_LA1224RDB)
-	fdt_fixup_dspi2_status(blob);
-#endif
 #if defined(CONFIG_TARGET_LA1238RDB)
 	fdt_fixup_board_model(blob);
 #endif
