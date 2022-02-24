@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2018-2021 NXP
+ * Copyright 2018-2022 NXP
  */
 
 #include <common.h>
@@ -711,6 +711,20 @@ int checkboard(void)
 
 	return 0;
 }
+
+void fdt_fixup_board_model(void *blob)
+{
+	int board_rev;
+	char board_rev_str[64] = {0};
+
+	board_rev = board_revision_num();
+	sprintf(board_rev_str, "NXP Layerscape LA1224-RDB Rev%c", board_revision_num() + 'A');
+
+	do_fixup_by_path(blob, "/", "model",
+			board_rev_str,
+			sizeof(board_rev_str), 1);
+}
+
 #else
 int checkboard(void)
 {
@@ -1287,7 +1301,7 @@ int ft_board_setup(void *blob, bd_t *bd)
 	fdt_fixup_board_enet(blob);
 #endif
 	fdt_fixup_icid(blob);
-#if defined(CONFIG_TARGET_LA1238RDB)
+#if defined(CONFIG_TARGET_LA1238RDB) || defined(CONFIG_TARGET_LA1224RDB)
 	fdt_fixup_board_model(blob);
 #endif
 	return 0;
