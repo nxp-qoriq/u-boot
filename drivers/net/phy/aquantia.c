@@ -3,7 +3,7 @@
  * Aquantia PHY drivers
  *
  * Copyright 2014 Freescale Semiconductor, Inc.
- * Copyright 2018 NXP
+ * Copyright 2018-2022 NXP
  */
 #include <config.h>
 #include <common.h>
