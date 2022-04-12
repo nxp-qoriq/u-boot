@@ -1,12 +1,18 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright 2015 Freescale Semiconductor, Inc.
- * Copyright 2017 NXP
+ * Copyright 2017-2022 NXP
  */
 
 #ifndef __FSL_SECURE_BOOT_H
 #define __FSL_SECURE_BOOT_H
 
+#define CONFIG_CHAIN_OF_TRUST
+/*
+ * By definition of CONFIG_CHAIN_OF_TRUST, the fsl_setenv_bootcmd() and
+ * fsl_setenv_mcinitcmd() are executed in the board_late_init() of
+ * U-Boot soc.c, and mcinitcmd is added to the U-Boot Boot script bootcmd.
+*/
 #ifdef CONFIG_CHAIN_OF_TRUST
 #define CONFIG_FSL_SEC_MON
 
