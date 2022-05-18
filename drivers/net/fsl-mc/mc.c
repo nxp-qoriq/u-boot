@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2014 Freescale Semiconductor, Inc.
- * Copyright 2017-2021 NXP
+ * Copyright 2017-2022 NXP
  */
 #include <common.h>
 #include <command.h>
@@ -1151,7 +1151,7 @@ err_calloc:
 
 static int dpio_exit(void)
 {
-	int err;
+	int err = 0;
 
 	err = dpio_disable(dflt_mc_io, MC_CMD_NO_FLAGS, dflt_dpio->dpio_handle);
 	if (err < 0) {
@@ -1159,7 +1159,7 @@ static int dpio_exit(void)
 		goto err;
 	}
 
-	dpio_close(dflt_mc_io, MC_CMD_NO_FLAGS, dflt_dpio->dpio_handle);
+	err = dpio_close(dflt_mc_io, MC_CMD_NO_FLAGS, dflt_dpio->dpio_handle);
 	if (err < 0) {
 		printf("dpio_close() failed: %d\n", err);
 		goto err;
