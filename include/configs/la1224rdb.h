@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * Copyright 2020-2021 NXP
+ * Copyright 2020-2022 NXP
  */
 
 #ifndef __LA1224_RDB_H
@@ -95,7 +95,8 @@
 		" && esbc_validate ${kernelheader_addr_r};"	\
 		"bootm $load_addr#$BOARD\0"			\
 	"othbootargs=default_hugepagesz=1024m hugepagesz=1024m"	\
-		" hugepages=2 mem=13758M\0"
+		" hugepages=2 mem=13758M\0"			\
+	"global_spi_protect=1\0"
 
 #include <asm/fsl_secure_boot.h>
 
