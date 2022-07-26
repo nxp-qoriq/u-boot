@@ -19,6 +19,7 @@
 #include <dm/device-internal.h>
 
 #ifdef CONFIG_TARGET_LA1224RDB
+#include <i2c.h>
 #include "../board/freescale/lx2160a/la1224rdb_defines.h"
 #endif
 
@@ -567,6 +568,9 @@ static int do_spi_flash(cmd_tbl_t *cmdtp, int flag, int argc,
 	char *global_spi_protect_flag;
 	static unsigned int bus = CONFIG_SF_DEFAULT_BUS;
 	static unsigned int cs = CONFIG_SF_DEFAULT_CS;
+	unsigned int curr_bank = 0;
+	struct udevice *dev;
+	u8 inp_data;
 #endif
 
 	/* need at least two arguments */
@@ -598,14 +602,32 @@ static int do_spi_flash(cmd_tbl_t *cmdtp, int flag, int argc,
 		global_spi_protect_flag = env_get("global_spi_protect");
 		debug("bus=%d, cs=%d, global_spi_protect=%s, cmd=%s\n", bus, cs, global_spi_protect_flag, cmd);
 
-		if (global_spi_protect_flag && *global_spi_protect_flag == '1' &&
-				(bus == CONFIG_SF_DEFAULT_BUS) && (cs == CONFIG_SF_DEFAULT_CS) &&
-				((strcmp(cmd, "write") == 0) ||
-				 (strcmp(cmd, "update") == 0) ||
-				 (strcmp(cmd, "erase") == 0))) {
-			puts("SPI flash protected. Please unset/remove global_spi_protect env variable to proceed.'\n");
-			return 1;
-		}
+	ret = i2c_get_chip_for_busnum(0, I2C_IO_EXP_ADDR_PRI_REVC, 1, &dev);
+	if (ret) {
+		printf("%s: Cannot find udev for a bus 0 addr :%d, ret: %d\n",
+		       __func__, I2C_IO_EXP_ADDR_PRI_REVC, ret);
+		return -1;
+	}
+
+	ret = dm_i2c_read(dev, IO_EXAPNDER_P0_INPUT_REG_REVC, &inp_data, 1);
+
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       I2C_IO_EXP_ADDR_PRI_REVC, IO_EXAPNDER_P0_INPUT_REG_REVC,
+			ret);
+
+		return -1;
+	}
+	curr_bank = inp_data & (1 << 4) ? 1 : 0;
+
+	if (global_spi_protect_flag && *global_spi_protect_flag == '1' &&
+	    cs == curr_bank &&
+			((strcmp(cmd, "write") == 0) ||
+			 (strcmp(cmd, "update") == 0) ||
+			 (strcmp(cmd, "erase") == 0))) {
+		puts("SPI flash protected. Please unset/remove global_spi_protect env variable to proceed.'\n");
+		return 1;
+	}
 	}
 #endif
 
