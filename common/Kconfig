@@ -789,11 +789,11 @@ config SYS_BOOTPARAMS_LEN
 	default 0x20000 if MIPS || RCAR_64
 	default 0x10000
 
-config ID_EEPROM
-	bool "Enable I2C connected system identifier EEPROM"
-	help
-	  A number of different systems and vendors enable a vendor-specified
-	  EEPROM that contains various identifying features.
+#config ID_EEPROM
+#	bool "Enable I2C connected system identifier EEPROM"
+#	help
+#	  A number of different systems and vendors enable a vendor-specified
+#	  EEPROM that contains various identifying features.
 
 config SYS_EEPROM_BUS_NUM
 	int "I2C bus number of the system identifier EEPROM"

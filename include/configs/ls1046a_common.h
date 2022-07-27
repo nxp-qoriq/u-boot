@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright 2016 Freescale Semiconductor
- * Copyright 2019-2021 NXP
+ * Copyright 2019-2021,2023 NXP
  */
 
 #ifndef __LS1046A_COMMON_H
@@ -67,8 +67,11 @@
 	func(USB, usb, 0) \
 	func(DHCP, dhcp, na)
 #include <config_distro_bootcmd.h>
-
-#if defined(CONFIG_TARGET_LS1046AFRWY)
+#if defined(CONFIG_TARGET_LS1046ATP1)
+#define LS1046A_BOOT_SRC_AND_HDR\
+	"boot_scripts=ls1046atp1_boot.scr\0"     \
+	"boot_script_hdr=hdr_ls1046atp1_bs.out\0"
+#elif defined(CONFIG_TARGET_LS1046AFRWY)
 #define LS1046A_BOOT_SRC_AND_HDR\
 	"boot_scripts=ls1046afrwy_boot.scr\0"	\
 	"boot_script_hdr=hdr_ls1046afrwy_bs.out\0"

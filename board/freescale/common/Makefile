@@ -38,6 +38,7 @@ obj-$(CONFIG_$(XPL_)VID)	+= vid.o
 obj-$(CONFIG_FSL_QIXIS)	+= qixis.o
 ifndef CONFIG_XPL_BUILD
 obj-$(CONFIG_ID_EEPROM)	+= sys_eeprom.o
+obj-$(CONFIG_ID_SPI_FLASH)      += sys_spi_flash.o
 endif
 ifndef CONFIG_RAMBOOT_PBL
 obj-$(CONFIG_FSL_FIXED_MMC_LOCATION)	+= sdhc_boot.o

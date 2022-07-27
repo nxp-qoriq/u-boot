@@ -1,0 +1,82 @@
+5g_cpe_path=n
+arch=arm
+baudrate=115200
+board=ls1046atp1-sdk-shared-usdpaa
+board_name=ls1046atp1
+boot_a_script=load ${devtype} ${devnum}:${distro_bootpart} ${scriptaddr} ${prefix}${script}; env exists secureboot && load ${devtype} ${devnum}:${distro_bootpart} ${scripthdraddr} ${prefix}${boot_script_hdr}; env exists secureboot && esbc_validate ${scripthdraddr};source ${scriptaddr}
+boot_efi_binary=if fdt addr ${fdt_addr_r}; then bootefi bootmgr ${fdt_addr_r};else bootefi bootmgr ${fdtcontroladdr};fi;load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} efi/boot/bootaa64.efi; if fdt addr ${fdt_addr_r}; then bootefi ${kernel_addr_r} ${fdt_addr_r};else bootefi ${kernel_addr_r} ${fdtcontroladdr};fi
+boot_extlinux=sysboot ${devtype} ${devnum}:${distro_bootpart} any ${scriptaddr} ${prefix}${boot_syslinux_conf}
+boot_net_pci_enum=pci enum
+boot_net_usb_start=usb start
+boot_prefixes=/ /boot/
+boot_script_dhcp=boot.scr.uimg
+boot_script_hdr=hdr_ls1046atp1_bs.out
+boot_scripts=ls1046atp1_boot.scr
+boot_syslinux_conf=extlinux/extlinux.conf
+boot_targets=scsi0 mmc0 usb0 dhcp
+bootargs=root=/dev/mmcblk0p3 ramdisk_size=0x30000000 console=ttyS0,115200 earlycon=uart8250,mmio,0x21c0500  rw rootdelay=10 default_hugepagesz=1024m hugepagesz=1024m hugepages=1 mem=6G
+bootcmd=run fwupdate_bootcmd;
+bootcmd_dhcp=run boot_net_usb_start; run boot_net_pci_enum; if dhcp ${scriptaddr} ${boot_script_dhcp}; then source ${scriptaddr}; fi;setenv efi_fdtfile ${fdtfile}; setenv efi_old_vci ${bootp_vci};setenv efi_old_arch ${bootp_arch};setenv bootp_vci PXEClient:Arch:00011:UNDI:003000;setenv bootp_arch 0xb;if dhcp ${kernel_addr_r}; then tftpboot ${fdt_addr_r} dtb/${efi_fdtfile};if fdt addr ${fdt_addr_r}; then bootefi ${kernel_addr_r} ${fdt_addr_r}; else bootefi ${kernel_addr_r} ${fdtcontroladdr};fi;fi;setenv bootp_vci ${efi_old_vci};setenv bootp_arch ${efi_old_arch};setenv efi_fdtfile;setenv efi_old_arch;setenv efi_old_vci;
+bootcmd_mmc0=devnum=0; run mmc_boot
+bootcmd_scsi0=devnum=0; run scsi_boot
+bootcmd_usb0=devnum=0; run usb_boot
+bootdelay=5
+bootdev=1
+bootdev_count=0
+bootdev_validate=2
+console=ttyS0,115200
+cpu=armv8
+distro_bootcmd=scsi_need_init=; for target in ${boot_targets}; do run bootcmd_${target}; done
+efi_dtb_prefixes=/ /dtb/ /dtb/current/
+ethact=FM1@TGEC1
+ethprime=FM1@TGEC1
+fdt_addr=0x64f00000
+fdt_addr_r=0x90000000
+fdt_high=0xffffffffffffffff
+fdtcontroladdr=fbc38460
+fdtheader_addr_r=0x80100000
+fman_ucode=fbc485a0
+fwupdate_bootcmd=pci enum; run la12xx_jtag_tclk; run fwupdate_wdt_disable; run fwupdate_partition_select; run distro_bootcmd; run qspi_bootcmd;env exists secureboot && esbc_halt;
+fwupdate_partition_select=echo Selecting the partition;env exists bootdev || setenv bootdev 1; env exists bootdev_validate || setenv bootdev_validate 2; env exists bootdev_count || setenv bootdev_count 0; if test "${bootdev_validate}" = 2; then echo "Selected partition /boot${bootdev}";else if test "${bootdev_count}" < ${max_bootdev_count}; then setexpr bootdev_count ${bootdev_count} + 1;echo "Validating partition /boot/${bootdev}...$bootdev_count"; else setenv bootdev_validate 1;echo "Switch partition /boot/$bootdev"; if test "${bootdev}" = 1; then setenv bootdev 2;else setenv bootdev 1; fi; fi; saveenv; fi;
+fwupdate_wdt_disable=wdt dev watchdog@2ad0000 && wdt stop
+hwconfig=fsl_ddr:bank_intlv=auto
+initrd_high=0xffffffffffffffff
+ipaddr=192.168.3.19
+kernel_addr=0x65000000
+kernel_addr_r=0x81000000
+kernel_addr_sd=0x8000
+kernel_load=0xa0000000
+kernel_size=0x2800000
+kernel_size_sd=0x14000
+kernel_start=0x1000000
+kernelhdr_addr_sd=0x4000
+kernelhdr_size_sd=0x10
+kernelheader_addr_r=0x80200000
+kernelheader_size=0x40000
+kernelheader_start=0x800000
+la12xx_jtag_tclk=mw 2320000 00014080; mw 2320008 00390f33; sleep .01; mw 2320008 00394f33; mw 2320000 00010080
+load_addr=0xa0000000
+load_efi_dtb=load ${devtype} ${devnum}:${distro_bootpart} ${fdt_addr_r} ${prefix}${efi_fdtfile}
+max_bootdev_count=5
+mmc_boot=if mmc dev ${devnum}; then devtype=mmc; run scan_dev_for_boot_part; fi
+mtdparts=1550000.quadspi:1m(rcw),15m(u-boot),48m(kernel.itb);7e800000.flash:16m(nand_uboot),48m(nand_kernel),448m(nand_free)
+qspi_bootcmd=echo Trying load from qspi..;sf probe && sf read $load_addr $kernel_start $kernel_size; env exists secureboot && sf read $kernelheader_addr_r $kernelheader_start $kernelheader_size && esbc_validate ${kernelheader_addr_r}; bootm $load_addr#$board
+ramdisk_addr=0x800000
+ramdisk_addr_r=0xa0000000
+ramdisk_size=0x2000000
+scan_dev_for_boot=echo Scanning ${devtype} ${devnum}:${distro_bootpart}...; for prefix in ${boot_prefixes}; do run scan_dev_for_scripts; done;
+scan_dev_for_boot_part=part list ${devtype} ${devnum} devplist; env exists bootdev || setenv bootdev 1; setenv distro_bootpart ${bootdev}; if fstype ${devtype} ${devnum}:${distro_bootpart} bootfstype; then run scan_dev_for_boot; fi;
+scan_dev_for_efi=setenv efi_fdtfile ${fdtfile}; for prefix in ${efi_dtb_prefixes}; do if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}${efi_fdtfile}; then run load_efi_dtb; fi;done;if test -e ${devtype} ${devnum}:${distro_bootpart} efi/boot/bootaa64.efi; then echo Found EFI removable media binary efi/boot/bootaa64.efi; run boot_efi_binary; echo EFI LOAD FAILED: continuing...; fi; setenv efi_fdtfile
+scan_dev_for_extlinux=if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}${boot_syslinux_conf}; then echo Found ${prefix}${boot_syslinux_conf}; run boot_extlinux; echo SCRIPT FAILED: continuing...; fi
+scan_dev_for_scripts=for script in ${boot_scripts}; do if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}${script}; then echo Found U-Boot script ${prefix}${script} in /boot${distro_bootpart}; run boot_a_script; echo SCRIPT FAILED: continuing...; fi; done
+scriptaddr=0x80000000
+scripthdraddr=0x80080000
+scsi_boot=run scsi_init; if scsi dev ${devnum}; then devtype=scsi; run scan_dev_for_boot_part; fi
+scsi_init=if ${scsi_need_init}; then scsi_need_init=false; scsi scan; fi
+sd_bootcmd=echo Trying load from SD ..;mmcinfo; mmc read $load_addr $kernel_addr_sd $kernel_size_sd && env exists secureboot && mmc read $kernelheader_addr_r $kernelhdr_addr_sd $kernelhdr_size_sd  && esbc_validate ${kernelheader_addr_r};bootm $load_addr#$board
+soc=fsl-layerscape
+stderr=serial
+stdin=serial
+stdout=serial
+usb_boot=usb start; if usb dev ${devnum}; then devtype=usb; run scan_dev_for_boot_part; fi
+vendor=freescale
