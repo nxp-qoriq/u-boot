@@ -1,0 +1,7 @@
+LS1046ATP1 BOARD
+M:	Nikhil Gupta <nikhil.gupta@nxp.com>
+S:	Maintained
+F:	board/freescale/ls1046atp1/
+F:	board/freescale/ls1046atp1/ls1046atp1.c
+F:	include/configs/ls1046atp1.h
+F:	configs/ls1046atp1_tfa_defconfig

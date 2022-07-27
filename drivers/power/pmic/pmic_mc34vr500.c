@@ -9,7 +9,6 @@
 #include <i2c.h>
 #include <power/pmic.h>
 #include <power/mc34vr500_pmic.h>
-
 int power_mc34vr500_init(unsigned char bus)
 {
 	static const char name[] = "MC34VR500";

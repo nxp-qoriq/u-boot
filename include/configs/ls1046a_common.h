@@ -147,8 +147,12 @@
 	func(DHCP, dhcp, na)
 #include <config_distro_bootcmd.h>
 #endif
+#if defined(CONFIG_TARGET_LS1046ATP1)
+#define LS1046A_BOOT_SRC_AND_HDR\
+	"boot_scripts=ls1046atp1_boot.scr\0"     \
+	"boot_script_hdr=hdr_ls1046atp1_bs.out\0"
 
-#if defined(CONFIG_TARGET_LS1046AFRWY)
+#elif defined(CONFIG_TARGET_LS1046AFRWY)
 #define LS1046A_BOOT_SRC_AND_HDR\
 	"boot_scripts=ls1046afrwy_boot.scr\0"	\
 	"boot_script_hdr=hdr_ls1046afrwy_bs.out\0"

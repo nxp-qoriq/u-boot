@@ -128,7 +128,6 @@ static int fman_upload_firmware(int fm_idx,
 
 	hdr = &firmware->header;
 	length = be32_to_cpu(hdr->length);
-
 	/* Check the magic */
 	if ((hdr->magic[0] != 'Q') || (hdr->magic[1] != 'E') ||
 		(hdr->magic[2] != 'F')) {
@@ -359,7 +358,6 @@ int fm_init_common(int index, struct ccsr_fman *reg)
 	int rc;
 	void *addr = NULL;
 	enum boot_src src = get_boot_src();
-
 	if (src == BOOT_SOURCE_IFC_NOR) {
 		addr = (void *)(CONFIG_SYS_FMAN_FW_ADDR +
 				CONFIG_SYS_FSL_IFC_BASE);

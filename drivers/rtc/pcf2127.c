@@ -11,7 +11,7 @@
 #include <i2c.h>
 #include <log.h>
 #include <rtc.h>
-
+#if defined(CONFIG_CMD_DATE)
 #define PCF2127_REG_CTRL1	0x00
 #define PCF2127_REG_CTRL2	0x01
 #define PCF2127_REG_CTRL3	0x02
@@ -132,3 +132,4 @@ U_BOOT_DRIVER(rtc_pcf2127) = {
 	.of_match = pcf2127_rtc_ids,
 	.ops	= &pcf2127_rtc_ops,
 };
+#endif
