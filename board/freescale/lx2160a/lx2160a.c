@@ -698,9 +698,9 @@ int checkboard(void)
 	else if (src == BOOT_SOURCE_XSPI_NOR) {
 		puts("FlexSPI NOR");
 		if (board_revision_num() == REVC) {
-			conf_reg = IO_EXAPNDER_P0_CONF_REG_REVC;
+			conf_reg = IO_EXAPNDER_P0_INPUT_REG_REVC;
 			dm_i2c_read(dev, conf_reg, &rev_port_val, 1);
-			if (rev_port_val == 0xef)
+			if (rev_port_val & (1 << 4))
 				puts(" DEV#1\n");
 			else
 				puts(" DEV#0\n");
@@ -1558,13 +1558,12 @@ static int switch_boot_source(int src_id, int param)
 	conf_reg = IO_EXAPNDER_P0_CONF_REG_REVC;
 	switch (src_id) {
 	case BOOT_FROM_XSPI: /* RCW_SRC[3:0] = 1111 */
-		if (param)
-			data = (cfg_data | 0x0f);
-		else
-			data = (cfg_data | 0x10);
+		data = cfg_data;
 		ret = dm_i2c_write(dev, conf_reg, &data, 1);
-		data = (out_data | 0x1f);
-
+		if (param)
+			data = (out_data | 0x1f);
+		else
+			data = (out_data | 0x0f);
 		break;
 	case BOOT_FROM_SD: /* RCW_SRC[3:0] = 1000 */
 		data = (cfg_data | 0x10);
