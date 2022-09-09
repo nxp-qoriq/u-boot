@@ -30,19 +30,6 @@ endif
 source "board/freescale/common/Kconfig"
 endif
 
-
-config SYS_BOARD
-	default "ls1046atp1"
-
-config SYS_VENDOR
-	default "freescale"
-
-config SYS_SOC
-	default "fsl-layerscape"
-
-config SYS_CONFIG_NAME
-	default "ls1046atp1"
-
 if FSL_LS_PPA
 config SYS_LS_PPA_FW_ADDR
 	hex "PPA Firmware Addr"
