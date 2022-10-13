@@ -85,8 +85,9 @@
 #define I2C_SFP_EEPROM_ADDR_LEN	1
 
 /* Qixis */
+#if !defined(CONFIG_TARGET_LA1224RDB)
 #define CFG_SYS_I2C_FPGA_ADDR		0x66
-
+#endif
 /* USB */
 
 #define COUNTER_FREQUENCY_REAL		(get_board_sys_clk() / 4)
