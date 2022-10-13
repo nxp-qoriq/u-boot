@@ -1,0 +1,130 @@
+// SPDX-License-Identifier: GPL-2.0+ OR X11
+/*
+ * NXP LA1224RDB device tree source
+ *
+ * Copyright 2020-2022 NXP
+ *
+ */
+
+/dts-v1/;
+
+#include "fsl-lx2160a.dtsi"
+
+/ {
+	model = "NXP Layerscape LA1224-RDB Board";
+	compatible = "nxp,la1224rdb", "fsl,lx2160a";
+
+	aliases {
+		spi0 = &fspi;
+	};
+};
+
+&dpmac3 {
+	status = "okay";
+	phy-handle = <&aquantia_phy1>;
+	phy-connection-type = "usxgmii";
+};
+
+&dpmac4 {
+	status = "okay";
+	phy-handle = <&aquantia_phy2>;
+	phy-connection-type = "usxgmii";
+};
+
+&dpmac17 {
+	status = "okay";
+	phy-handle = <&rgmii_phy1>;
+	phy-connection-type = "rgmii-id";
+};
+
+&emdio1 {
+	status = "okay";
+	rgmii_phy1: ethernet-phy@1 {
+		/* AR8035 PHY - "compatible" property not strictly needed */
+		compatible = "fsl,ls-mdio";
+		reg = <0x3>;
+		/* Poll mode - no "interrupts" property defined */
+	};
+	aquantia_phy1: ethernet-phy@4 {
+		/* AQR107 PHY - "compatible" property not strictly needed */
+		compatible = "ethernet-phy-ieee802.3-c45";
+		interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
+		reg = <0x8>;
+	};
+	aquantia_phy2: ethernet-phy@5 {
+		/* AQR107 PHY - "compatible" property not strictly needed */
+		compatible = "ethernet-phy-ieee802.3-c45";
+		interrupts = <GIC_SPI 3 IRQ_TYPE_LEVEL_HIGH>;
+		reg = <0x0>;
+	};
+};
+
+&emdio2 {
+	status = "okay";
+	inphi_phy: ethernet-phy@0 {
+		compatible = "ethernet-phy-id0210.7440";
+		reg = <0x0>;
+	};
+};
+
+&fspi {
+	bus-num = <0>;
+	status = "okay";
+	fspi-has-second-chip;
+
+	qflash0: mt35xu512g@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-flash";
+		spi-max-frequency = <20000000>;
+		reg = <0>;
+		/* The following setting enables 1-1-8 (CMD-ADDR-DATA) mode */
+		fspi-rx-bus-width = <8>; /* 8 FSPI Rx lines */
+		fspi-tx-bus-width = <1>; /* 1 FSPI Tx line */
+	};
+
+	/*
+	 * MCR2[SAMEDEVICEEN] bit is enabled in FlexSPI controller for
+	 * LX2160ARDB and LX2160AQDS board. Both these has same type of flash
+	 * slave devices connected on both A0 and A1.
+	 * No need to provide node info for second flash device.
+	 */
+};
+
+&esdhc0 {
+	status = "okay";
+};
+
+&esdhc1 {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+	u-boot,dm-pre-reloc;
+};
+
+&i2c3 {
+	status = "okay";
+
+	rtc@51 {
+		compatible = "pcf2127-rtc";
+		reg = <0x51>;
+	};
+};
+
+&sata0 {
+	status = "okay";
+};
+
+&sata1 {
+	status = "okay";
+};
+
+&sata2 {
+	status = "okay";
+};
+
+&sata3 {
+	status = "okay";
+};

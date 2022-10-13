@@ -46,7 +46,6 @@
 #define CORTINA_PHY_ADDR1		0x0
 #define INPHI_PHY_ADDR1			0x0
 
-#define RGMII_PHY_ADDR1			0x01
 #define RGMII_PHY_ADDR2			0x02
 
 #if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
@@ -75,5 +74,10 @@ enum qsfp_compat_codes {
 u8 get_board_rev(void);
 int fdt_fixup_board_phy_revc(void *fdt);
 #endif
+
+#ifdef CONFIG_TARGET_LA1224RDB
+#include <fsl_dspi.h>
+#include "../board/freescale/lx2160a/la1224rdb_defines.h"
+#endif /* CONFIG_TARGET_LA1224RDB */
 
 #endif /* __LX2160_H */
