@@ -646,7 +646,13 @@ static int ls_pcie_probe(struct udevice *dev)
 	 * for LS2088A series SoCs
 	 */
 	svr = get_svr();
-	svr = (svr >> SVR_VAR_PER_SHIFT) & 0xFFFFFE;
+	svr = svr >> SVR_VAR_PER_SHIFT;
+	if ((svr & 0xFFFF00) == SVR_LX2160A)
+		pcie->pf1_offset = LX2160_PCIE_PF1_OFFSET;
+	else
+		pcie->pf1_offset = LS_PCIE_PF1_OFFSET;
+
+	svr = svr & 0xFFFFFE;
 	if (svr == SVR_LS2088A || svr == SVR_LS2084A ||
 	    svr == SVR_LS2048A || svr == SVR_LS2044A ||
 	    svr == SVR_LS2081A || svr == SVR_LS2041A) {
@@ -655,13 +661,6 @@ static int ls_pcie_probe(struct udevice *dev)
 		pcie->cfg_res.end = pcie->cfg_res.start + cfg_size;
 		pcie->ctrl = pcie->lut + 0x40000;
 	}
-
-	if (svr == SVR_LX2160A || svr == SVR_LX2162A ||
-	    svr == SVR_LX2120A || svr == SVR_LX2080A ||
-	    svr == SVR_LX2122A || svr == SVR_LX2082A)
-		pcie->pf1_offset = LX2160_PCIE_PF1_OFFSET;
-	else
-		pcie->pf1_offset = LS_PCIE_PF1_OFFSET;
 
 	if (svr == SVR_LS2080A || svr == SVR_LS2085A)
 		pcie->cfg2_flag = 1;
