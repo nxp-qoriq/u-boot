@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2017-2020 NXP
+ * Copyright 2017-2023 NXP
  * Copyright 2014-2015 Freescale Semiconductor, Inc.
  * Layerscape PCIe driver
  */
@@ -21,6 +21,8 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 LIST_HEAD(ls_pcie_list);
+
+#define LS_PCI_WAIT_FIXED_LINK_MAX_MS (1000 * 10)
 
 static unsigned int dbi_readl(struct ls_pcie *pcie, unsigned int offset)
 {
@@ -515,6 +517,9 @@ static int ls_pcie_probe(struct udevice *dev)
 	uint svr;
 	int ret;
 	fdt_size_t cfg_size;
+	char env[64];
+	char *penv;
+	u32 wait_max_ms = 0;
 
 	pcie->bus = dev;
 
@@ -624,9 +629,29 @@ static int ls_pcie_probe(struct udevice *dev)
 		printf("PCIe%u: %s %s", PCIE_SRDS_PRTCL(pcie->idx), dev->name,
 		       "Root Complex");
 		ls_pcie_setup_ctrl(pcie);
+
+		/*
+		 * PCIe device boots up later than RC.
+		 */
+		sprintf(env, "PCIe%d-fixed-link-wait-ms",
+			PCIE_SRDS_PRTCL(pcie->idx));
+		penv = env_get(env);
+		if (penv) {
+			wait_max_ms = (u32)simple_strtoul(penv, NULL, 10);
+			if (wait_max_ms > LS_PCI_WAIT_FIXED_LINK_MAX_MS)
+				wait_max_ms = LS_PCI_WAIT_FIXED_LINK_MAX_MS;
+		}
 	}
 
+wait_link_up:
 	if (!ls_pcie_link_up(pcie)) {
+		if (wait_max_ms > 0) {
+			mdelay(1);
+			wait_max_ms--;
+			if (!(wait_max_ms % 1000))
+				printf(". ");
+			goto wait_link_up;
+		}
 		/* Let the user know there's no PCIe link */
 		printf(": no link\n");
 		return 0;
