@@ -48,10 +48,20 @@
 };
 
 &fec1 {
+	phy-reset-gpios = <&gpio1 5 GPIO_ACTIVE_LOW>;
+	phy-reset-post-delay = <150>;
+	phy-reset-duration = <15>;
+
 	mdio {
 		ethphy0: ethernet-phy@0 {
 			reset-gpios = <&gpio1 5 GPIO_ACTIVE_LOW>;
-			max-speed = <100>;
+			reset-deassert-us = <150000>;
+			reset-assert-us = <15000>;
+
+			fixed-link {
+				speed = <100>;
+				full-duplex;
+			};
 		};
 	};
 };
