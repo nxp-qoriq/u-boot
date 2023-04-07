@@ -154,6 +154,8 @@ static int setup_fec(void)
 
 int board_phy_config(struct phy_device *phydev)
 {
+	phy_set_supported(phydev, SPEED_100);
+
 	if (phydev->drv->config)
 		phydev->drv->config(phydev);
 
