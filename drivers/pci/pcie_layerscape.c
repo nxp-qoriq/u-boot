@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2017-2020 NXP
+ * Copyright 2017-2023 NXP
  * Copyright 2014-2015 Freescale Semiconductor, Inc.
  * Layerscape PCIe driver
  */
@@ -21,6 +21,8 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 LIST_HEAD(ls_pcie_list);
+
+#define LS_PCI_WAIT_FIXED_LINK_MAX_MS (1000 * 10)
 
 static unsigned int dbi_readl(struct ls_pcie *pcie, unsigned int offset)
 {
@@ -506,15 +508,79 @@ static void ls_pcie_setup_ep(struct ls_pcie *pcie)
 	ls_pcie_ep_enable_cfg(pcie);
 }
 
+/* Scan EP connected in case of PCIe link up.
+ * In general, there must be EP connected if link is up.
+ * This function is used to check endpoint whose
+ * configuration is later after RC PCIe enumeration.
+ * If we don't wait for EP to complete configuring,
+ * device-tree may not be fixed up to add iommu/msi attributions.
+ * Here we only consider the EP connected without PCIe switch
+ * then device ID starts from 0.
+ */
+static int ls_pcie_scan_dev(struct udevice *bus,
+	u32 wait_max_ms)
+{
+	ulong vendor, device;
+	pci_dev_t bdf;
+	int ret, busnum = bus->seq + 1;
+	int dev, fun;
+	u32 wait_ms = 0, console_nl = 0;
+
+	/* Device ID starts from 0 for direct connection.*/
+	dev = 0;
+	/* Function 0 must be supported for each device.*/
+	fun = 0;
+	bdf = PCI_BDF(busnum, dev, fun);
+
+scan_bdf:
+	ret = ls_pcie_read_config(bus, bdf, PCI_VENDOR_ID,
+		&vendor, PCI_SIZE_16);
+	if (ret)
+		goto error;
+
+	ret = ls_pcie_read_config(bus, bdf, PCI_DEVICE_ID,
+		&device, PCI_SIZE_16);
+	if (ret)
+		goto error;
+
+	if (vendor != 0xffff && vendor != 0x0000 &&
+		device != 0xffff && device != 0x0000) {
+		if (console_nl)
+			printf("\n");
+		return 0;
+	}
+
+	if (wait_ms < wait_max_ms) {
+		mdelay(1);
+		if (!(wait_ms % 1000)) {
+			printf(". ");
+			console_nl = 1;
+		}
+
+		wait_ms++;
+		goto scan_bdf;
+	}
+
+	return -ENODEV;
+
+error:
+	printf("Cannot read bus configuration: %d\n", ret);
+
+	return ret;
+}
+
 static int ls_pcie_probe(struct udevice *dev)
 {
 	struct ls_pcie *pcie = dev_get_priv(dev);
 	const void *fdt = gd->fdt_blob;
 	int node = dev_of_offset(dev);
-	u16 link_sta;
+	u16 link_sta, link_width, link_gen;
 	uint svr;
 	int ret;
 	fdt_size_t cfg_size;
+	char env[64];
+	char *penv;
+	u32 wait_max_ms = 0;
 
 	pcie->bus = dev;
 
@@ -580,7 +646,13 @@ static int ls_pcie_probe(struct udevice *dev)
 	 * for LS2088A series SoCs
 	 */
 	svr = get_svr();
-	svr = (svr >> SVR_VAR_PER_SHIFT) & 0xFFFFFE;
+	svr = svr >> SVR_VAR_PER_SHIFT;
+	if ((svr & 0xFFFF00) == SVR_LX2160A)
+		pcie->pf1_offset = LX2160_PCIE_PF1_OFFSET;
+	else
+		pcie->pf1_offset = LS_PCIE_PF1_OFFSET;
+
+	svr = svr & 0xFFFFFE;
 	if (svr == SVR_LS2088A || svr == SVR_LS2084A ||
 	    svr == SVR_LS2048A || svr == SVR_LS2044A ||
 	    svr == SVR_LS2081A || svr == SVR_LS2041A) {
@@ -589,13 +661,6 @@ static int ls_pcie_probe(struct udevice *dev)
 		pcie->cfg_res.end = pcie->cfg_res.start + cfg_size;
 		pcie->ctrl = pcie->lut + 0x40000;
 	}
-
-	if (svr == SVR_LX2160A || svr == SVR_LX2162A ||
-	    svr == SVR_LX2120A || svr == SVR_LX2080A ||
-	    svr == SVR_LX2122A || svr == SVR_LX2082A)
-		pcie->pf1_offset = LX2160_PCIE_PF1_OFFSET;
-	else
-		pcie->pf1_offset = LS_PCIE_PF1_OFFSET;
 
 	if (svr == SVR_LS2080A || svr == SVR_LS2085A)
 		pcie->cfg2_flag = 1;
@@ -624,9 +689,29 @@ static int ls_pcie_probe(struct udevice *dev)
 		printf("PCIe%u: %s %s", PCIE_SRDS_PRTCL(pcie->idx), dev->name,
 		       "Root Complex");
 		ls_pcie_setup_ctrl(pcie);
+
+		/*
+		 * PCIe device boots up later than RC.
+		 */
+		sprintf(env, "PCIe%d-fixed-link-wait-ms",
+			PCIE_SRDS_PRTCL(pcie->idx));
+		penv = env_get(env);
+		if (penv) {
+			wait_max_ms = (u32)simple_strtoul(penv, NULL, 10);
+			if (wait_max_ms > LS_PCI_WAIT_FIXED_LINK_MAX_MS)
+				wait_max_ms = LS_PCI_WAIT_FIXED_LINK_MAX_MS;
+		}
 	}
 
+wait_link_up:
 	if (!ls_pcie_link_up(pcie)) {
+		if (wait_max_ms > 0) {
+			mdelay(1);
+			wait_max_ms--;
+			if (!(wait_max_ms % 1000))
+				printf(". ");
+			goto wait_link_up;
+		}
 		/* Let the user know there's no PCIe link */
 		printf(": no link\n");
 		return 0;
@@ -634,8 +719,25 @@ static int ls_pcie_probe(struct udevice *dev)
 
 	/* Print the negotiated PCIe link width */
 	link_sta = readw(pcie->dbi + PCIE_LINK_STA);
-	printf(": x%d gen%d\n", (link_sta & PCIE_LINK_WIDTH_MASK) >> 4,
-	       link_sta & PCIE_LINK_SPEED_MASK);
+	link_width = (link_sta & PCIE_LINK_WIDTH_MASK) >> 4;
+	link_gen = link_sta & PCIE_LINK_SPEED_MASK;
+	printf(": x%d gen%d\n", link_width, link_gen);
+
+	if (pcie->mode != PCI_HEADER_TYPE_NORMAL &&
+		link_width > 0 && link_gen > 0) {
+		sprintf(env, "PCIe%d-scan-device",
+			PCIE_SRDS_PRTCL(pcie->idx));
+		penv = env_get(env);
+		if (!penv || !simple_strtoul(penv, NULL, 10))
+			return 0;
+
+		ret = ls_pcie_scan_dev(dev,
+			LS_PCI_WAIT_FIXED_LINK_MAX_MS);
+		if (ret) {
+			printf("PCIe%d link up, but scan failed\n",
+				pcie->idx);
+		}
+	}
 
 	return 0;
 }
