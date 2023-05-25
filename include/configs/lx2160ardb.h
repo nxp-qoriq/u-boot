@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * Copyright 2018,2020 NXP
+ * Copyright 2018,2020-2023 NXP
  */
 
 #ifndef __LX2_RDB_H
@@ -59,6 +59,9 @@
 #if defined(CONFIG_FSL_MC_ENET)
 #define CONFIG_MII
 #define CONFIG_ETHPRIME		"DPMAC1@xgmii"
+#define AQR113C_PHY_ADDR1	0x0
+#define AQR113C_PHY_ADDR2	0x08
+
 
 #define AQR107_PHY_ADDR1	0x04
 #define AQR107_PHY_ADDR2	0x05
