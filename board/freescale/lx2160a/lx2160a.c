@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2018-2022 NXP
+ * Copyright 2018-2023 NXP
  */
 
 #include <common.h>
@@ -325,6 +325,12 @@ int board_fix_fdt(void *fdt)
 		off = fdt_node_offset_by_compatible(fdt, off,
 						    "fsl,lx2160a-pcie");
 	}
+
+       /* Fixup u-boot's DTS in case this is a revC board and
+        * we're using DM_ETH.
+        */
+       if (IS_ENABLED(CONFIG_TARGET_LX2160ARDB))
+		fdt_fixup_board_phy_revc(fdt);
 
 	return 0;
 }
@@ -1060,6 +1066,15 @@ int config_board_mux(void)
 }
 #endif
 
+#if CONFIG_IS_ENABLED(TARGET_LX2160ARDB)
+u8 get_board_rev(void)
+{
+       u8 board_rev = (QIXIS_READ(arch) & 0xf) - 1 + 'A';
+
+       return board_rev;
+}
+#endif
+
 unsigned long get_board_sys_clk(void)
 {
 #if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
@@ -1235,7 +1250,10 @@ void fdt_fixup_board_enet(void *fdt)
 	if (get_mc_boot_status() == 0 &&
 	    (is_lazy_dpl_addr_valid() || get_dpl_apply_status() == 0)) {
 		fdt_status_okay(fdt, offset);
-		fdt_fixup_board_phy(fdt);
+		if (IS_ENABLED(CONFIG_TARGET_LX2160ARDB))
+			fdt_fixup_board_phy_revc(fdt);
+		else
+			fdt_fixup_board_phy(fdt);
 	} else {
 		fdt_status_fail(fdt, offset);
 	}
@@ -1500,6 +1518,11 @@ static int select_boot_source_modem(cmd_tbl_t *cmdtp, int flag, int argc,
 		switch_boot_source_modem(BOOT_FROM_PEB_MODEM);
 	else
 		return CMD_RET_USAGE;
+
+	if (IS_ENABLED(CONFIG_TARGET_LX2160ARDB)) {
+		if (get_board_rev() >= 'C')
+			fdt_fixup_i2c_thermal_node(blob);
+	}
 
 	return 0;
 }
