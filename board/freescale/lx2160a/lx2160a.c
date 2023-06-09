@@ -32,6 +32,7 @@
 #include <asm/arch-fsl-layerscape/fsl_icid.h>
 #include <cpu_func.h>
 #include <asm/gpio.h>
+#include "lx2160a.h"
 
 #ifdef CONFIG_TARGET_LA1224RDB
 #include <fsl_dspi.h>
@@ -329,9 +330,9 @@ int board_fix_fdt(void *fdt)
        /* Fixup u-boot's DTS in case this is a revC board and
         * we're using DM_ETH.
         */
-       if (IS_ENABLED(CONFIG_TARGET_LX2160ARDB))
+#if CONFIG_IS_ENABLED(TARGET_LX2160ARDB)
 		fdt_fixup_board_phy_revc(fdt);
-
+#endif
 	return 0;
 }
 #endif
@@ -730,10 +731,8 @@ int checkboard(void)
 
 void fdt_fixup_board_model(void *blob)
 {
-	int board_rev;
 	char board_rev_str[64] = {0};
 
-	board_rev = board_revision_num();
 	sprintf(board_rev_str, "NXP Layerscape LA1224-RDB Rev%c", board_revision_num() + 'A');
 
 	do_fixup_by_path(blob, "/", "model",
@@ -1250,10 +1249,11 @@ void fdt_fixup_board_enet(void *fdt)
 	if (get_mc_boot_status() == 0 &&
 	    (is_lazy_dpl_addr_valid() || get_dpl_apply_status() == 0)) {
 		fdt_status_okay(fdt, offset);
-		if (IS_ENABLED(CONFIG_TARGET_LX2160ARDB))
+#if CONFIG_IS_ENABLED(TARGET_LX2160ARDB)
 			fdt_fixup_board_phy_revc(fdt);
-		else
+#else
 			fdt_fixup_board_phy(fdt);
+#endif
 	} else {
 		fdt_status_fail(fdt, offset);
 	}
@@ -1265,6 +1265,115 @@ void board_quiesce_devices(void)
 }
 #endif
 
+#if CONFIG_IS_ENABLED(TARGET_LX2160ARDB)
+int fdt_fixup_add_thermal(void *blob, int mux_node, int channel, int reg)
+{
+	int err;
+	int noff;
+	int offset;
+	char channel_node_name[50];
+	char thermal_node_name[50];
+	u32 phandle;
+
+	snprintf(channel_node_name, sizeof(channel_node_name),
+		 "i2c@%x", channel);
+	debug("channel_node_name = %s\n", channel_node_name);
+
+	snprintf(thermal_node_name, sizeof(thermal_node_name),
+		 "temperature-sensor@%x", reg);
+	debug("thermal_node_name = %s\n", thermal_node_name);
+
+	err = fdt_increase_size(blob, 200);
+	if (err) {
+		printf("fdt_increase_size: err=%s\n", fdt_strerror(err));
+		return err;
+	}
+
+	noff = fdt_subnode_offset(blob, mux_node, (const char *)
+				  channel_node_name);
+	if (noff < 0) {
+		/* channel node not found - create it */
+		noff = fdt_add_subnode(blob, mux_node, channel_node_name);
+		if (noff < 0) {
+			printf("fdt_add_subnode: err=%s\n", fdt_strerror(err));
+			return err;
+		}
+		fdt_setprop_u32 (blob, noff, "#address-cells", 1);
+		fdt_setprop_u32 (blob, noff, "#size-cells", 0);
+		fdt_setprop_u32 (blob, noff, "reg", channel);
+	}
+
+	/* Create thermal node*/
+	offset = fdt_add_subnode(blob, noff, thermal_node_name);
+	fdt_setprop(blob, offset, "compatible", "nxp,sa56004",
+		    strlen("nxp,sa56004") + 1);
+	fdt_setprop_u32 (blob, offset, "reg", reg);
+
+	/* fixup phandle*/
+	noff = fdt_node_offset_by_compatible(blob, -1, "regulator-fixed");
+	if (noff < 0) {
+		printf("%s : failed to get phandle\n", __func__);
+		return noff;
+	}
+	phandle = fdt_get_phandle(blob, noff);
+	fdt_setprop_u32 (blob, offset, "vcc-supply", phandle);
+
+	return 0;
+}
+
+void fdt_fixup_delete_thermal(void *blob, int mux_node, int channel, int reg)
+{
+	int node;
+	int value;
+	int err;
+	int subnode;
+
+	fdt_for_each_subnode(subnode, blob, mux_node) {
+		value = fdtdec_get_uint(blob, subnode, "reg", -1);
+		if (value == channel) {
+			/* delete thermal node */
+			fdt_for_each_subnode(node, blob, subnode) {
+				value = fdtdec_get_uint(blob, node, "reg", -1);
+				err = fdt_node_check_compatible(blob, node,
+								"nxp,sa56004");
+				if (!err && value == reg) {
+					fdt_del_node(blob, node);
+					break;
+				}
+			}
+		}
+	}
+}
+
+void fdt_fixup_i2c_thermal_node(void *blob)
+{
+	int i2coffset;
+	int mux_node;
+	int reg;
+	int err;
+
+	i2coffset = fdt_node_offset_by_compat_reg(blob, "fsl,vf610-i2c",
+						  0x2000000);
+	if (i2coffset != -FDT_ERR_NOTFOUND) {
+		fdt_for_each_subnode(mux_node, blob, i2coffset) {
+			reg = fdtdec_get_uint(blob, mux_node, "reg", -1);
+			err = fdt_node_check_compatible(blob, mux_node,
+							"nxp,pca9547");
+			if (!err && reg == 0x77) {
+				fdt_fixup_delete_thermal(blob, mux_node,
+							 0x3, 0x4d);
+				err = fdt_fixup_add_thermal(blob, mux_node,
+							    0x3, 0x48);
+				if (err)
+					printf("%s: Add thermal node failed\n",
+					       __func__);
+			}
+		}
+	} else {
+		printf("%s: i2c node not found\n", __func__);
+	}
+}
+#endif
 #ifdef CONFIG_OF_BOARD_SETUP
 int ft_board_setup(void *blob, bd_t *bd)
 {
@@ -1331,6 +1440,10 @@ int ft_board_setup(void *blob, bd_t *bd)
 	fdt_fixup_icid(blob);
 #if defined(CONFIG_TARGET_LA1238RDB) || defined(CONFIG_TARGET_LA1224RDB)
 	fdt_fixup_board_model(blob);
+#endif
+#if CONFIG_IS_ENABLED(TARGET_LX2160ARDB)
+		if (get_board_rev() >= 'C')
+			fdt_fixup_i2c_thermal_node(blob);
 #endif
 	return 0;
 }
@@ -1518,13 +1631,6 @@ static int select_boot_source_modem(cmd_tbl_t *cmdtp, int flag, int argc,
 		switch_boot_source_modem(BOOT_FROM_PEB_MODEM);
 	else
 		return CMD_RET_USAGE;
-
-	if (IS_ENABLED(CONFIG_TARGET_LX2160ARDB)) {
-		if (get_board_rev() >= 'C')
-			fdt_fixup_i2c_thermal_node(blob);
-	}
-
-	return 0;
 }
 
 U_BOOT_CMD(boot_source_modem, 2, 0, select_boot_source_modem,
