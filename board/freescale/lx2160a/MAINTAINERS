@@ -44,6 +44,15 @@ F:	arch/arm/dts/fsl-lx2162a-qds-sd1-17.dtsi
 F:	arch/arm/dts/fsl-lx2162a-qds-sd1-18.dtsi
 F:	arch/arm/dts/fsl-lx2162a-qds-sd1-20.dtsi
 
+LA1238RDB BOARD
+M:      Priyanka Jain <priyanka.jain@nxp.com>
+M:      Jagdish Gediya <jagdish.gediya@nxp.com>
+S:      Maintained
+F:      board/freescale/lx2160a/eth_la1238rdb.c
+F:      include/configs/la1238rdb.h
+F:      configs/la1238rdb_tfa_defconfig
+F:      arch/arm/dts/fsl-la1238-rdb.dts
+
 LX2162AQDS_SECURE_BOOT BOARD
 M:	Manish Tomar <Manish.Tomar@nxp.com>
 S:	Maintained

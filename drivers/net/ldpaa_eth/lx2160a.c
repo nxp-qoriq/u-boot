@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2018, 2020-2022 NXP
+ * Copyright 2018, 2020-2023 NXP
  */
 #include <common.h>
 #include <phy.h>
@@ -60,7 +60,8 @@ phy_interface_t wriop_dpmac_enet_if(int dpmac_id, int lane_prtcl)
 	if (is_device_disabled(dpmac_id))
 		return PHY_INTERFACE_MODE_NONE;
 
-#ifndef CONFIG_TARGET_LA1224RDB
+#if (!defined(CONFIG_TARGET_LA1238RDB) && !defined(CONFIG_TARGET_LA1224RDB))
+
 	if (lane_prtcl >= SGMII1 && lane_prtcl <= SGMII18)
 		return PHY_INTERFACE_MODE_SGMII;
 
