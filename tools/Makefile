@@ -98,6 +98,8 @@ AES_OBJS-$(CONFIG_TOOLS_LIBCRYPTO) := $(addprefix lib/aes/, \
 LIBCRYPTO_OBJS-$(CONFIG_TOOLS_LIBCRYPTO) := $(addprefix lib/, \
 					fdt-libcrypto.o)
 
+KWBIMAGE_OBJS-$(CONFIG_TOOLS_LIBCRYPTO) := kwbimage.o
+
 ROCKCHIP_OBS = lib/rc4.o rkcommon.o rkimage.o rksd.o rkspi.o
 
 # common objs for dumpimage and mkimage
@@ -118,7 +120,7 @@ dumpimage-mkimage-objs := aisimage.o \
 			imximage.o \
 			imx8image.o \
 			imx8mimage.o \
-			kwbimage.o \
+			$(KWBIMAGE_OBJS-y) \
 			lib/md5.o \
 			lpc32xximage.o \
 			mxsimage.o \
