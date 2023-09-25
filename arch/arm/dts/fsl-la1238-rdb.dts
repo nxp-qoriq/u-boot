@@ -1,0 +1,135 @@
+// SPDX-License-Identifier: GPL-2.0+ OR X11
+/*
+ * NXP LA1238RDB device tree source
+ *
+ * Copyright 2021-2023 NXP
+ *
+ */
+
+/dts-v1/;
+
+#include "fsl-lx2160a.dtsi"
+
+/ {
+	model = "NXP Layerscape LA1238-RDB Board";
+	compatible = "fsl,la1238rdb", "fsl,lx2160a";
+
+	aliases {
+		spi0 = &fspi;
+	};
+};
+
+
+&emdio1 {
+	status = "okay";
+	aquantia_phy: ethernet-phy@8 {
+		compatible = "ethernet-phy-ieee802.3-c45";
+		interrupts = <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
+		reg = <0x8>;
+	};
+};
+
+&dpmac3 {
+	status = "okay";
+	phy-handle = <&aquantia_phy>;
+	phy-connection-type = "usxgmii";
+};
+
+&dpmac5 {
+};
+
+&fspi {
+	status = "okay";
+
+	mt35xu512aba0: flash@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		spi-max-frequency = <50000000>;
+		reg = <0>;
+		spi-rx-bus-width = <8>;
+		spi-tx-bus-width = <1>;
+	};
+};
+
+&usb0 {
+	status = "disabled";
+};
+
+&usb1 {
+	status = "disabled";
+};
+
+&esdhc0 {
+	status = "okay";
+};
+
+&esdhc1 {
+	status = "okay";
+	mmc-hs200-1_8v;
+	mmc-hs400-1_8v;
+	bus-width = <8>;
+};
+
+&i2c0 {
+	status = "okay";
+	u-boot,dm-pre-reloc;
+
+	i2c-switch@77 {
+		compatible = "nxp,pca9546";
+		reg = <0x77>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		i2c@2 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0x2>;
+
+			rtc@51 {
+				compatible = "pcf2127-rtc";
+				reg = <0x51>;
+			};
+		};
+	};
+};
+
+&i2c1 {
+	status = "okay";
+};
+
+&i2c2 {
+	status = "okay";
+};
+
+&gpio0 {
+	u-boot,dm-pre-reloc;
+};
+
+&gpio1 {
+	u-boot,dm-pre-reloc;
+};
+
+&gpio2 {
+	u-boot,dm-pre-reloc;
+};
+
+&gpio3 {
+	u-boot,dm-pre-reloc;
+};
+
+&pcie1 {
+	status = "disabled";
+};
+
+&pcie2 {
+	status = "disabled";
+};
+
+&pcie5 {
+	status = "disabled";
+};
+
+&pcie6 {
+	status = "disabled";
+};

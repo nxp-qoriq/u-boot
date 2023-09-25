@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2018-2022 NXP
+ * Copyright 2018-2023 NXP
  */
 
 #include <common.h>
@@ -34,6 +34,7 @@
 #include "../common/vid.h"
 #include <fsl_immap.h>
 #include <asm/arch-fsl-layerscape/fsl_icid.h>
+#include <asm/gpio.h>
 #include "lx2160a.h"
 #include "../common/qsfp_eeprom.h"
 #include "../common/i2c_mux.h"
@@ -42,7 +43,8 @@
 #include "../common/emc2305.h"
 #endif
 
-#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)
+#if defined(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS)  || \
+    defined(CONFIG_TARGET_LA1238RDB)
 #define CFG_MUX_I2C_SDHC(reg, value)		((reg & 0x3f) | value)
 #define SET_CFG_MUX1_SDHC1_SDHC(reg)		(reg & 0x3f)
 #define SET_CFG_MUX2_SDHC1_SPI(reg, value)	((reg & 0xcf) | value)
@@ -88,6 +90,18 @@ U_BOOT_DRVINFO(nxp_serial1) = {
 	.plat = &serial1,
 };
 
+#if defined(CONFIG_TARGET_LA1238RDB)
+static struct pl01x_serial_plat serial2 = {
+	.base = CONFIG_SYS_SERIAL2,
+	.type = TYPE_PL011,
+};
+
+U_BOOT_DRVINFO(nxp_serial2) = {
+	.name = "serial_pl01x",
+	.plat = &serial2,
+};
+#endif
+
 #ifdef CONFIG_TARGET_LA1224RDB
 static struct pl01x_serial_plat serial2 = {
 	.base = CONFIG_SYS_SERIAL2,
@@ -109,6 +123,10 @@ U_BOOT_DRVINFO(nxp_serial3) = {
 	.plat = &serial3,
 };
 #endif /* CONFIG_TARGET_LA1224RDB */
+
+#if defined(CONFIG_TARGET_LA1238RDB)
+static inline uint32_t get_board_version(void);
+#endif
 
 // Get the Board revision number of LA1224RDB Board
 #if defined(CONFIG_TARGET_LA1224RDB)
@@ -164,10 +182,65 @@ int board_revision_num(void)
 
 #endif /* CONFIG_TARGET_LA1224RDB */
 
+#ifdef NOT_NEEDED_NOW
+int select_i2c_ch_pca9547(u8 ch)
+{
+	int ret;
+
+#ifndef CONFIG_DM_I2C
+	ret = i2c_write(I2C_MUX_PCA_ADDR_PRI, 0, 1, &ch, 1);
+#else
+	struct udevice *dev;
+
+	ret = i2c_get_chip_for_busnum(0, I2C_MUX_PCA_ADDR_PRI, 1, &dev);
+	if (ret) {
+		printf("PCA: failed to get udev : %d\n", ret);
+		return ret;
+	} else {
+		ret = dm_i2c_write(dev, 0, &ch, 1);
+	}
+#endif
+	if (ret) {
+		printf("PCA: failed to select channel : %d\n", ret);
+		return ret;
+	}
+
+	return 0;
+}
+#endif
+
+#ifdef NOT_NEEDED_NOW
+#if !defined(CONFIG_TARGET_LA1238RDB)
+int select_i2c_ch_pca9547_sec(u8 ch)
+{
+	int ret;
+
+#ifndef CONFIG_DM_I2C
+	ret = i2c_write(I2C_MUX_PCA_ADDR_SEC, 0, 1, &ch, 1);
+#else
+	struct udevice *dev;
+
+	ret = i2c_get_chip_for_busnum(0, I2C_MUX_PCA_ADDR_SEC, 1, &dev);
+	if (!ret)
+		ret = dm_i2c_write(dev, 0, &ch, 1);
+#endif
+	if (ret) {
+		puts("PCA: failed to select proper channel\n");
+		return ret;
+	}
+
+	return 0;
+}
+#endif
+#endif
+
 static void uart_get_clock(void)
 {
 	serial0.clock = get_serial_clock();
 	serial1.clock = get_serial_clock();
+#if defined(CONFIG_TARGET_LA1238RDB)
+	serial2.clock = get_serial_clock();
+#endif
 #ifdef CONFIG_TARGET_LA1224RDB
 	serial2.clock = get_serial_clock();
 	serial2.clock = get_serial_clock();
@@ -346,7 +419,7 @@ int esdhc_status_fixup(void *blob, const char *compat)
 				 sizeof("disabled"), 1);
 	}
 #else
-	/* Enable both esdhc DT nodes for LX2160ARDB and LA1224RDB */
+	/* Enable both esdhc DT nodes for LX2160ARDB LA1238RDB and LA1224RDB */
 	do_fixup_by_compat(blob, compat, "status", "okay",
 			   sizeof("okay"), 1);
 #endif
@@ -386,8 +459,191 @@ int init_func_vid(void)
 	return 0;
 }
 #endif
+#if defined(CONFIG_TARGET_LA1238RDB)
 
-#if defined(CONFIG_TARGET_LA1224RDB)
+#define LS_GPIO_NUMBER(port, gpio) ((((port) - 1) * 32) + ((gpio) & 31))
+
+static void toggle_la1238_jtag_tck_gpio(void)
+{
+	int i;
+
+	gpio_request(LS_GPIO_NUMBER(4, 3), "JTAG_TCK_TMS_MUX");
+	gpio_direction_output(LS_GPIO_NUMBER(4, 3), 0);
+
+	for (i = 0; i < 10; i++) {
+		gpio_set_value(LS_GPIO_NUMBER(4, 3), 0);
+		mdelay(1);
+		gpio_set_value(LS_GPIO_NUMBER(4, 3), 1);
+		mdelay(1);
+	}
+}
+
+static void la1238rdb_gpio_init(void)
+{
+	gpio_request(LS_GPIO_NUMBER(4, 7), "SW_LEA_6T_RST_B");
+	gpio_request(LS_GPIO_NUMBER(4, 6), "SW_MODEM_PORST_B");
+	gpio_request(LS_GPIO_NUMBER(4, 8), "SW_AQR113_RST_B");
+	gpio_request(LS_GPIO_NUMBER(4, 9), "SW_NLM_RST_B");
+	gpio_request(LS_GPIO_NUMBER(4, 0), "SW_MODEM_WARM_RST_B");
+	gpio_request(LS_GPIO_NUMBER(3, 15), "SW_SI5518_RST_B");
+	gpio_request(LS_GPIO_NUMBER(1, 23), "STATUS_LED");
+	gpio_request(LS_GPIO_NUMBER(4, 1), "CPU_GPIO_LED2_B");
+	gpio_request(LS_GPIO_NUMBER(4, 2), "CPU_GPIO_LED1_B");
+	gpio_request(LS_GPIO_NUMBER(4, 10), "GPIO_FUSE_PROG");
+	gpio_request(LS_GPIO_NUMBER(4, 25), "CFG_MUX_1PPS_S1");
+	gpio_request(LS_GPIO_NUMBER(4, 26), "CFG_MUX_1PPS_S2");
+	gpio_request(LS_GPIO_NUMBER(1, 22), "LEA_6T_EXTINT0");
+	gpio_request(LS_GPIO_NUMBER(4, 5), "GPIO_NLM_CPU");
+	gpio_request(LS_GPIO_NUMBER(1, 26), "SI5518_GPIO1");
+	gpio_request(LS_GPIO_NUMBER(1, 27), "SI5518_GPIO2");
+	gpio_request(LS_GPIO_NUMBER(4, 4), "CPU_GPIO_TO_LA1238_1");
+	gpio_request(LS_GPIO_NUMBER(4, 11), "CPU_GPIO_TO_LA1238_2");
+	gpio_request(LS_GPIO_NUMBER(1, 15), "unused_mux1");
+	gpio_request(LS_GPIO_NUMBER(1, 16), "unused_mux2");
+	gpio_request(LS_GPIO_NUMBER(1, 17), "unused_mux3");
+	gpio_request(LS_GPIO_NUMBER(1, 18), "unused_mux4");
+	gpio_request(LS_GPIO_NUMBER(1, 19), "unused_mux5");
+	gpio_request(LS_GPIO_NUMBER(1, 20), "unused_mux6");
+	gpio_request(LS_GPIO_NUMBER(1, 21), "unused_mux7");
+	gpio_request(LS_GPIO_NUMBER(1, 5), "unused_mux8");
+	gpio_request(LS_GPIO_NUMBER(1, 4), "unused_mux9");
+
+	gpio_direction_output(LS_GPIO_NUMBER(4, 7), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 6), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 8), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 9), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 0), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(3, 15), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 23), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 1), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 2), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 10), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 25), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(4, 26), 1);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 22), 1);
+
+	gpio_direction_input(LS_GPIO_NUMBER(4, 5));
+	gpio_direction_input(LS_GPIO_NUMBER(1, 26));
+	gpio_direction_input(LS_GPIO_NUMBER(1, 27));
+	gpio_direction_input(LS_GPIO_NUMBER(4, 4));
+	gpio_direction_input(LS_GPIO_NUMBER(4, 11));
+
+	gpio_direction_output(LS_GPIO_NUMBER(1, 15), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 16), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 17), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 18), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 19), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 20), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 21), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 5), 0);
+	gpio_direction_output(LS_GPIO_NUMBER(1, 4), 0);
+
+	u32 rev = get_board_version();
+
+	if (rev == REVA) {
+		gpio_request(LS_GPIO_NUMBER(3, 12), "SI5518_GPIO3");
+		gpio_request(LS_GPIO_NUMBER(3, 16), "unused_mux10");
+		gpio_direction_input(LS_GPIO_NUMBER(3, 12));
+		gpio_direction_output(LS_GPIO_NUMBER(3, 16), 0);
+	} else if (rev == REVB) {
+		gpio_request(LS_GPIO_NUMBER(3, 12), "CPU_EVT0_B");
+		gpio_request(LS_GPIO_NUMBER(3, 16), "SI5518_GPIO3");
+		gpio_direction_input(LS_GPIO_NUMBER(3, 12));
+		gpio_direction_input(LS_GPIO_NUMBER(3, 16));
+	} else {
+		printf("Unknown - Board rev %x\n", rev);
+	}
+}
+
+static inline uint32_t get_board_version(void)
+{
+	int val_13, val_14;
+
+	gpio_request(LS_GPIO_NUMBER(3, 13), "gpio_ver_1");
+	gpio_request(LS_GPIO_NUMBER(3, 14), "gpio_ver_2");
+
+	gpio_direction_input(LS_GPIO_NUMBER(3, 13));
+	gpio_direction_input(LS_GPIO_NUMBER(3, 14));
+
+	val_13 = gpio_get_value(LS_GPIO_NUMBER(3, 13));
+	val_14 = gpio_get_value(LS_GPIO_NUMBER(3, 14));
+
+	return ((val_14 << 1) | val_13);
+}
+
+int checkboard(void)
+{
+	enum boot_src src = get_boot_src();
+	u32 rev = get_board_version();
+	int mode;
+	char buf[64];
+
+	cpu_name(buf);
+	printf("CPU: %s\n", buf);
+
+	mode = gpio_get_value(LS_GPIO_NUMBER(4, 24));
+	switch (mode) {
+	case 0:
+		puts("Board: LA1234-RDB, ");
+		break;
+	case 1:
+		puts("Board: LA1238-RDB, ");
+		break;
+	}
+
+	switch (rev) {
+	case REVA:
+		puts("Rev: A, boot from ");
+		break;
+	case REVB:
+		puts("Rev: B, boot from ");
+		break;
+	default:
+		puts("Rev: Unknown, boot from ");
+		break;
+	}
+
+	if (src == BOOT_SOURCE_SD_MMC)
+		puts("SD\n");
+	else if (src == BOOT_SOURCE_SD_MMC2)
+		puts("eMMC\n");
+	else if (src == BOOT_SOURCE_XSPI_NOR)
+		puts("FlexSPI NOR\n");
+	else
+		puts("Invalid source\n");
+
+	puts("SERDES1 Reference Clock = 156.25\n");
+	puts("SERDES2 Reference Clock1 = 100MHz Clock2 = 100MHz\n");
+
+	return 0;
+}
+
+void fdt_fixup_board_model(void *blob)
+{
+	gpio_request(LS_GPIO_NUMBER(4, 24), "board_rev");
+	gpio_direction_input(LS_GPIO_NUMBER(4, 24));
+	if (gpio_get_value(LS_GPIO_NUMBER(4, 24)) == 0)
+		do_fixup_by_path(blob, "/", "model",
+				 "NXP Layerscape LA1234-RDB",
+				 sizeof("NXP Layerscape LA1234-RDB"), 1);
+}
+
+#if defined(CONFIG_DISPLAY_BOARDINFO)
+int show_board_info(void)
+{
+#ifdef CONFIG_OF_CONTROL
+	gpio_request(LS_GPIO_NUMBER(4, 24), "board_rev");
+	gpio_direction_input(LS_GPIO_NUMBER(4, 24));
+	if (gpio_get_value(LS_GPIO_NUMBER(4, 24)) == 0)
+		printf("Model: NXP Layerscape LA1234-RDB\n");
+	else
+		printf("Model: %s\n",
+		       (char *)fdt_getprop(gd->fdt_blob, 0, "model", NULL));
+#endif
+	return checkboard();
+}
+#endif
+#elif defined(CONFIG_TARGET_LA1224RDB)
 int checkboard(void)
 {
 	enum boot_src src = get_boot_src();
@@ -799,11 +1055,18 @@ int board_early_init_r(void)
 }
 #endif
 #else
+/* TBD for CONFIG_TARGET_LA1238RDB */
+#if defined(CONFIG_BOARD_EARLY_INIT_R)
+int board_early_init_r(void)
+{
+	return 0;
+}
+#endif
 int config_board_mux(void)
 {
 	return 0;
 }
-#endif /*(CONFIG_TARGET_LX2160AQDS) || defined(CONFIG_TARGET_LX2162AQDS) */
+#endif
 
 #if CONFIG_IS_ENABLED(TARGET_LX2160ARDB)
 u8 get_board_rev(void)
@@ -945,8 +1208,9 @@ void qsfp_cortina_detect(void)
 
 int board_init(void)
 {
+
 #if defined(CONFIG_FSL_MC_ENET) && (defined(CONFIG_TARGET_LX2160ARDB) || \
-		 defined(CONFIG_TARGET_LA1224RDB))
+		 defined(CONFIG_TARGET_LA1224RDB) || defined(CONFIG_TARGET_LA1238RDB) )
 	u32 __iomem *irq_ccsr = (u32 __iomem *)ISC_BASE;
 #endif
 #ifdef CONFIG_ENV_IS_NOWHERE
@@ -958,6 +1222,8 @@ int board_init(void)
 		defined(CONFIG_TARGET_LA1224RDB))
 	/* invert AQR107 IRQ pins polarity */
 	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR107_IRQ_MASK);
+#elif defined(CONFIG_TARGET_LA1238RDB)
+	out_le32(irq_ccsr + IRQCR_OFFSET / 4, AQR113_IRQ_MASK);
 #endif
 #if defined(CONFIG_QSFP_EEPROM) && defined(CONFIG_PHY_CORTINA)
 	qsfp_cortina_detect();
@@ -972,6 +1238,10 @@ int board_init(void)
 	pci_init();
 #ifdef CONFIG_FSL_CAAM
 	sec_init();
+#endif
+#if defined(CONFIG_TARGET_LA1238RDB)
+	toggle_la1238_jtag_tck_gpio();
+	la1238rdb_gpio_init();
 #endif
 #endif
 	return 0;
@@ -1265,7 +1535,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 #endif
 	fdt_fixup_icid(blob);
 
-#if defined(CONFIG_TARGET_LA1224RDB)
+#if defined(CONFIG_TARGET_LA1238RDB) || defined(CONFIG_TARGET_LA1224RDB)
 	fdt_fixup_board_model(blob);
 #endif
 #if CONFIG_IS_ENABLED(TARGET_LX2160ARDB)
@@ -1276,7 +1546,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 	return 0;
 }
 #endif /* CONFIG_OF_BOARD_SETUP */
-
+#if !defined(CONFIG_TARGET_LA1238RDB)
 void qixis_dump_switch(void)
 {
 	int i, nr_of_cfgsw;
@@ -1290,6 +1560,186 @@ void qixis_dump_switch(void)
 		printf("SW%d = (0x%02x)\n", i, QIXIS_READ(cms[1]));
 	}
 }
+#endif
+
+#if defined(CONFIG_TARGET_LA1238RDB)
+int get_pcal_bus(void)
+{
+	u32 rev = get_board_version();
+
+	switch (rev) {
+	case REVA:
+		return PCAL_BUS_NO;
+	case REVB:
+		return PCAL_BUS_NO_REVB;
+	default:
+		return -1;
+	}
+}
+
+static int switch_boot_source(int src_id, int param)
+{
+	int ret;
+	struct udevice *dev;
+	u8 data;
+	int pcal_bus;
+
+	if ((get_board_version() == REVA) && (src_id == BOOT_FROM_SD)) {
+		printf("SD boot is not defined for REV A\n");
+		return CMD_RET_FAILURE;
+	}
+
+	pcal_bus = get_pcal_bus();
+	if (pcal_bus == -1) {
+		printf("Unable to get pcal bus\n");
+		return -ENXIO;
+	}
+
+	ret = i2c_get_chip_for_busnum(pcal_bus, PCAL_CPU_ADDR, 1, &dev);
+	if (ret) {
+		printf("%s: Cannot find udev for a bus %d, addr :%d, ret: %d\n",
+		       __func__, pcal_bus, PCAL_CPU_ADDR, ret);
+		return -ENXIO;
+	}
+
+	/* Make all rcw src pin output, don't touch svr pins */
+	ret = dm_i2c_read(dev, PCAL_CONFIG, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_CONFIG, ret);
+		return ret;
+	}
+	/* Clear bit 4 to 7 (RCW_SRC0 to RCW_SRC3) to make then input */
+	data &= 0x0f;
+	ret = dm_i2c_write(dev, PCAL_CONFIG, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_CONFIG, data, ret);
+		return ret;
+	}
+
+	ret = dm_i2c_read(dev, PCAL_OUTPUT_PORT, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, ret);
+		return ret;
+	}
+	data &= 0x0f;
+	switch (src_id) {
+	case BOOT_FROM_XSPI: /* RCW_SRC[3:0] = 1111 */
+		data |= 0xf0;
+		break;
+	case BOOT_FROM_SD: /* RCW_SRC[3:0] = 1000 */
+		data |= 0x80;
+		break;
+	case BOOT_FROM_EMMC: /* RCW_SRC[3:0] = 1001 */
+		data |= 0x90;
+		break;
+	default:
+		printf("CPU boot source error: %d\n", src_id);
+		return -ENXIO;
+	}
+
+	ret = dm_i2c_write(dev, PCAL_OUTPUT_PORT, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, data, ret);
+		return ret;
+	}
+
+	return run_command("reset", 0);
+}
+
+static int switch_boot_source_modem(int src_id)
+{
+	int ret;
+	struct udevice *dev;
+	u8 data;
+	int pcal_bus = get_pcal_bus();
+
+	if (pcal_bus == -1) {
+		printf("Unable to get pcal bus\n");
+		return -ENXIO;
+	}
+
+	ret = i2c_get_chip_for_busnum(pcal_bus, PCAL_MODEM_ADDR, 1, &dev);
+	if (ret) {
+		printf("%s: Cannot find udev for a bus %d, addr :%d, ret: %d\n",
+		       __func__, pcal_bus, PCAL_MODEM_ADDR, ret);
+		return -ENXIO;
+	}
+
+	/* Make modem boot source control pins output, Don't touch other pins */
+	ret = dm_i2c_read(dev, PCAL_CONFIG, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       PCAL_MODEM_ADDR, PCAL_CONFIG, ret);
+		return ret;
+	}
+	data = data & 0xf9;
+	ret = dm_i2c_write(dev, PCAL_CONFIG, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_CONFIG, data, ret);
+		return ret;
+	}
+
+	ret = dm_i2c_read(dev, PCAL_OUTPUT_PORT, &data, 1);
+	if (ret) {
+		printf("i2c read error addr: %u reg: %u ret: %d\n",
+		       PCAL_MODEM_ADDR, PCAL_OUTPUT_PORT, ret);
+		return ret;
+	}
+	data &= 0xf9;
+	switch (src_id) {
+	case BOOT_FROM_XSPI_MODEM:
+		data |= 0x02; /* SW_CFG_BOOT_SRC[1:0] = 01 */
+		break;
+	case BOOT_FROM_PCIE_MODEM:
+		data |= 0x06; /* SW_CFG_BOOT_SRC[1:0] = 11 */
+		break;
+	case BOOT_FROM_PEB_MODEM:
+		data |= 0; /* SW_CFG_BOOT_SRC[1:0] = 00 */
+		break;
+	default:
+		printf("Modem boot source error: %d\n", src_id);
+		return -ENXIO;
+	}
+
+	ret = dm_i2c_write(dev, PCAL_OUTPUT_PORT, &data, 1);
+	if (ret) {
+		printf("i2c write error addr: %u reg: %u data: %u, ret: %d\n",
+		       PCAL_CPU_ADDR, PCAL_OUTPUT_PORT, data, ret);
+		return ret;
+	}
+
+	return run_command("reset", 0);
+}
+
+static int select_boot_source_modem(struct cmd_tbl *cmdtp, int flag, int argc,
+				    char *const argv[])
+{
+	if (argc <= 1)
+		return CMD_RET_USAGE;
+	else if (strcmp(argv[1], "xspi") == 0)
+		switch_boot_source_modem(BOOT_FROM_XSPI_MODEM);
+	else if (strcmp(argv[1], "pcie") == 0)
+		switch_boot_source_modem(BOOT_FROM_PCIE_MODEM);
+	else if (strcmp(argv[1], "peb") == 0)
+		switch_boot_source_modem(BOOT_FROM_PEB_MODEM);
+	else
+		return CMD_RET_USAGE;
+
+	return CMD_RET_SUCCESS;
+}
+
+U_BOOT_CMD(boot_source_modem, 2, 0, select_boot_source_modem,
+	   "Modem boot source Selection Control",
+	   "boot_source_modem xspi : reset to FlexSPI\n"
+	   "boot_source_modem pcie : reset to pcie\n"
+	   "boot_source_modem peb : reset to preloaded peb\n"
+);
+#endif
 
 #if defined(CONFIG_TARGET_LA1224RDB)
 static int switch_boot_source(int src_id, int param)
@@ -1369,7 +1819,8 @@ static int switch_boot_source(int src_id, int param)
 
 	return run_command("reset", 0);
 }
-
+#endif
+#if defined(CONFIG_TARGET_LA1238RDB) || defined(CONFIG_TARGET_LA1224RDB)
 static int select_boot_source(struct cmd_tbl *cmdtp, int flag, int argc,
 			      char *const argv[])
 {

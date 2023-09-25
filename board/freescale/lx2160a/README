@@ -327,3 +327,63 @@ SERDES2	|CARDS
 	|Connect Hydra Cable (HDR-198564-01-ECUE) to SD_SLOT4 (J117)
 	|Connect I/O cable to IO_SLOT8(J131)
 ------------------------------------------------------------------------
+
+LA1238RDB board Overview
+----------------------
+DDR Memory
+	One ports of 72-bits (8-bits ECC) DDR4.
+	Part no: MTA18ASF2G72HZ-2G6, Density:16GB
+	Data rate up to 2600MT/s
+
+SERDES ports
+	Two serdes controllers (12 lanes)
+	Serdes1: Supports two USXGMII connectors, 1 connected through
+	AQR113 PHY and 1 SFP+.
+
+	Serdes2: Supports one PCIe x1 (Gen2) and one PCIe x4 (Gen3) connector.
+
+eSDHC
+	eSDHC2: Supports 128GB Micron MTFC16GAPALBH-IT eMMC
+
+Octal SPI (XSPI)
+	Supports 64 MB onboard octal SPI flash memory.
+
+I2C	All system devices on I2C1 multiplexed using PCA9547 multiplexer.
+	I2C2 have SFP+ slot, PCAL6408APW and PCA8574APW connected.
+	I2C3 have NLM daughter card connected.
+
+Serial Ports	Two UART ports
+Ethernet	Supports two USXGMII connectors, 1 connected through
+		AQR113 PHY and 1 SFP+.
+Debug		ARM JTAG support
+
+Booting Options
+---------------
+a) Flexspi boot
+c) eMMC boot
+
+Memory map for Flexspi flash
+----------------------------
+Image							Flash Offset
+bl2_flexspi_nor.pbl (RCW+PBI+bl2.pbl)			0x00000000
+fip.bin (bl31 + bl33(u-boot) +
+	 header for Secure-boot(secure-boot only))	0x00100000
+Boot firmware Environment				0x00500000
+DDR PHY Firmware (fip_ddr_all.bin)			0x00800000
+DPAA2 MC Firmware					0x00A00000
+DPAA2 DPL						0x00D00000
+DPAA2 DPC						0x00E00000
+Kernel.itb						0x01000000
+
+Memory map for sd/eMMC card
+----------------------------
+Image							SD/eMMC card Offset
+bl2_sd.pbl (RCW+PBI+bl2.pbl)				0x00008
+fip.bin (bl31 + bl33(u-boot) +
+	 header for Secure-boot(secure-boot only))	0x00800
+Boot firmware Environment				0x02800
+DDR PHY Firmware (fip_ddr_all.bin)			0x04000
+DPAA2 MC Firmware					0x05000
+DPAA2 DPL						0x06800
+DPAA2 DPC						0x07000
+Kernel.itb						0x08000
