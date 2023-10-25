@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright 2016 Freescale Semiconductor
- * Copyright 2019-2021 NXP
+ * Copyright 2019-2021,2023 NXP
  */
 
 #ifndef __LS1046A_COMMON_H
