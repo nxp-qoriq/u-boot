@@ -2,7 +2,7 @@
 /*
  * NXP LA1224RDB device tree source
  *
- * Copyright 2020-2022 NXP
+ * Copyright 2020-2023 NXP
  *
  */
 
@@ -108,7 +108,7 @@
 	status = "okay";
 
 	rtc@51 {
-		compatible = "pcf2127-rtc";
+		compatible = "nxp,pcf2127";
 		reg = <0x51>;
 	};
 };
