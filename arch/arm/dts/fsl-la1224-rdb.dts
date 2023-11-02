@@ -31,6 +31,12 @@
 	phy-connection-type = "usxgmii";
 };
 
+&dpmac5 {
+          status = "okay";
+          phy-handle = <&inphi_phy>;
+          phy-connection-type = "25g-aui";
+};
+
 &dpmac17 {
 	status = "okay";
 	phy-handle = <&rgmii_phy1>;
