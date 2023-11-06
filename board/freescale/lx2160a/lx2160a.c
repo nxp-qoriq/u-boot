@@ -1236,9 +1236,6 @@ int board_init(void)
 
 #if !defined(CONFIG_SYS_EARLY_PCI_INIT) && defined(CONFIG_DM_ETH)
 	pci_init();
-#ifdef CONFIG_FSL_CAAM
-	sec_init();
-#endif
 #if defined(CONFIG_TARGET_LA1238RDB)
 	toggle_la1238_jtag_tck_gpio();
 	la1238rdb_gpio_init();
