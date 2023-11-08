@@ -634,7 +634,7 @@ static int do_spi_flash(struct cmd_tbl *cmdtp, int flag, int argc,
 			((strcmp(cmd, "write") == 0) ||
 			(strcmp(cmd, "update") == 0) ||
 			(strcmp(cmd, "erase") == 0))) {
-		puts("SPI flash protected. Please unset/remove global_spi_protect");
+		puts("SPI flash protected. Please unset/remove global_spi_protect ");
 		puts("env variable to proceed.\n");
 		return 1;
 	}
