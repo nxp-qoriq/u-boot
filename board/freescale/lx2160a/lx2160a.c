@@ -40,6 +40,7 @@
 #include "lx2160a.h"
 #include "../common/qsfp_eeprom.h"
 #include "../common/i2c_mux.h"
+#include <cpu_func.h>
 
 #ifdef CONFIG_EMC2305
 #include "../common/emc2305.h"
@@ -1310,6 +1311,64 @@ void fdt_fixup_i2c_thermal_node(void *blob)
 }
 #endif /* TARGET_LX2160ARDB */
 
+#define LX2XX_MAX_CORES 16
+#define VALS_PER_MAP 3
+void disable_cpu_thermal_maps(void *blob)
+{
+	static const char* const cool_maps_path[] = {
+		"/thermal-zones/cluster6-7/cooling-maps/map0"
+	};
+	int nodeoff = 0, cnt = 0, i= 0, ret = 0, j = 0, index = 0;
+    u32 cooling_dev[LX2XX_MAX_CORES * VALS_PER_MAP] = {0};
+    int num_cores = cpu_numcores();
+	int disabled_maps = (LX2XX_MAX_CORES - num_cores);
+
+	/* For 16 Cores no fixup required. */
+    if (num_cores == LX2XX_MAX_CORES)
+		return;
+
+	for (i = 0; i < ARRAY_SIZE(cool_maps_path); i++) {
+		nodeoff = fdt_path_offset(blob,cool_maps_path[i]);
+		if (nodeoff < 0)
+			continue; /*  Not found, skip it */
+
+		cnt = fdtdec_get_int_array_count(blob, nodeoff,
+				"cooling-device", cooling_dev,
+				(LX2XX_MAX_CORES * VALS_PER_MAP));
+		if (cnt < 0)
+			continue;
+
+        if (cnt != (LX2XX_MAX_CORES * VALS_PER_MAP))
+            printf("Warning: %s, cooling-device count %d\n",
+                    cool_maps_path[i], cnt);
+
+        if (num_cores != 8)	{
+            for (j = 0; j < cnt; j++) {
+                cooling_dev[j] = cpu_to_fdt32(cooling_dev[j]);
+            }
+        } else {
+            /* Maps are already as per no. of cores */
+            if (cnt == (num_cores * VALS_PER_MAP))
+                return;
+
+            /* For 8 Core personality skip alternate cooling maps */
+            for (j = 0, i = 0; j < num_cores * 3; j++) {
+                    index = ((i * 2) + (j - i));
+                    cooling_dev[j] = cpu_to_fdt32(cooling_dev[index]);
+                    ((j + 1) % 3) ? i : (i += 3);
+            }
+        }
+
+		ret = fdt_setprop(blob, nodeoff, "cooling-device", &cooling_dev,
+					sizeof(u32) * (VALS_PER_MAP *
+					( LX2XX_MAX_CORES - disabled_maps)));
+		if (ret < 0) {
+			printf("Warning: %s, cooling-device setprop failed %d\n",
+					cool_maps_path[i], ret);
+		}
+	}
+}
+
 #ifdef CONFIG_OF_BOARD_SETUP
 int ft_board_setup(void *blob, struct bd_info *bd)
 {
@@ -1391,7 +1450,7 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 	if (get_board_rev() == 'C')
 		fdt_fixup_i2c_thermal_node(blob);
 #endif
-
+	disable_cpu_thermal_maps(blob);
 	return 0;
 }
 #endif /* CONFIG_OF_BOARD_SETUP */
