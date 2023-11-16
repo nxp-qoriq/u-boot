@@ -282,9 +282,9 @@
 #endif
 
 #define BOOT_TARGET_DEVICES(func) \
-	BOOT_TARGET_DEVICES_USB(func) \
 	BOOT_TARGET_DEVICES_MMC(func, 0) \
 	BOOT_TARGET_DEVICES_MMC(func, 1) \
+	BOOT_TARGET_DEVICES_USB(func) \
 	BOOT_TARGET_DEVICES_SCSI(func) \
 	BOOT_TARGET_DEVICES_DHCP(func)
 #include <config_distro_bootcmd.h>
