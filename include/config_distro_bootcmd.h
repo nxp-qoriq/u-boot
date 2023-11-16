@@ -139,7 +139,6 @@
 #endif
 
 #ifdef CONFIG_CMD_BOOTEFI_BOOTMGR
-#ifndef CONFIG_TARGET_LA1224RDB
 #define BOOTENV_EFI_BOOTMGR                                               \
 	"boot_efi_bootmgr="                                               \
 		"if fdt addr -q ${fdt_addr_r}; then "                     \
@@ -147,12 +146,10 @@
 		"else "                                                   \
 			"bootefi bootmgr;"                                \
 		"fi\0"
-#endif
 #else
 #define BOOTENV_EFI_BOOTMGR
 #endif
 
-#ifndef CONFIG_TARGET_LA1224RDB
 #define BOOTENV_SHARED_EFI                                                \
 	BOOTENV_EFI_BOOTMGR                                               \
 	\
@@ -192,7 +189,6 @@
 		"fi; "                                                    \
 		"setenv efi_fdtfile\0"
 #define SCAN_DEV_FOR_EFI "run scan_dev_for_efi;"
-#endif
 #else
 #define BOOTENV_SHARED_EFI
 #define SCAN_DEV_FOR_EFI
@@ -381,7 +377,6 @@
  * device tree in the same folder. Then boot everything. If the file was
  * not an EFI binary, we just return from the bootefi command and continue.
  */
-#ifndef CONFIG_TARGET_LA1224RDB
 #define BOOTENV_EFI_RUN_DHCP \
 	"setenv efi_fdtfile ${fdtfile}; "                                 \
 	BOOTENV_EFI_SET_FDTFILE_FALLBACK                                  \
@@ -402,7 +397,6 @@
 	"setenv efi_fdtfile;"                                             \
 	"setenv efi_old_arch;"                                            \
 	"setenv efi_old_vci;"
-#endif
 #else
 #define BOOTENV_EFI_RUN_DHCP
 #endif
