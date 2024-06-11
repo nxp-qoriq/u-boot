@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2014-2015 Freescale Semiconductor
- * Copyright 2019-2021 NXP
+ * Copyright 2019-2021, 2024 NXP
  */
 
 #include <config.h>
@@ -319,6 +319,30 @@ void erratum_a009635(void)
 }
 #endif	/* CONFIG_SYS_FSL_ERRATUM_A009635 */
 
+/*
+ * Erratum A050752
+ *
+ * If RCW source is SDHC1 (CFG_RCW_SRC = 4'b1000), SPI3 and GPIO1_[14:12]
+ * cannot be selected through RCW[SDHC1_DIR_PMUX].
+ *
+ * Impact:
+ * SPI3_PCS[1:3] and GPIO1_[14:12] are unavailable when CFG_RCW_SRC = 4'b1000.
+ *
+ * Note: After this workaround, use PORESET_B instead of HRESET_B to reset the device.
+ */
+static void erratum_a050752(void)
+{
+	u32 __iomem *dcfg_ccsr = (u32 __iomem *)DCFG_BASE;
+	u32 __iomem *dcfg_dcsr = (u32 __iomem *)DCFG_DCSR_BASE;
+	u32 __iomem *rst_ccsr = (u32 __iomem *)RST_CCSR_BASE;
+	u32 dat;
+
+	dat = in_le32(dcfg_ccsr + DCFG_PORSR1);
+	dat &= ~(0xF << 23);
+	out_le32(dcfg_dcsr, dat);
+	out_le32(rst_ccsr, HRESET_MASK);
+}
+
 static void erratum_rcw_src(void)
 {
 #if defined(CONFIG_SPL) && defined(CONFIG_NAND_BOOT)
@@ -422,6 +446,14 @@ void fsl_lsch3_early_init_f(void)
 	defined(CONFIG_ARCH_LS2080A) || defined(CONFIG_ARCH_LX2160A) || \
 	defined(CONFIG_ARCH_LX2162A)
 	set_icids();
+#endif
+
+#if  defined(CONFIG_ARCH_LX2160A)
+	enum boot_src src = get_boot_src();
+	if (src == BOOT_SOURCE_SD_MMC)
+	{
+		erratum_a050752();
+	}
 #endif
 }
 

@@ -2,7 +2,7 @@
 /*
  * LayerScape Internal Memory Map
  *
- * Copyright 2017-2020, 2022 NXP
+ * Copyright 2017-2020, 2022-2024 NXP
  * Copyright 2014 Freescale Semiconductor, Inc.
  */
 
@@ -243,6 +243,9 @@
 
 #define DCFG_DCSR_BASE		0X700100000ULL
 #define DCFG_DCSR_PORCR1		0x000
+
+#define RST_CCSR_BASE	 	0x01e60000
+#define HRESET_MASK             0x02000000
 
 /* Interrupt Sampling Control */
 #define ISC_BASE		0x01F70000
