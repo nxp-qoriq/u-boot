@@ -29,7 +29,7 @@
 #include <imx_sip.h>
 #include <linux/arm-smccc.h>
 #include <mmc.h>
-#include "rfnm-shared.h"
+#include "sdr-shared.h"
 #include <command.h>
 #include "rfnm_wsled.h"
 

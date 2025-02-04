@@ -1,16 +1,16 @@
 if TARGET_IMX8MP_RFNM
 
 config SYS_BOARD
-	default "imx8mp_rfnm"
+	default "imx8mp_sdr"
 
 config SYS_VENDOR
 	default "freescale"
 
 config SYS_CONFIG_NAME
-	default "imx8mp_rfnm"
+	default "imx8mp_sdr"
 
 config IMX_CONFIG
-	default "board/freescale/imx8mp_rfnm/imximage-8mp-lpddr4.cfg"
+	default "board/freescale/imx8mp_sdr/imximage-8mp-lpddr4.cfg"
 
 source "board/freescale/common/Kconfig"
 
