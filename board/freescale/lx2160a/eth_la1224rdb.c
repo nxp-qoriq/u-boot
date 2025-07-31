@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2020-2022 NXP
+ * Copyright 2020-2022, 2025 NXP
  *
  */
 
@@ -232,4 +232,25 @@ int fdt_fixup_board_phy(void *fdt)
 {
 	/* TO DO */
 	return 0;
+}
+
+int board_fit_config_name_match(const char *name)
+{
+	struct ccsr_gur *gur = (void *)(CONFIG_SYS_FSL_GUTS_ADDR);
+	u32 rcw_status = in_le32(&gur->rcwsr[28]);
+	char expected_dts[100];
+	u32 srds_s1;
+
+	srds_s1 = rcw_status & FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_MASK;
+	srds_s1 >>= FSL_CHASSIS3_RCWSR28_SRDS1_PRTCL_SHIFT;
+
+	if (srds_s1 == 22)
+		sprintf(expected_dts, "fsl-la1224-rdb-sd1-22");
+	else
+		sprintf(expected_dts, "fsl-la1224-rdb");
+
+	if (!strcmp(name, expected_dts))
+		return 0;
+
+	return -1;
 }
