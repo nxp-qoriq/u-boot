@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0+ OR X11
 /*
- * NXP LA1224RDB device tree source for SerDes#1 protocol 18
+ * NXP LA1224RDB device tree source for SerDes#1 protocol 22
  *
- * Copyright 2020-2023, 2025 NXP
+ * Copyright 2025 NXP
  *
  */
 
@@ -11,7 +11,7 @@
 #include "fsl-la1224-rdb.dtsi"
 
 / {
-	model = "NXP Layerscape LA1224-RDB Board - SerDes#1 18";
+	model = "NXP Layerscape LA1224-RDB Board - SerDes#1 22";
 	compatible = "nxp,la1224rdb", "fsl,lx2160a";
 
 	aliases {
@@ -21,5 +21,5 @@
 
 &dpmac5 {
 	status = "okay";
-	phy-connection-type = "25g-aui";
+	phy-connection-type = "10gbase-r";
 };

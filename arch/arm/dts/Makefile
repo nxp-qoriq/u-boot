@@ -498,7 +498,8 @@ dtb-$(CONFIG_FSL_LSCH3) += fsl-ls2080a-qds.dtb \
 	fsl-lx2162a-qds-17-x.dtb \
 	fsl-lx2162a-qds-18-x.dtb \
 	fsl-lx2162a-qds-20-x.dtb \
-	fsl-la1224-rdb.dtb
+	fsl-la1224-rdb.dtb \
+	fsl-la1224-rdb-sd1-22.dtb
 dtb-$(CONFIG_FSL_LSCH2) += fsl-ls1043a-qds-duart.dtb \
 	fsl-ls1043a-qds-lpuart.dtb \
 	fsl-ls1043a-rdb.dtb \
