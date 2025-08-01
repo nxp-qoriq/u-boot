@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2018-2023 NXP
+ * Copyright 2018-2023, 2025 NXP
  */
 
 #include <config.h>
@@ -1065,6 +1065,7 @@ void qsfp_cortina_detect(void)
 
 int board_init(void)
 {
+	int err;
 
 #if defined(CONFIG_FSL_MC_ENET) && (defined(CONFIG_TARGET_LX2160ARDB) || \
 		 defined(CONFIG_TARGET_LA1224RDB) || defined(CONFIG_TARGET_LA1238RDB) )
@@ -1098,6 +1099,11 @@ int board_init(void)
 	la1238rdb_gpio_init();
 #endif
 #endif
+
+	err = board_retimer_init();
+	if (err)
+		pr_err("board_retimer_init() failed with %d\n", err);
+
 	return 0;
 }
 

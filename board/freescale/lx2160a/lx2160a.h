@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * Copyright 2020-2022 NXP
+ * Copyright 2020-2022, 2025 NXP
  */
 
 #ifndef __LX2160_H
@@ -89,5 +89,14 @@ static inline int fdt_fixup_board_phy_revc(void *fdt)
 #include <fsl_dspi.h>
 #include "../board/freescale/lx2160a/la1224rdb_defines.h"
 #endif /* CONFIG_TARGET_LA1224RDB */
+
+#if CONFIG_IS_ENABLED(TARGET_LA1224RDB)
+int board_retimer_init(void);
+#else
+static inline int board_retimer_init(void)
+{
+	return 0;
+}
+#endif
 
 #endif /* __LX2160_H */

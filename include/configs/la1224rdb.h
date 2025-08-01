@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  */
 
 #ifndef __LA1224_RDB_H
@@ -35,7 +35,7 @@
 #define AQR113_PHY_ADDR1	0x08
 #define AQR113_PHY_ADDR2	0x0
 
-#define TI_DS250_I2C_ADDR	0x1
+#define TI_DS250_I2C_ADDR	0x18
 #define INPHI_PHY_ADDR1		0x0
 #define INPHI_PHY_ADDR2		0x1
 #ifdef CONFIG_SD_BOOT
