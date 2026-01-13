@@ -67,7 +67,7 @@
 #define AQR107_IRQ_MASK				0x0C
 
 /* Initial environment variables */
-#define CONFIG_EXTRA_ENV_SETTINGS		\
+#define CFG_EXTRA_ENV_SETTINGS		\
 	EXTRA_ENV_SETTINGS			\
 	"boot_scripts=la1224rdb_boot.scr\0"	\
 	"boot_script_hdr=hdr_la1224rdb_bs.out\0"	\
