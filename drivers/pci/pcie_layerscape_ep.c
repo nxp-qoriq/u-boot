@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2020 NXP
+ * Copyright 2020,2026 NXP
  * Layerscape PCIe EP driver
  */
 
@@ -17,7 +17,7 @@
 #include "pcie_layerscape.h"
 
 DECLARE_GLOBAL_DATA_PTR;
-
+extern uint get_svr(void);
 static void ls_pcie_ep_enable_cfg(struct ls_pcie_ep *pcie_ep)
 {
 	struct ls_pcie *pcie = pcie_ep->pcie;
