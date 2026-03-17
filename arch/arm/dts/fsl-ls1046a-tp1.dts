@@ -2,20 +2,30 @@
 /*
  * Device Tree Include file for NXP Layerscape-1046A family SoC.
  *
- * Copyright 2022 NXP
+ * Copyright 2022, 2026 NXP
  *
  */
 
 /dts-v1/;
-/include/ "fsl-ls1046a.dtsi"
+#include "fsl-ls1046a.dtsi"
 
 / {
 	model = "LS1046A TP1 Board";
 
 	aliases {
 		spi0 = &qspi;
+		serial0 = &duart0;
+		serial1 = &duart1;
 	};
 
+};
+
+&duart0 {
+	status = "okay";
+};
+
+&duart1 {
+	status = "okay";
 };
 
 &qspi {
